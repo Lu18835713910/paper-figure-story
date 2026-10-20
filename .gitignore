@@ -1,0 +1,21 @@
+# Local papers and generated presentation outputs
+*.pdf
+*.pptx
+!assets/default_academic_blue_174994.pptx
+*.ppt
+*.potx
+*.zip
+output/
+outputs/
+_cache/
+cache/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

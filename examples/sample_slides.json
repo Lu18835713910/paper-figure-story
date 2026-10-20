@@ -1,0 +1,263 @@
+{
+  "meta": {
+    "paper_title": "HSFA1a modulates plant heat stress responses and alters the 3D chromatin organization of enhancer-promoter interactions",
+    "short_citation": "Huang et al. · Nature Communications · 2023",
+    "demo_notice": "本文件仅演示PPT布局和字段；Figure图片须从用户合法提供的论文PDF导出，不能把演示占位当作最终结果"
+  },
+  "slides": [
+    {
+      "kind": "cover",
+      "title": "热胁迫如何改变染色质三维组织与基因调控？",
+      "subtitle": "番茄热胁迫中的HSFA1a与增强子–启动子互作",
+      "citation": "Huang et al. · Nature Communications · 2023"
+    },
+    {
+      "kind": "question",
+      "title": "热胁迫响应还存在两项关键问题",
+      "lead": "热胁迫引起快速转录重编程，但相应的染色质空间动态仍需解释。",
+      "bullets": [
+        "热胁迫是否诱导可重复的三维染色质互作重构？",
+        "哪些转录因子参与远端增强子和启动子的动态联系？"
+      ]
+    },
+    {
+      "kind": "logic",
+      "title": "研究思路：两条互补证据支线汇合至HSFA1a验证",
+      "lead": "结构、开放性和调控元件数据从不同角度解释热响应；最后用基因干预检验候选机制。",
+      "transition": "实线＝论文正文支持的关系；虚线＝汇报结构性过渡。箭头表示研究问题推进，不等于证明生物学因果。",
+      "diagram_type": "branch_merge",
+      "nodes": [
+        {
+          "id": "q",
+          "title": "热胁迫影响3D组织吗？",
+          "detail": "比较番茄常态与热处理的三维染色质接触",
+          "role": "question",
+          "x": 0,
+          "y": 0.5
+        },
+        {
+          "id": "s",
+          "title": "观察到空间重构",
+          "detail": "Hi-C显示部分区室及接触频率发生变化",
+          "role": "observation",
+          "figure_ref": "原文Fig 3",
+          "x": 0.25,
+          "y": 0.5
+        },
+        {
+          "id": "a",
+          "title": "开放性与表达支线",
+          "detail": "0/1/6h ATAC-seq和RNA-seq识别动态变化",
+          "role": "analysis",
+          "figure_ref": "原文Fig 3",
+          "x": 0.5,
+          "y": 0.18
+        },
+        {
+          "id": "b",
+          "title": "调控元件与接触支线",
+          "detail": "ChIP-seq和接触图谱连接远端RE与启动子",
+          "role": "analysis",
+          "figure_ref": "原文Fig 4",
+          "x": 0.5,
+          "y": 0.82
+        },
+        {
+          "id": "tf",
+          "title": "锁定候选调控因子",
+          "detail": "Motif、DAP-seq及互作证据聚焦HSFA1a",
+          "role": "inference",
+          "figure_ref": "原文Fig 5",
+          "x": 0.75,
+          "y": 0.5
+        },
+        {
+          "id": "v",
+          "title": "遗传与局部互作验证",
+          "detail": "HSFA1a敲低、3C-qPCR及报告基因检测",
+          "role": "validation",
+          "x": 1,
+          "y": 0.5
+        }
+      ],
+      "edges": [
+        {
+          "to": "s",
+          "relation": "tests",
+          "provenance": "paper",
+          "from": "q"
+        },
+        {
+          "to": "a",
+          "relation": "motivates",
+          "provenance": "presentation",
+          "from": "s"
+        },
+        {
+          "to": "b",
+          "relation": "extends",
+          "provenance": "paper",
+          "from": "s"
+        },
+        {
+          "to": "tf",
+          "relation": "integrates",
+          "provenance": "paper",
+          "from": "a"
+        },
+        {
+          "to": "tf",
+          "relation": "integrates",
+          "provenance": "presentation",
+          "from": "b"
+        },
+        {
+          "to": "v",
+          "relation": "validates",
+          "provenance": "paper",
+          "from": "tf"
+        }
+      ]
+    },
+    {
+      "kind": "route",
+      "title": "实验路线：同一热胁迫模型的多技术测量与独立验证",
+      "lead": "从相同研究模型开展平行测量：开放性、表达及空间接触，各自提供不同证据。",
+      "diagram_type": "parallel_tracks",
+      "nodes": [
+        {
+          "id": "sample",
+          "title": "研究材料与处理",
+          "detail": "番茄植株；未处理和热胁迫时间序列",
+          "role": "experiment",
+          "x": 0,
+          "y": 0.5
+        },
+        {
+          "id": "rna",
+          "title": "转录/开放变化",
+          "detail": "RNA-seq与ATAC-seq；表达和可及性",
+          "role": "analysis",
+          "x": 0.32,
+          "y": 0.2
+        },
+        {
+          "id": "chrom",
+          "title": "三维组织变化",
+          "detail": "Hi-C及C-Hi-C；区室和局部接触",
+          "role": "analysis",
+          "x": 0.32,
+          "y": 0.8
+        },
+        {
+          "id": "tf",
+          "title": "候选TF与调控元件",
+          "detail": "Motif、DAP-seq与ChIP-seq整合",
+          "role": "analysis",
+          "x": 0.64,
+          "y": 0.5
+        },
+        {
+          "id": "verify",
+          "title": "功能验证",
+          "detail": "HSFA1a敲低、3C-qPCR与报告基因",
+          "role": "validation",
+          "x": 1,
+          "y": 0.5
+        }
+      ],
+      "edges": [
+        {
+          "to": "rna",
+          "relation": "parallel",
+          "provenance": "paper",
+          "from": "sample"
+        },
+        {
+          "to": "chrom",
+          "relation": "parallel",
+          "provenance": "paper",
+          "from": "sample"
+        },
+        {
+          "to": "tf",
+          "relation": "integrates",
+          "provenance": "paper",
+          "from": "rna"
+        },
+        {
+          "to": "tf",
+          "relation": "integrates",
+          "provenance": "presentation",
+          "from": "chrom"
+        },
+        {
+          "to": "verify",
+          "relation": "validates",
+          "provenance": "paper",
+          "from": "tf"
+        }
+      ],
+      "transition": "技术路线图保留平行测量关系；不把RNA、ATAC、Hi-C误画成必须顺序实施的实验。"
+    },
+    {
+      "kind": "figure",
+      "title": "HSFA1a参与热诱导的增强子–启动子接触",
+      "question": "HSFA1a对增强子–启动子互作变化是否必要？",
+      "design": "比较野生型与HSFA1a敲低植株在热胁迫条件下的转录与染色质接触。",
+      "result": "部分位点的相互作用和转录响应在HSFA1a敲低后发生改变。",
+      "takeaway": "支持HSFA1a参与部分热诱导的三维染色质重构。",
+      "transition": "下一步整合结构、结合和表达证据，明确模型边界。",
+      "figure_ref": "文章Figure证据示例 · 原图待添加",
+      "section": "FIGURE STORY · DEMO",
+      "story_steps": [
+        {
+          "text": "围绕HSFA1a调控作用提出热胁迫下的机制问题",
+          "role": "question"
+        },
+        {
+          "text": "比较野生型与HSFA1a敲低植株的热响应",
+          "role": "design",
+          "relation_from_previous": "tests"
+        },
+        {
+          "text": "结合转录数据与3C-qPCR检查表达和接触变化",
+          "role": "analysis",
+          "relation_from_previous": "extends"
+        },
+        {
+          "text": "部分基因座的热诱导接触受HSFA1a影响",
+          "role": "finding",
+          "relation_from_previous": "observes",
+          "panel_ref": "论文Fig 5f、h",
+          "highlight": "受HSFA1a影响"
+        },
+        {
+          "text": "整合干预与互作证据，限定调控模型的适用范围",
+          "role": "inference",
+          "relation_from_previous": "synthesizes"
+        }
+      ]
+    },
+    {
+      "kind": "conclusion",
+      "title": "研究结论及证据边界",
+      "points": [
+        "热胁迫诱导部分染色质接触发生动态变化",
+        "HSFA1a参与部分热胁迫调控元件的互作响应",
+        "综合多组学与遗传干预建立候选机制模型"
+      ],
+      "limitation": "转录因子参与互作不等同于已经直接证明其以物理桥梁形式连接DNA两端。"
+    },
+    {
+      "kind": "technology",
+      "title": "ATAC-seq提供了什么独有的证据维度？",
+      "lead": "把动态开放的调控区与转录变化、候选TF结合及三维接触联系起来。",
+      "points": [
+        "识别热胁迫引发的染色质可及性变化",
+        "区分启动子近端和远端调控区域",
+        "为候选TF结合和互作分析提供空间位置锚点"
+      ]
+    }
+  ]
+}
