@@ -1,4 +1,4 @@
-# Paper Figure Story v5.1｜高质量、低消耗论文PPT Skill
+# Paper Figure Story ｜高质量、低消耗论文PPT Skill
 
 ## 这次优化什么
 
