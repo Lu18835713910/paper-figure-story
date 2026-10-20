@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="355" viewBox="0 0 1200 355">
+<defs><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#123B7D"/><stop offset="1" stop-color="#174994"/></linearGradient></defs>
+<rect width="1200" height="355" rx="20" fill="url(#b)"/>
+<circle cx="1050" cy="45" r="180" fill="#FFFFFF" opacity="0.04"/><circle cx="1120" cy="270" r="130" fill="#FFFFFF" opacity="0.05"/>
+<text x="55" y="82" font-family="Arial, sans-serif" font-size="47" font-weight="700" fill="#FFFFFF">Paper Figure Story</text>
+<text x="57" y="121" font-family="'Noto Sans CJK SC',sans-serif" font-size="21" fill="#CFE4FF">科研逻辑重构与 Figure 驱动的可编辑学术 PPT</text>
+<text x="57" y="160" font-family="Arial, sans-serif" font-size="16" fill="#E3EEFF">From scientific papers to research logic, experiment maps and editable PPTX</text>
+<g font-family="'Noto Sans CJK SC',sans-serif" text-anchor="middle">
+<rect x="54" y="207" width="242" height="84" rx="12" fill="#FFFFFF" opacity="0.97"/><text x="175" y="241" font-size="20" font-weight="700" fill="#174994">论文 PDF</text><text x="175" y="267" font-size="15" fill="#45617F">正文 · Methods · Figure</text>
+<path d="M310 248 L342 248" stroke="#FFFFFF" stroke-width="4"/><path d="M338 241 L348 248 L338 255" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+<rect x="362" y="207" width="242" height="84" rx="12" fill="#FFFFFF" opacity="0.97"/><text x="483" y="241" font-size="20" font-weight="700" fill="#174994">科研证据链</text><text x="483" y="267" font-size="15" fill="#45617F">问题 · 设计 · 结果 · 追问</text>
+<path d="M618 248 L650 248" stroke="#FFFFFF" stroke-width="4"/><path d="M646 241 L656 248 L646 255" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+<rect x="669" y="207" width="242" height="84" rx="12" fill="#FFFFFF" opacity="0.97"/><text x="790" y="241" font-size="20" font-weight="700" fill="#174994">整体框架 + 逐图</text><text x="790" y="267" font-size="15" fill="#45617F">分支汇合 · 文字箭头链</text>
+<path d="M925 248 L957 248" stroke="#FFFFFF" stroke-width="4"/><path d="M953 241 L963 248 L953 255" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+<rect x="976" y="207" width="175" height="84" rx="12" fill="#FFFFFF" opacity="0.97"/><text x="1063" y="241" font-size="20" font-weight="700" fill="#174994">可编辑 PPTX</text><text x="1063" y="267" font-size="15" fill="#45617F">#174994 · 16:9</text>
+</g></svg>
