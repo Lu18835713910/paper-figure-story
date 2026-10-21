@@ -2,7 +2,7 @@
 
 - **来源论文**：Wu et al. (2026), *Resolving the immune response across clonal cancer evolution in situ with Atera whole transcriptome profiling*，bioRxiv，DOI [10.64898/2026.08.03.741871](https://doi.org/10.64898/2026.08.03.741871)。
 - **展示目的**：验证从科研问题、样本设计、证据分支与独立核验，到可编辑PPTX的完整组织方式。
-- **PPT页数**：30页（由此前 v5 深度工作流生成；不是 v5.1 的标准页数）。
+- **PPT页数**：30页（深度精读测试案例，实际生成页数由论文内容决定）。
 - **公开内容**：原PPT中的文本、总框架、箭头、版式、讲者备注以及演示占位元素。
 - **明确移除**：原始论文Figure的嵌入图片，防止未经核实授权的再分发。
 
