@@ -8,7 +8,7 @@
 
 *A Codex Skill for turning scientific papers into evidence-grounded research stories and editable academic presentations.*
 
-**Version 5.1** · `quick` / `balanced` / `full` · 默认配色 `#174994` · 支持自定义 PPT 模板
+**Version 1.0** · `quick` / `balanced` / `full` · 默认配色 `#174994` · 支持自定义 PPT 模板
 
 **使用许可：仅限个人非商业使用（Personal Non-Commercial Use License v1.0），禁止商业用途及组织化部署。** 本项目为 source-available（源码公开可查看），**不是 OSI 定义的开源软件**。
 
@@ -59,9 +59,9 @@
 
 我们使用这篇论文测试了深度讲述工作流：从平台测量能力出发，分别展开**肿瘤克隆轴**（空间转录组 CNV 推断、LCM-WGS 独立核验）和**免疫状态轴**（稀有细胞识别、多重IF验证），最终汇合到肿瘤克隆与免疫微环境的空间关联分析。
 
-- **原始测试成果**：30页、16:9的中文学术PPT（v5深度工作流案例）。
+- **实际测试成果**：30页、16:9的中文学术PPT（深度精读工作流案例）。
 - **公开演示版本**：保留30页页面结构、科研文字逻辑和可编辑对象；为避免未经授权再分发预印本Figure，移除了37处嵌入的原论文图片。
-- **关于 `full`**：v5.1中的 `full` 延续深度精读理念，但不保证与这次案例页数完全相同。
+- **关于 `full`**：`full` 用于深度精读与证据核查，具体PPT页数取决于论文内容，不以此案例的30页为固定标准。
 
 **[下载 Atera 30页公开演示版 PPTX](examples/atera/atera-research-story-demo-30-slides.pptx)** · [查看案例说明](examples/atera/README.md) · [阅读原论文](https://doi.org/10.64898/2026.08.03.741871)
 
