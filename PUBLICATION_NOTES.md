@@ -4,4 +4,4 @@ This public-source bundle excludes `examples/tomato_test/` (paper figures extrac
 
 The original full ZIP is a local development/testing distribution. When publishing screenshots or paper figures, verify the rights and citation/licensing requirements separately.
 
-No LICENSE file is included until the repository owner chooses one. Consider MIT for code, after reviewing rights to all bundled assets.
+LICENSE now contains the project's custom Personal Non-Commercial Use License v1.0. The repository is source-available, not OSI open source; individual noncommercial use and private local modification are allowed, while commercial use, organizational deployment, and redistribution require written permission. Third-party materials remain excluded.
