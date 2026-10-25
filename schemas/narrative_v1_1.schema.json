@@ -1,0 +1,682 @@
+{
+  "type": "object",
+  "properties": {
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "central_focus": {
+      "$ref": "#/$defs/focus"
+    },
+    "bindings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/binding"
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "statements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/statement"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "reasoning_units": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/unit"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "reasoning_relations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/relation"
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/conflict"
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "metadata",
+    "central_focus",
+    "bindings",
+    "statements",
+    "reasoning_units",
+    "reasoning_relations",
+    "conflicts"
+  ],
+  "additionalProperties": false,
+  "title": "M2-C reference-only narrative mapping and explicit review ledger",
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "narrative_version": {
+          "const": "m2c-1"
+        },
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "paper_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "knowledge_snapshot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "story_plan_snapshot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "framework_plan_snapshot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_profile_fingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assets_snapshot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenance": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/provenance"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "narrative_version",
+        "case_id",
+        "paper_type",
+        "knowledge_snapshot",
+        "story_plan_snapshot",
+        "framework_plan_snapshot",
+        "request_profile_fingerprint",
+        "assets_snapshot",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
+    "focus": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "question",
+            "thesis"
+          ]
+        },
+        "statement_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "kind",
+        "statement_id"
+      ],
+      "additionalProperties": false
+    },
+    "binding": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pointer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref_pointer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "figure_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "panels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "asset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "object_id",
+        "pointer",
+        "source_ref_pointer",
+        "figure_id",
+        "panels",
+        "asset_ids"
+      ],
+      "additionalProperties": false
+    },
+    "statement": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "display_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text_mode": {
+          "enum": [
+            "literal",
+            "paraphrase"
+          ]
+        },
+        "assertion_kind": {
+          "enum": [
+            "direct_observation",
+            "experimental_finding",
+            "computational_prediction",
+            "external_report",
+            "author_interpretation",
+            "mechanism_hypothesis",
+            "normative_recommendation",
+            "presentation_transition"
+          ]
+        },
+        "source_binding_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "scope": {
+          "enum": [
+            "primary_study",
+            "external_literature",
+            "author_argument",
+            "presentation"
+          ]
+        },
+        "motivation_basis": {
+          "enum": [
+            "author_stated",
+            "argument_supported",
+            "presentation_organized",
+            "unknown"
+          ]
+        },
+        "depth": {
+          "enum": [
+            "quick",
+            "balanced",
+            "full"
+          ]
+        },
+        "critical": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "display_text",
+        "text_mode",
+        "assertion_kind",
+        "source_binding_ids",
+        "scope",
+        "motivation_basis",
+        "depth",
+        "critical"
+      ],
+      "additionalProperties": false
+    },
+    "unit": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_rsu_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "entity_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "figure_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "communicative_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "main_message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purpose": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "approach_or_argument": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "intermediate_conclusion": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unresolved_question": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "detail_statement_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "presentation_order": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "source_rsu_ids",
+        "entity_ids",
+        "figure_ids",
+        "communicative_role",
+        "main_message",
+        "purpose",
+        "approach_or_argument",
+        "intermediate_conclusion",
+        "unresolved_question",
+        "detail_statement_ids",
+        "presentation_order"
+      ],
+      "additionalProperties": false
+    },
+    "relation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identity": {
+          "enum": [
+            "scientific",
+            "author_argument",
+            "presentation"
+          ]
+        },
+        "relation_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scientific_relation_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_binding_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "presentation_only": {
+          "type": "boolean"
+        },
+        "justification": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "source_unit",
+        "target_unit",
+        "identity",
+        "relation_kind",
+        "scientific_relation_ref",
+        "source_binding_ids",
+        "presentation_only",
+        "justification"
+      ],
+      "additionalProperties": false
+    },
+    "conflict": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_binding_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "guard_statement_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "resolved": {
+          "const": false
+        }
+      },
+      "required": [
+        "id",
+        "source_binding_ids",
+        "guard_statement_ids",
+        "resolved"
+      ],
+      "additionalProperties": false
+    },
+    "review": {
+      "type": "object",
+      "properties": {
+        "target_type": {
+          "enum": [
+            "statement",
+            "relation"
+          ]
+        },
+        "target_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_sha256": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allowed_assertion_kinds": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "direct_observation",
+              "experimental_finding",
+              "computational_prediction",
+              "external_report",
+              "author_interpretation",
+              "mechanism_hypothesis",
+              "normative_recommendation",
+              "presentation_transition"
+            ]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "PARTIAL",
+            "FAIL",
+            "NOT_TESTED",
+            "NA"
+          ]
+        },
+        "reviewer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "enum": [
+            "author_self_review",
+            "independent_review",
+            "prior_record",
+            "current_image_visual"
+          ]
+        },
+        "artifact_paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "checks": {
+          "type": "object",
+          "properties": {
+            "text_support": {
+              "enum": [
+                "PASS",
+                "PARTIAL",
+                "FAIL",
+                "NOT_TESTED",
+                "NA"
+              ]
+            },
+            "panel_mapping": {
+              "enum": [
+                "PASS",
+                "PARTIAL",
+                "FAIL",
+                "NOT_TESTED",
+                "NA"
+              ]
+            },
+            "image_visual": {
+              "enum": [
+                "PASS",
+                "PARTIAL",
+                "FAIL",
+                "NOT_TESTED",
+                "NA"
+              ]
+            }
+          },
+          "required": [
+            "text_support",
+            "panel_mapping",
+            "image_visual"
+          ],
+          "additionalProperties": false
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "image_visual_current": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "target_type",
+        "target_id",
+        "target_sha256",
+        "allowed_assertion_kinds",
+        "status",
+        "reviewer",
+        "method",
+        "artifact_paths",
+        "checks",
+        "note",
+        "image_visual_current"
+      ],
+      "additionalProperties": false
+    },
+    "ledger": {
+      "type": "object",
+      "properties": {
+        "review_version": {
+          "const": "m2c-review-1"
+        },
+        "knowledge_snapshot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mapping_snapshot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/review"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "review_version",
+        "knowledge_snapshot",
+        "mapping_snapshot",
+        "records"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

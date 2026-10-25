@@ -1,7 +1,5 @@
-# Publication notes
+# Publication notes — v1.1 candidate
 
-This public-source bundle excludes `examples/tomato_test/` (paper figures extracted from an external publication, and local test outputs) and `references/user_overview_reference.png` (a user-provided figure). It retains the implementation, documentation, example JSON, and default editable academic PPTX template.
+The installable v1.1 ZIP is built from an explicit source allowlist. It includes a self-authored layout example and excludes local research PDFs, extracted Figures, reviewed scientific fixtures and internal development records. Existing tracked v1.0 examples remain unchanged in history and in this preparation; their third-party content does not become covered by the project license.
 
-The original full ZIP is a local development/testing distribution. When publishing screenshots or paper figures, verify the rights and citation/licensing requirements separately.
-
-LICENSE now contains the project's custom Personal Non-Commercial Use License v1.0. The repository is source-available, not OSI open source; individual noncommercial use and private local modification are allowed, while commercial use, organizational deployment, and redistribution require written permission. Third-party materials remain excluded.
+The project retains its Personal Non-Commercial Use License v1.0. It is source-available, not OSI open source. Commercial use, organizational deployment and redistribution are governed by that original license. Third-party materials require separate rights and citation checks. No actual GitHub Release is claimed until the Tag, Release and attached ZIP have been verified remotely.

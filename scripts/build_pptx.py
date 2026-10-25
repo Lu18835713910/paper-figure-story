@@ -248,6 +248,12 @@ def theme_rgb_from_shape(prs):
     st = dict(COLORS)
     candidate = []
     fonts = []
+    def legible_on_white(value):
+        # Decorative pale rules must not become the primary text/arrow color.
+        channels = [int(value.lstrip('#')[i:i+2], 16) / 255 for i in (0, 2, 4)]
+        linear = [c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4 for c in channels]
+        luminance = sum(c * w for c, w in zip(linear, (.2126, .7152, .0722)))
+        return 1.05 / (luminance + .05) >= 4.5
     for slide in list(prs.slides)[:min(5, len(prs.slides))]:
         for shape in slide.shapes:
             if shape.has_text_frame and shape.text.strip():
@@ -269,6 +275,8 @@ def theme_rgb_from_shape(prs):
                         candidate.append('#'+str(col.rgb))
             except (ValueError, AttributeError, TypeError):
                 continue
+    candidate = [c for c in candidate if legible_on_white(c)]
+    fonts = [c for c in fonts if legible_on_white(c)]
     if candidate: st['accent'] = Counter(candidate).most_common(1)[0][0]
     if fonts: st['dark'] = Counter(fonts).most_common(1)[0][0]
     return st
@@ -318,7 +326,8 @@ def styled_text(shape, value, is_list=False):
 
 
 def insert_images(slide, shape, paths, json_path, allow_missing):
-    paths = paths[:2]
+    if len(paths)>2:
+        raise ValueError('TOO_MANY_IMAGES: 此成熟版式每页最多2幅原图；请按科学问题拆页，不能静默丢弃后续原图。')
     blank_note = next((v for v in slide.shapes if v.name == 'PFS_IMAGE_PLACEHOLDER'), None)
     if blank_note is not None:
         clear_shape_fill_text(blank_note)
@@ -868,6 +877,17 @@ def populate_slide(slide, record, json_path, index, short_citation, allow_missin
             render_integrated_framework(slide,record,style=getattr(slide,'_pfs_style',COLORS))
     if kind in ('logic','route'):
         render_argument_graph(slide,record,style=getattr(slide,'_pfs_style',COLORS))
+    # Human speaking layer; the reviewed page JSON remains the machine record.
+    note=['本页问题：'+record.get('question',record.get('title',''))]
+    if record.get('lead'):note.append('背景与边界：'+str(record['lead']))
+    if record.get('story_steps'):
+        note.append('讲述顺序：\n'+'\n'.join(str(i+1)+'．'+str(s['text']) for i,s in enumerate(record['story_steps'])))
+    elif record.get('bullets'):note.append('讲述要点：\n'+'\n'.join(map(str,record['bullets'])))
+    if record.get('limitation'):note.append('证据边界：'+str(record['limitation']))
+    if record.get('transition'):note.append('衔接：'+str(record['transition']))
+    if isinstance(record.get('speaker_notes'),str):note.append(record['speaker_notes'])
+    note.append('来源：'+record.get('figure_ref',record.get('citation',short_citation)))
+    slide.notes_slide.notes_text_frame.text='\n\n'.join(note)
 
 
 def check_input(manifest):

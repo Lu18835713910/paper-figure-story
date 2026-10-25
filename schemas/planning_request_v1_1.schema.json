@@ -1,0 +1,211 @@
+{
+  "type": "object",
+  "properties": {
+    "request_version": {
+      "const": "m2a-1"
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "merge"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+              },
+              "story_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+                },
+                "minItems": 2,
+                "uniqueItems": true
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "basis_relation_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              },
+              "basis_source_pointers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "op",
+              "id",
+              "story_ids",
+              "reason",
+              "basis_relation_ids",
+              "basis_source_pointers"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "const": "split"
+              },
+              "story_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+              },
+              "parts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+                    },
+                    "method_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+                      },
+                      "minItems": 0,
+                      "uniqueItems": true
+                    },
+                    "evidence_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+                      },
+                      "minItems": 0,
+                      "uniqueItems": true
+                    },
+                    "figure_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+                      },
+                      "minItems": 0,
+                      "uniqueItems": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "method_ids",
+                    "evidence_ids",
+                    "figure_ids"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 2,
+                "uniqueItems": true
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "basis_relation_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              },
+              "basis_source_pointers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "op",
+              "story_id",
+              "parts",
+              "reason",
+              "basis_relation_ids",
+              "basis_source_pointers"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "reorder": {
+      "type": "object",
+      "properties": {
+        "unit_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basis_relation_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "basis_source_pointers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "unit_ids",
+        "reason",
+        "basis_relation_ids",
+        "basis_source_pointers"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "request_version",
+    "operations"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:paper-figure-story:planning-request:m2a-1",
+  "title": "M2-A presentation planning decisions (references only)"
+}

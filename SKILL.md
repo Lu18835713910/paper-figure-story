@@ -1,9 +1,39 @@
 ---
 name: paper-figure-story
-description: 从论文PDF提炼问题驱动的科研证据链，生成“全文研究思路+实验路线联合框架”与逐Figure的文字箭头故事，并使用指定PPT模板或#174994无Logo默认模板制作可编辑学术PPT。默认采用节约上下文和页数的均衡模式；可按需深入核查或展开全部panel。
+description: 从科研论文PDF重构科学问题、实验或论据、实际发现及证据边界，用原始Figure和简短文字箭头链制作可编辑中文学术PPT；支持多分支总框架、综述讲述、三档深度及可选Methods和详细证据图。
 ---
 
-# Paper Figure Story v1.0｜科研逻辑重构与高效PPT生成
+# Paper Figure Story v1.1.0
+
+## 默认目标与产物选择
+
+默认交付高质量科研PPT：文献信息、科学问题、简洁多分支开场、逐Figure故事、综合认识。原图是证据，3–5个具体短句及箭头连接对象/处理、分析、发现和认识；步数可随研究问题调整。保留关键对照、数字和影响结论强度的限制，不粘贴RSU长段落，不以残基定位线代替科研讲述。
+
+三类产物共享M1来源：A简洁开场框架；B可选独立详细网络及实验卡/清单；C逐Figure讲述。A引用某图不等于C完成；B关系不因排版变为因果或实验历史。
+
+`run_pfs.py run --products presentation`为默认主PPT，含封面、问题和总结；`with-network`再给独立大画布；`deep --inventory ...`才展开已有Methods清单及实验卡。缺补件或未核n不阻塞有充分来源的主稿，也不能宣称深度审计完成。`full`是正文深度，不隐式生成82页卡片。
+
+## 用户只给PDF时，当前Codex负责闭环
+
+用户不必编写M1 JSON。读[PDF到PPT工作流](references/pdf_to_ppt_workflow.md)，使用同一缓存完成：识别文献类型→读正文、关键Methods和实际Figure→Agent建立有源M1/图像资产→校验→规划/生成→实际渲染与科学审核→交付。
+
+缺knowledge的CLI返回exit3、`REVIEWED_KNOWLEDGE_REQUIRED`和`agent_handoff.json`，这是交给当前Codex的中间任务。Agent继续语义整理并用新输出目录重入，不能停下来要求用户写JSON，也不能取消来源审核门。候选句、PDF存在或页码定位不等于原文支持。CLI不自行调用远程模型；科研理解由使用此Skill的Codex执行。
+
+综述区分叙述性综述、系统综述及Meta分析。围绕研究路线、文献证据、争议、综合解释与未来问题组织；引述实验不是综述作者新实验。没有检索流程/纳入数/合并效应的来源时不补造。文章论证顺序不等于实验历史。
+
+## 展示、来源与有限审核
+
+必要缩写首次解释实体类别：例如CNNM4膜蛋白、HEK293T细胞系、KRR突变体。文字、框和箭头原生可编辑，原始Figure可替换，禁止重绘实验数据。中文Microsoft YaHei，英文/数字Times New Roman，实际检查PPTX属性。
+
+备注必须是科研人员可讲述的问题、对象/术语、方法/对照、结果、边界与短来源。完整ID、Figure/panel、Methods、指纹、语句身份和冲突保存在独立`audit/*.json`、`source_review.json/md`，不向备注粘贴大型JSON。源头事实、作者解释及presentation连接分别保存。
+
+quick/balanced/full复用同一事实、RSU、关系和图片索引；quick压缩展开，balanced为默认，full增加有源方法/限制和必要局部图。复杂主图按问题拆页，不能为了三档差异删核心数字。三档可能页数相同，不声称每篇都固定页数。只重渲染实际修改页；每类视觉故障最多两次定向修正，仍失败则记录并停止正式通过。
+
+默认16:9学术蓝#174994、无Logo模板。新入口支持PFS兼容16:9 PPTX；普通PPTX先inspect_template，再用成熟build_pptx.py的native/tagged路径。不能承诺任意母版像素级复刻。旧成熟Figure版式最多2幅原图，更多须拆页，禁止静默丢图。详[安装与使用](INSTALL.md)。
+
+深度整理使用[实验层合同](references/experiment_inventory_contract.md)，不删除现有模块。稳定Experiment ID按研究/分析任务登记，任务数不等于独立生物实验次数。n、生物/技术重复、独立测量、粒子、数据集分单位；未获材料为NOT_VERIFIED，实际查完整原文仍无报告才用NOT_REPORTED。VERIFIED字段不等于独立科学终审；PARTIAL可显式生成待审核材料，保留formal_ready=false，不伪造USER_ACCEPTED。
+
+以下成熟版式规范及JSON/CLI兼容路径继续可用；不是要求每次加载全部参考。
 
 ## 一、核心目标（不可简化）
 
@@ -92,3 +122,6 @@ description: 从论文PDF提炼问题驱动的科研证据链，生成“全文�
 ## 六、完成条件
 
 用户能讲清楚“研究为什么做、用什么实验、如何支持发现、为什么进一步研究”，总框架和逐图逻辑用途清晰且可靠，PPT可编辑、可阅读并标注原文图源。默认优先交付**完整、精炼而非冗长**的学术报告。禁止为了省时间而跳过研究事实核查。
+
+
+M2-B开发版新增的知识模型→讲述片段→可编辑PPT入口，按需读取 [presentation_projection.md](references/presentation_projection.md)；该入口不替代上述成熟页面JSON与构建流程，验收边界以独立规则及实际测试报告为准。
