@@ -15,7 +15,7 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 
 ## 用户只给PDF时，当前Codex负责闭环
 
-用户不必编写M1 JSON。读[PDF到PPT工作流](references/pdf_to_ppt_workflow.md)，使用同一缓存完成：识别文献类型→读正文、关键Methods和实际Figure→Agent建立有源M1/图像资产→校验→规划/生成→实际渲染与科学审核→交付。
+用户不必编写M1 JSON。读[PDF到PPT工作流](references/pdf_to_ppt_workflow.md)，使用同一缓存完成：全文可用科学内容阅读→科学信息索引→Methods任务清单→Methods与结果映射→有源科研逻辑判定→同模型A/B与逐Figure故事→实际渲染与科学审核。不得先选主题拓扑再找证据填充。
 
 缺knowledge的CLI返回exit3、`REVIEWED_KNOWLEDGE_REQUIRED`和`agent_handoff.json`，这是交给当前Codex的中间任务。Agent继续语义整理并用新输出目录重入，不能停下来要求用户写JSON，也不能取消来源审核门。候选句、PDF存在或页码定位不等于原文支持。CLI不自行调用远程模型；科研理解由使用此Skill的Codex执行。
 
@@ -63,16 +63,24 @@ quick/balanced/full复用同一事实、RSU、关系和图片索引；quick压�
 
 1. 定位主论文PDF、补充材料、用户指定的PPT/PPTX模板。参考PPT不等于用户指定模板；明确上传模板优先于默认模板。
 2. 运行 `python scripts/index_pdf.py 主论文.pdf --outdir 工作目录/_cache`。这只生成PDF逐页文本与Figure候选页索引，**不等于内容核查**。如缓存与文件SHA256匹配则直接复用。
-3. 一次性读取Abstract、Introduction、Results、Discussion、各主Figure legend；仅当实验分组/n/阈值不清楚时按需定位Methods段落。只阅读与主要结论相关的补图/补充材料，不默认全文逐页重复浏览。
+3. 原创研究先完整读取当前可用的Abstract、Introduction、Results、Discussion、Materials and Methods / STAR Methods、主图图注及可用补充Methods和说明；quick/balanced也须完成科学结构阅读与Methods任务识别，再识别关系。复用缓存和已读记录，不重复解析；缺补件登记为未获，不写成原文未报告。深度整理再追溯全部适用字段的参数、重复、统计与冲突。
 4. **每张主Figure图片至少查看一次**，核对坐标、颜色、panel与正文解读。只为将进入PPT的panel提取高清裁剪；不要在反复推敲句子时反复截图、重做裁剪。
 
 ### 1. 先建立一个权威“科研证据表”，后续复用
+
+先完成12类[科学索引和科研逻辑合同](references/research_logic_contract.md)：背景缺口、中心问题、假说、任务、目的、材料、分组对照、处理、检测分析、实际结果、作者解释、限制。Methods清单记录任务类别、全部已知字段和来源，建立Methods—Results—Figure—Conclusion双向引用。只有Methods而无结果时保留方法任务；未核完整Methods的结果标为PARTIAL。
+
+在此之后判断递进、问题分叉、并行、互补、汇合、共享流程与假说；记录方向、理由、来源及其他解释。论文顺序、论证顺序和真实执行时间分开。共享制备不重复计为独立验证；实验/控制/计算/共享任务总数不等于独立实验数。每项Methods同时保留完整结构记录及有源的“为什么做—怎样比较—读数—结果—认识—限制”六角色简释。
 
 一次生成每个关键实验的：`Figure/panel`、来源页码、问题来源、样本/对照/处理/n、方法及其读数、主要直接结果、最小可支持结论、证据级别、下一项问题、与其他实验的关系。区分 `paper`（原文明示）和 `presentation`（汇报组织关系）。跨Figure相同的样本及方法不重复长篇解释，可引用前面的设计条目。
 
 默认存为 `01_科研逻辑与逐Figure证据.md`。**这一份是内容事实的单一基准**：排版和撰稿阶段优先读取它，只有发现疑点才回到PDF原文定位复查。不要分别用模型从头创作5份重复的大型Markdown，再相互对照。
 
 ### 2. 将同一证据表转化为两层PPT内容
+
+新科研逻辑入口使用`research_logic.py`验证来源与已有M1/Inventory引用，`project_research_logic.py`从同一逻辑模型投影A简图、B详细展开及分支图；B必须能压缩回A的核心节点和边。允许有依据的递进，不默认固定数量并行模块。`run_pfs.py run --research-logic ...`显式采用该模型，旧默认CLI/校验行为保留。C的逐Figure覆盖独立验收，不能用总图引用冒充完成。
+
+可选深度产物[科研逻辑拆解手册](references/research_logic_contract.md#可选科研逻辑拆解手册)由`build_research_workbook.py`生成DOCX：总图、分支图、设计对照表、关系矩阵、完整Methods结构引用和来源索引。嵌入同模型PPT的实际导出PNG，不另外手工构建逻辑图；文档文字/表可编辑，图中节点在配套PPTX编辑。禁止IMRD文章改写。必须实际打开、渲染并逐页检查。
 
 - **总框架**：把对象、实际分组/时间、并行组学任务、补充验证和总发现写入 `kind=framework` 的 `study_map`；证据支持的关系用实线，讲述性重排标记为虚线。并非所有图谱型研究都有干预验证，不要编造。
 - **Figure页**：根据研究问题选择关键panel，并将本图证据提炼为 `story_steps`，每步是**具体操作/发现/解释**而非空泛标题。默认3–5步即可讲清楚；2–7步按需扩展。不要求所有步骤都重复完整的“问题/方法/结果/下一步”五标签。

@@ -47,6 +47,7 @@ export async function renderEvidenceProducts(o){
  const net=JSON.parse(await fs.readFile(o.network,'utf8')),plan=JSON.parse(await fs.readFile(o.plan,'utf8'));
  if(plan.version!=='pfs-products-1'||plan.formal_ready!==false)throw Error('Invalid candidate plan version/review gate');
  mustRun(o.python,[path.join(HERE,'run_pfs.py'),'validate-products','--network',o.network,'--plan',o.plan,...(o.metadata?['--metadata',o.metadata]:[])]);
+ const logicEdges=plan.research_logic?new Map(JSON.parse(await fs.readFile(plan.research_logic.path,'utf8')).edges.map(e=>[e.id,e])):new Map();
  const {Presentation,PresentationFile,FileBlob}=await import(pathToFileURL(o['artifact-module']).href);
  const {finalizePresentation}=await import(pathToFileURL(path.join(o['presentation-skill'],'container_tools/artifact_tool_utils.mjs')).href);
  const assets=new Map(net.assets.map(a=>[a.id,a]));const orientations={};const reports=[];
@@ -82,13 +83,15 @@ export async function renderEvidenceProducts(o){
      }
      for(const e of scene.elements.filter(x=>['rect','down_arrow'].includes(x.kind)))slide.shapes.add({name:'RC_'+scene.id+'_'+e.id,geometry:e.kind==='down_arrow'?'downArrow':'rect',position:e.position,fill:e.kind==='down_arrow'?plan.style.accent:e.fill,line:{fill:e.kind==='down_arrow'?'none':(e.stroke||'none'),width:e.kind==='down_arrow'?0:1}});
      for(const a of scene.connectors||[]){
-       if(!['presentation','author_argument_candidate'].includes(a.identity)&&!a.source_relation_id)throw Error('Scientific arrow without registered relation ID');
+       const logical=a.source_logic_relation_id&&logicEdges.get(a.source_logic_relation_id);
+       if(logical&&(logical.identity!==a.identity||logical.type!==a.relation_type))throw Error('Logic relationship identity drift');
+       if(!['presentation','author_argument_candidate'].includes(a.identity)&&!a.source_relation_id&&!logical)throw Error('Scientific arrow without registered relation ID or validated logic binding');
        const points=a.points.filter((p,i,all)=>i===0||p[0]!==all[i-1][0]||p[1]!==all[i-1][1]);
        if(points.length<2)throw Error('Degenerate entire connector '+a.id);
        for(let j=1;j<points.length;j++){
          const[x,y]=points[j-1],[xx,yy]=points[j];const name='RC_EDGE_'+scene.id+'_'+a.id+'_'+j;
          orientations[name]={flipH:xx<x,flipV:yy<y};
-         slide.shapes.add({name,geometry:'connector',kind:'straight',position:{left:Math.min(x,xx),top:Math.min(y,yy),width:Math.abs(xx-x),height:Math.abs(yy-y)},line:{fill:plan.style.accent,width:product.kind==='main'?1.7:2.2,style:a.dashed?'dashed':'solid'},head:{type:'none'},tail:{type:a.arrow&&j===points.length-1?'triangle':'none',width:'sm',length:'sm'}});
+         slide.shapes.add({name,geometry:'connector',kind:'straight',position:{left:Math.min(x,xx),top:Math.min(y,yy),width:Math.abs(xx-x),height:Math.abs(yy-y)},line:{fill:a.color||plan.style.accent,width:product.kind==='main'?1.7:2.2,style:a.dashed?'dashed':'solid'},head:{type:'none'},tail:{type:a.arrow&&j===points.length-1?'triangle':'none',width:'sm',length:'sm'}});
        }
      }
      for(const e of scene.elements.filter(x=>x.kind==='text'))text(slide,'RC_'+scene.id+'_'+e.id,e.text,e.position,e.font_size,e.bold,e.color,e.align);
@@ -100,7 +103,8 @@ export async function renderEvidenceProducts(o){
      machinePages.push({entry:'pfs-evidence-products-1',profile:plan.profile,scene_id:scene.id,product:scene.product,
        source_statement_ids:scene.source_statement_ids,source_node_ids:scene.source_node_ids,source_relation_ids:scene.source_relation_ids,
        narrative_arrows:(scene.elements||[]).filter(x=>x.kind==='down_arrow').map(x=>({id:x.id,identity:'presentation'})),
-       scientific_edges_added:0,figure_ids:scene.figure_ids,coverage:scene.coverage,notes:scene.notes,formal_ready:false});
+       scientific_edges_added:0,figure_ids:scene.figure_ids,coverage:scene.coverage,notes:scene.notes,formal_ready:false,
+       ...(scene.logic_snapshot?{logic_snapshot:scene.logic_snapshot,source_logic_node_ids:scene.source_logic_node_ids,source_logic_relation_ids:scene.source_logic_relation_ids}: {})});
      slide.speakerNotes.text=humanSpeakerNotes(scene,net,plan.profile);
    }
    const auditRoot=path.join(workspace,'audit');await fs.mkdir(auditRoot,{recursive:true});

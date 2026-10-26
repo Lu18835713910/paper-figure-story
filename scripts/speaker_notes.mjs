@@ -21,6 +21,7 @@ export function humanSpeakerNotes(scene,network,profile){
  if(body.length){lines.push('讲述顺序：');body.forEach((e,i)=>lines.push((i+1)+'．'+clean(e.text)));}
  else if(scene.source_node_ids?.length)lines.push('讲述要点：'+scene.source_node_ids.slice(0,8).map(id=>clean(nodes.get(id)?.label||id)).join('；'));
  if(restrictions.length)lines.push('证据边界：'+restrictions.join('；'));
+ if(scene.notes?.logic_relations?.length)lines.push('研究衔接：'+scene.notes.logic_relations.map(e=>e.label+'：'+e.rationale+' 边界：'+e.alternatives).join('\n'));
  if(scene.product==='B2')lines.push('本页仅为该Experiment ID的分页；未知n与重复仍待核，不能按散点、粒子、泳道或页数推算。');
  lines.push('来源：'+clean(scene.citation));
  lines.push('来源索引：'+(scene.source_statement_ids||[]).slice(0,6).join('，')+'；完整映射见同名独立audit JSON。');

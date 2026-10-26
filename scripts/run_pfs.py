@@ -164,6 +164,7 @@ def execute(args):
         ei.write_audit(read_json(args.inventory),output/'inventory')
     meta=bibliography(args.metadata,network['paper']['id']) if args.metadata else {}
     if args.guidance:meta['display_guidance']={'path':str(Path(args.guidance).resolve()),'sha256':sha(args.guidance)}
+    if getattr(args,'research_logic',None):meta['research_logic']={'path':str(Path(args.research_logic).resolve()),'sha256':sha(args.research_logic)}
     if meta:save(output/'bibliography.resolved.json',meta)
     template=Path(args.template or DEFAULT_TEMPLATE).resolve()
     if template.suffix.lower()!='.pptx' or not template.is_file():raise ValueError('TEMPLATE_INPUT: existing PPTX required')
@@ -208,6 +209,7 @@ def main(argv=None):
     run.add_argument('--no-front-matter',action='store_true',help='Keep a requested short selection without adding report cover/question/summary.')
     run.add_argument('--slides',nargs='+',help='Explicit existing scene IDs for a targeted sample; omitted pages remain recorded as deferred.')
     run.add_argument('--node',default=shutil.which('node'));run.add_argument('--artifact-module');run.add_argument('--presentation-skill')
+    run.add_argument('--research-logic',help='Source-adjudicated logic model created after reading, Methods task identification and result mapping; shares A/B topology.')
     val=sub.add_parser('validate-products');val.add_argument('--network',required=True);val.add_argument('--plan',required=True);val.add_argument('--metadata')
     args=p.parse_args(argv)
     try:
