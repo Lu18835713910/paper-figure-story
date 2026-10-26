@@ -28,6 +28,8 @@ python scripts/run_pfs.py run ... --research-logic logic.json --plan-only
 
 新入口显式启用；旧CLI和project_products无research_logic时行为不变。模型指纹参与重建漂移检验，未关闭TEXT_DRIFT/PLAN_DRIFT。投影的source_logic_*引用不能冒充M1科学实体。
 
+`logic_display`是版本绑定的显示注释，包含节点问题/方法/发现/意义、布局和边的简短标签。只引用已有节点、关系及来源，不得改科学身份或新增因果；核心边不得隐藏。非核心冗余支持或共享流程可以集中说明，必须在notes.display_only_relations逐条保留理由及原身份。显示注释指纹进入产品计划，防止布局阶段偷改科研内容。旧无注释入口保持原行为。
+
 ## 可选科研逻辑拆解手册
 
 ```text
@@ -35,3 +37,5 @@ python scripts/build_research_workbook.py --model logic.json --graphs graph_expo
 ```
 
 graph_exports记录同模型各view的PPTX和实际PNG路径、SHA256及logic_snapshot；文档拒绝图或模型漂移。可选annotations只是绑定同一版本与source_ids的术语及审核显示文本，不保存第二套实验事实。正文以总图、代表性分支、Methods对照表、关系矩阵为主；完整清单及字段来源可以结构化附件引用。禁止按IMRD改写论文或重复粘贴Methods。DOCX文字和表格可编辑；嵌入图为配套原生PPT的确切导出图，图节点在PPTX中编辑。实际打开与逐页渲染必做，自动结构检查与人工体验验收分开。
+
+`--reader`采用初学者阅读布局，rows/cards/groups只是有源文字和分页注释；cards绑定原Experiment ID和字段，分组必须恰好覆盖全部适用任务且不能重复计数。先做开篇和一组实验小样，再做完整稿；原始字段、状态与冲突仍独立随附。`--sample`仅供局部预览，不得当作完整Methods交付。

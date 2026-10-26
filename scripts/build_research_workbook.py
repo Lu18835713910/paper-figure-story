@@ -20,7 +20,8 @@ def value(x):
     return x if isinstance(x,str) else json.dumps(x,ensure_ascii=False)
 def fonts(run,size=10.5,bold=False,color=None):
     run.font.name='Times New Roman';run.font.size=Pt(size);run.font.bold=bold
-    run._element.get_or_add_rPr().get_or_add_rFonts().set(qn('w:eastAsia'),'Microsoft YaHei')
+    rf=run._element.get_or_add_rPr().get_or_add_rFonts()
+    for key,font in [('ascii','Times New Roman'),('hAnsi','Times New Roman'),('eastAsia','Microsoft YaHei')]:rf.set(qn('w:'+key),font)
     if color:run.font.color.rgb=RGBColor.from_string(color)
 def table(doc,headers,rows,widths,size=10):
     t=doc.add_table(rows=1,cols=len(headers));t.autofit=False
@@ -142,8 +143,15 @@ def build(model_path,manifest_path,output,annotations_path=None):
     for root in [doc.element,doc.styles.element]:
         for border in list(root.iter(qn('w:pBdr'))):border.getparent().remove(border)
     doc.save(output)
+    from apply_script_fonts import apply_docx_fonts
+    apply_docx_fonts(output)
     receipt={'version':'pfs-workbook-1','docx':str(output),'docx_sha256':rl.file_sha(output),'logic_model':str(Path(model_path).resolve()),'logic_snapshot':model['snapshot'],'network_snapshot':model['network_snapshot'],'annotations_sha256':rl.file_sha(annotations_path) if annotations_path else None,'graphs':used,'inventory_source_sha256':rl.file_sha(full) if inv else None,'experiment_ids':[m['experiment_id'] for m in methods],'format':'Structured diagrams, comparisons and source tables; full Methods companion preserved, no article rewrite.','document_text_tables_editable':True,'diagram_editing':'Native nodes/arrows editable in linked PPTX; DOCX contains their exact exported PNGs.','render_status':'PENDING','formal_ready':False}
     output.with_suffix('.receipt.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2),encoding='utf-8');return receipt
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--model',required=True,type=Path);p.add_argument('--graphs',required=True,type=Path);p.add_argument('--output',required=True,type=Path);p.add_argument('--annotations',type=Path);a=p.parse_args();r=build(a.model,a.graphs,a.output,a.annotations);print(json.dumps({'docx':r['docx'],'experiments':len(r['experiment_ids']),'graphs':len(r['graphs'])},ensure_ascii=False))
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--model',required=True,type=Path);p.add_argument('--graphs',required=True,type=Path);p.add_argument('--output',required=True,type=Path);p.add_argument('--annotations',type=Path);p.add_argument('--reader',action='store_true');p.add_argument('--sample',action='store_true');a=p.parse_args()
+    if a.reader:
+        from reader_workbook import build_reader
+        r=build_reader(a.model,a.graphs,a.output,a.annotations,a.sample)
+    else:r=build(a.model,a.graphs,a.output,a.annotations)
+    print(json.dumps({'docx':r['docx'],'experiments':len(r['experiment_ids']),'graphs':len(r['graphs'])},ensure_ascii=False))
 if __name__=='__main__':main()

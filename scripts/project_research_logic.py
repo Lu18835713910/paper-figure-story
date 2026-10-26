@@ -47,7 +47,21 @@ def _route(a,b,lane,width):
         return [[ax+aw,ay+ah/2],[mid,ay+ah/2],[mid,by+bh/2],[bx,by+bh/2]]
     mid=(bx+bw+ax)/2
     return [[ax,ay+ah/2],[mid,ay+ah/2],[mid,by+bh/2],[bx+bw,by+bh/2]]
-def build_scene(network,model,view='A'):
+def read_display(model,metadata):
+    rec=metadata.get('logic_display')
+    if not rec:return None
+    if rl.file_sha(rec['path'])!=rec['sha256']:raise ValueError('LOGIC_DISPLAY_DRIFT')
+    d=rl.load(rec['path'])
+    if d.get('logic_snapshot')!=model['snapshot'] or d.get('formal_ready') is not False:raise ValueError('LOGIC_DISPLAY_VERSION_OR_REVIEW')
+    nm={n['id']:n for n in model['nodes']};em={e['id']:e for e in model['edges']}
+    for nid,r in d.get('nodes',{}).items():
+        if nid not in nm or not r.get('source_ids') or not set(r['source_ids'])<=set(model['sources']):raise ValueError('LOGIC_DISPLAY_SOURCE')
+        if set(r)-{'question','method','discovery','meaning','source_ids'}:raise ValueError('LOGIC_DISPLAY_FACT_OVERRIDE')
+    for eid,r in d.get('edges',{}).items():
+        if eid not in em or set(r)-{'label','display_note'}:raise ValueError('LOGIC_DISPLAY_EDGE_OVERRIDE')
+        if r.get('display_note') and (eid in model['core']['edges'] or not r.get('label')):raise ValueError('CORE_EDGE_CANNOT_BE_HIDDEN')
+    return d
+def build_scene(network,model,view='A',display=None):
     nm={x['id']:x for x in model['nodes']};em={x['id']:x for x in model['edges']}
     if view in ['A','B']:
         ids=list(model['core']['nodes']);eids=list(model['core']['edges']);detail=view=='B'
@@ -58,7 +72,8 @@ def build_scene(network,model,view='A'):
         title='全文科研逻辑' if view=='A' else '综述主题证据与论证逻辑' if network['paper']['paper_type'] in ['review','perspective'] else '完整科研逻辑与实验设计'
     else:
         branch=next(x for x in model['branches'] if x['id']==view);ids=branch['nodes'];eids=branch['edges'];detail=False;title=branch['title']
-    layout=copy.deepcopy(model['layout'].get(view) or _default_positions(model,view,ids));width,height=layout['width'],layout['height'];pos=layout['positions']
+    active=display if display and view!='A' else None
+    layout=copy.deepcopy((active or {}).get('layout',{}).get(view) or model['layout'].get(view) or _default_positions(model,view,ids));width,height=layout['width'],layout['height'];pos=layout['positions']
     if set(pos)!=set(ids):raise ValueError('LOGIC_LAYOUT_NODE_COVERAGE: '+view)
     elements=[];connectors=[];statement_ids=[];nodeids=[];figures=[];body_refs=[]
     sid='LOGIC_'+view
@@ -72,42 +87,56 @@ def build_scene(network,model,view='A'):
             e['logic_node_id']=nid;e['statement_ids']=node['statement_ids'];e['source_node_ids']=node['source_entity_ids'];elements.append(e)
             statement_ids+=node['statement_ids'];nodeids+=node['source_entity_ids'];body_refs.append(nid);continue
         elements.append(box(sid+'_'+nid+'_frame',p,'#FFF9EF' if node['identity']=='AUTHOR_INTERPRETATION' else '#F5F8FD'))
-        ftitle=27 if view=='A' else 38 if view=='B' else 34
-        fbody=22 if view=='A' else 31 if view=='B' else 30
+        if active and node['kind']=='shared_method':
+            shown=active.get('nodes',{}).get(nid,{})
+            value='共用技术：'+shown.get('method',node['short_text'])+'  '+shown.get('meaning','不计为独立验证。')
+            e=text(sid+'_'+nid+'_shared',value,[x+20,y+10,w-40,h-20],28,color='#61748A');e['logic_node_id']=nid;e['field_bindings']=node['field_bindings'];elements.append(e)
+            statement_ids+=node['statement_ids'];nodeids+=node['source_entity_ids'];body_refs.append(nid);continue
+        ftitle=27 if view=='A' else 42 if active else 38 if view=='B' else 34
+        fbody=22 if view=='A' else 36 if active else 31 if view=='B' else 30
         titleh=ftitle*1.55
-        tt=text(sid+'_'+nid+'_label',node['title'],[x+16,y+10,w-32,titleh],ftitle,True);tt['logic_node_id']=nid;elements.append(tt)
+        shown=(active or {}).get('nodes',{}).get(nid,{})
+        padx,pady=(20,12) if active else (16,10)
+        tt=text(sid+'_'+nid+'_label',shown.get('question',node['title']),[x+padx,y+pady,w-2*padx,titleh],ftitle,True);tt['logic_node_id']=nid;elements.append(tt)
         value=node.get('detail_text',node['short_text']) if view=='B' else node['short_text']
+        if shown:value='\n'.join(label+shown[key] for key,label in [('method','方法：'),('discovery','发现：'),('meaning','意义：')] if shown.get(key))
         th=h-titleh-28-(62 if view=='B' else 0)
         body=text(sid+'_'+nid+'_body',value,[x+16,y+titleh+13,w-32,th],fbody)
         body['logic_node_id']=nid;body['statement_ids']=node['statement_ids'];body['source_node_ids']=node['source_entity_ids'];body['field_bindings']=node['field_bindings'];elements.append(body)
         statement_ids+=node['statement_ids'];nodeids+=node['source_entity_ids'];body_refs.append(nid)
         if view=='B':
-            ref=(node.get('figure_reference','')+'  p'+','.join(str(p) for p in sorted({model['sources'][s]['physical_page'] for s in node['source_ids']}))+'  PARTIAL').strip()
+            ref=(node.get('figure_reference','')+'  p'+','.join(str(p) for p in sorted({model['sources'][s]['physical_page'] for s in node['source_ids']}))+('' if active else '  PARTIAL')).strip()
             elements.append(text(sid+'_'+nid+'_source',ref,[x+16,y+h-54,w-32,45],22,color='#61748A'))
     for i,eid in enumerate(eids):
         e=em[eid];hint=layout.get('routes',{}).get(eid,{})
+        shown_edge=(active or {}).get('edges',{}).get(eid,{})
+        if shown_edge.get('display_note'):continue
         points=hint.get('points') or _route(pos[e['from']],pos[e['to']],i,width)
-        c={'id':sid+'_'+eid,'points':points,'identity':e['identity'],'source_relation_id':None,'source_logic_relation_id':eid,'relation_type':e['type'],'arrow':e['type']!='complements','dashed':e['identity'] in ['AUTHOR_ARGUMENT','AUTHOR_INTERPRETATION','SHARED_PROTOCOL','PRESENTATION'],'color':'#8A5B20' if e['identity']=='AUTHOR_INTERPRETATION' else '#738598' if e['identity']=='SHARED_PROTOCOL' else BLUE}
+        c={'id':sid+'_'+eid,'points':points,'identity':e['identity'],'source_relation_id':None,'source_logic_relation_id':eid,'relation_type':e['type'],'arrow':e['identity']!='SHARED_PROTOCOL' if active else e['type']!='complements','dashed':e['identity'] in ['AUTHOR_ARGUMENT','AUTHOR_INTERPRETATION','PRESENTATION'] if active else e['identity'] in ['AUTHOR_ARGUMENT','AUTHOR_INTERPRETATION','SHARED_PROTOCOL','PRESENTATION'],'color':'#8A5B20' if e['identity']=='AUTHOR_INTERPRETATION' else '#738598' if e['identity']=='SHARED_PROTOCOL' else BLUE}
+        if active:c.update(stroke_width=3.5,arrow_size='lg')
         connectors.append(c)
         label=hint.get('label_position')
         if label:
-            elements.append(text(sid+'_'+eid+'_relation',e.get('display_label',e['label']),label,15 if view=='A' else 24,color=c['color']))
+            elements.append(text(sid+'_'+eid+'_relation',shown_edge.get('label',e.get('display_label',e['label'])),label,15 if view=='A' else 30 if active else 24,color=c['color']))
     core_members={nid:[x['id'] for x in model['nodes'] if x.get('parent_id')==nid] for nid in ids}
     legend='实线：科学证据关系   蓝虚线：作者论证   棕虚线：机制解释/假说   灰虚线：共享流程\n论证顺序不等于实验历史；未知重复及缺失补件不自动补全。'
     if view=='A':legend='实线：证据   蓝虚线：论证   棕虚线：假说/解释   灰虚线：共享流程；均不等于真实实验历史'
+    elif active:legend='蓝实箭头：证据补充或汇合   蓝虚箭头：问题推进   棕虚箭头：机制解释或假说   灰线：共用流程\n箭头表达论文论证和证据关系，不表示真实实验日期或已证明的分子因果。'
     elements.append(text(sid+'_legend',legend,[60,height-48 if view=='A' else height-145,width-120,22 if view=='A' else 72],13 if view=='A' else 25,color='#61748A'))
     allsourceids=list(dict.fromkeys(s for nid in ids for s in nm[nid]['source_ids']))
-    citation=model.get('short_citation',model['paper_title'])+' · p'+', '.join(str(p) for p in sorted({model['sources'][s]['physical_page'] for s in allsourceids}))+' · model '+model['snapshot'][:12]
+    citation=model.get('short_citation',model['paper_title'])+' · p'+', '.join(str(p) for p in sorted({model['sources'][s]['physical_page'] for s in allsourceids}))+(' · 科学边界及来源审阅见配套资料' if active else ' · model '+model['snapshot'][:12])
     scene={'id':sid,'product':'A' if view=='A' else 'LOGIC','section':'科研逻辑简要图' if view=='A' else title,'title':title,'elements':elements,'connectors':connectors,
            'source_statement_ids':list(dict.fromkeys(statement_ids)),'source_node_ids':list(dict.fromkeys(nodeids)),'source_relation_ids':[],'figure_ids':figures,'citation':citation,
            'source_logic_node_ids':ids,'source_logic_relation_ids':eids,'logic_snapshot':model['snapshot'],
            'notes':{'scientific_question':nm[model['core']['nodes'][0]]['short_text'],'logic_model_snapshot':model['snapshot'],'logic_source_ids':allsourceids,'logic_relations':[em[e] for e in eids],'logical_members':core_members,'formal_ready':False,'source_mapping_status':'PARTIAL','paper_type':network['paper']['paper_type'],'scientific_limits':['论证推进不代表实验日历或分子因果；源字段状态和缺失补件见科学索引及Inventory。']},
            'coverage':{'view':view,'logic_node_ids':ids,'logical_members':core_members,'new_M1_entities':0,'repeated_experiment_counting':False}}
+    if active:scene['notes']['display_only_relations']={eid:r for eid,r in active.get('edges',{}).items() if r.get('display_note') and eid in eids}
     return {'kind':'main' if view=='A' else 'detail' if view=='B' else 'branch_'+view,'width':width,'height':height,'slides':[scene]}
 def sample_products(network,metadata,views):
     m=read_model(network,metadata)
     if m is None:raise ValueError('RESEARCH_LOGIC_REQUIRED')
-    return [build_scene(network,m,v) for v in views]
+    display=read_display(m,metadata)
+    return [build_scene(network,m,v,display) for v in views]
 def validate_AB(model,A,B):
     a=A['slides'][0];b=B['slides'][0]
     core=rl.compress_to_core(model,b['source_logic_node_ids'],b['source_logic_relation_ids'])

@@ -25,6 +25,7 @@ import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { inflateRawSync, deflateRawSync } from 'node:zlib';
 import { randomUUID } from 'node:crypto';
+import {spawnSync} from 'node:child_process';
 
 export const RELATION_STYLES = Object.freeze({
   data_depends_on: { label: '数据依赖', edgeLabel: '数据依赖', color: '#174994', dashed: false, directed: true },
@@ -641,6 +642,9 @@ export async function renderAdaptivePptx(options) {
     report.unchanged_slide_parts.push(baseParts[i]);
   }
   await fs.writeFile(output, writeZip(original), { flag: 'wx' });
+  const fontPatch=spawnSync(options.python||process.env.PFS_PYTHON||'python',[path.join(path.dirname(fileURLToPath(import.meta.url)),'apply_script_fonts.py'),output],{encoding:'utf8'});
+  if(fontPatch.error||fontPatch.status!==0)fail('FONT_POLICY_FAILED: '+(fontPatch.error?.message||fontPatch.stderr));
+  report.font_policy={latin:'Times New Roman',east_asian:'Microsoft YaHei',applied_to_all_parts:true,preservation_scope_after_font_policy:'Text, experimental data, images and geometry retained; font attributes intentionally normalized.'};
   const reportPath = output.replace(/\.pptx$/i, '') + '.render-report.json';
   await fs.writeFile(reportPath, JSON.stringify(report, null, 2) + '\n');
   report.report_path = reportPath;

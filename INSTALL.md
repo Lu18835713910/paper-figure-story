@@ -40,3 +40,7 @@ native采样母版/比例与颜色，tagged复用PFS命名槽位；复杂动画�
 `--products with-network`追加独立详细图。`--products deep --inventory Full_Experimental_Inventory.json`调用已有实验层、详细图、卡片和审查清单。未知数量不补造。主PPT、来源表、audit JSON与讲者备注共享ID；发给听众的备注不包含机器JSON。
 
 quick/balanced/full是展开规则，可能同页数，不改变事实与基础关系。默认先做关键样张；一次集中检查，只重渲染修改页，保留每次失败和来源冲突。
+
+可选初学者手册通过`build_research_workbook.py --reader`使用同模型图及有源显示注释生成DOCX，附原Methods结构记录。实际使用Word打开/导出PDF并逐页检查；内置LibreOffice渲染器不可用时明确记录实际引擎，不虚报通过。手册中的图为配套原生PPT的确切PNG，文档文字/表可编辑，节点编辑在PPT中完成。
+
+字体是交付约束：PPT拉丁/东亚属性、DOCX的ASCII/HAnsi/EastAsia以及PDF实际字体都需检查。可用`audit_script_fonts.py ... --output font_audit.json`读取实际产物。生成器在Windows缺少指定字体文件时报错，不静默替换。论文原始Figure内的字体属于作者图像，保持原貌，不重绘实验数据。

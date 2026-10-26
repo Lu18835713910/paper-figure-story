@@ -683,7 +683,7 @@ def project_products(network, profile='balanced', metadata=None, template=None, 
                 'template':template,'style':{'accent':BLUE,'font_family':FONT,'latin_font':'Times New Roman'},'products':products,
                 'formal_ready':False,'review_status':'PARTIAL','automation_boundary':'Agent-adjudicated research logic; display only, no added M1 entities or causal relations.',
                 'input_formats':{'paper':'Reviewed evidence network and source-bound logic','template':'PPTX'},'projection_hash':digest(products),
-                'delivery':copy.deepcopy(delivery),'research_logic':copy.deepcopy(meta['research_logic']),'logic_snapshot':logic['snapshot']}
+                'delivery':copy.deepcopy(delivery),'research_logic':copy.deepcopy(meta['research_logic']),'logic_snapshot':logic['snapshot'],**({'logic_display':copy.deepcopy(meta['logic_display'])} if meta.get('logic_display') else {})}
     g=load_guidance(network,meta)
     figure_scenes=stories(network,profile,meta)
     if g:
@@ -706,10 +706,11 @@ def project_products(network, profile='balanced', metadata=None, template=None, 
         from experiment_products import build_network_canvas
         products.append(build_network_canvas(network,meta))
     if meta.get('research_logic'):
-        from project_research_logic import read_model,build_scene
+        from project_research_logic import read_model,read_display,build_scene
         logic=read_model(network,meta)
         products[0]['slides'][0]=build_scene(network,logic,'A')['slides'][0]
-        products=[build_scene(network,logic,'B') if p['kind']=='detail' else p for p in products]
+        display=read_display(logic,meta)
+        products=[build_scene(network,logic,'B',display) if p['kind']=='detail' else p for p in products]
     if delivery:
         from presentation_delivery import compose_delivery
         products=compose_delivery(network,products,meta,delivery)
@@ -721,6 +722,7 @@ def project_products(network, profile='balanced', metadata=None, template=None, 
     if delivery:result['delivery']=copy.deepcopy(delivery)
     if meta.get('research_logic'):
         result['research_logic']=copy.deepcopy(meta['research_logic']);result['logic_snapshot']=logic['snapshot']
+    if meta.get('logic_display'):result['logic_display']=copy.deepcopy(meta['logic_display'])
     return result
 
 def validate_products(network, plan, metadata=None):

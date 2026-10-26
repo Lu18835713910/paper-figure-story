@@ -27,7 +27,7 @@ def main(argv=None):
   if a.template:cmd+=['--template',str(a.template)]
   proc=subprocess.run(cmd,env=env,capture_output=True,text=True,encoding='utf-8');(private/'legacy.log').write_text(proc.stdout+'\n'+proc.stderr,'utf-8')
   if proc.returncode:raise RuntimeError(proc.stderr or proc.stdout)
-  cmd=[a.node,str(script/'render_adaptive_pptx.mjs'),'--base',str(base),'--plan',str(a.outdir/'plans'/f'pages.{mode}.json'),'--knowledge',str(a.knowledge),'--output',str(candidate),'--artifact-module',a.artifact_module,'--preview-dir',str(a.outdir/'framework_previews'/mode)]
+  cmd=[a.node,str(script/'render_adaptive_pptx.mjs'),'--base',str(base),'--plan',str(a.outdir/'plans'/f'pages.{mode}.json'),'--knowledge',str(a.knowledge),'--output',str(candidate),'--artifact-module',a.artifact_module,'--preview-dir',str(a.outdir/'framework_previews'/mode),'--python',sys.executable]
   proc=subprocess.run(cmd,env=env,capture_output=True,text=True,encoding='utf-8');(private/'artifact.log').write_text(proc.stdout+'\n'+proc.stderr,'utf-8')
   if proc.returncode:raise RuntimeError(proc.stderr or proc.stdout)
   results.append({'profile':mode,'pptx':str(candidate),'slides':len(plan['slides']),'segments':len(plan['segments']),'rsus':len(plan['source_rsu_ids']),'method_pages':plan['statistics']['method_pages'],'figure_pages':plan['statistics']['figure_pages'],'elapsed_s':round(time.monotonic()-tick,3)})

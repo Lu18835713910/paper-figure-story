@@ -1,19 +1,17 @@
-# Paper Figure Story v1.1.0 — Release Notes draft
+# Paper Figure Story v1.1.0 — 候选发布说明
 
-Status: local release candidate; no GitHub Tag, Release or download asset has been created.
+状态：本地候选安装包；USER_ACCEPTANCE=PENDING；尚未创建正式Tag、GitHub Release或附件。
 
-The core remains an editable academic presentation: original Figures, short Chinese explanations and native arrows connecting the research action, observation and supported interpretation. A shared source-bound evidence network supplies the concise opening framework, optional detailed network and per-Figure stories.
+本版从统一、有来源的科研事实和关系生成三类产物：简洁开场逻辑框架、可选完整关系大画布、逐Figure原图旁科研故事。quick/balanced/full共享同一事实与来源；综述保持主题与论证结构，不伪装成原创实验。
 
-The default presentation path adds a cover, scientific question and summary, and no longer expands every optional Methods card. `with-network` and `deep` retain the detailed graph and experiment inventory. quick/balanced/full vary presentation depth without changing scientific facts or relationships.
+本次最终修复集中在详细图方向箭头、分支可读性、初学者手册和实际字体。展示注释以模型指纹与来源绑定，不能更改科学身份或隐藏核心关系。蓝色实线、蓝色虚线、棕色虚线分别保留证据衔接、论证推进和机制解释的区别，共享技术独立说明。学习手册包含实验卡、邻近解释和完整Methods附录，正文避免机器身份堆积。
 
-Speaker notes contain human-readable methods, speaking order, limitations and source pointers; complete machine mappings are saved separately. Numeric wrapping preserves decimals and units. Native-template color sampling excludes pale decorative rules. The mature template path now reports too many Figure images instead of silently dropping them.
+中文采用Microsoft YaHei；英文和数字采用Times New Roman。PPTX实际Latin/EastAsia、DOCX ASCII/HAnsi/EastAsia和PDF实际字体均有专用检查；Windows缺少必需字体时不静默替代。原始论文图像内容保持不变，其栅格字体不能强制转换。
 
-Windows validation: an isolated installation generated a 13-slide CNNM4 presentation; a newly Agent-curated review produced five main slides and one editable detailed canvas; State received a focused regression. Actual PowerPoint checks on seven decks (24 slides) found no text overflow, off-canvas objects or image-ratio errors. Current targeted suites: 17/17, final delta 8/8, legacy projection 8/8; historical counts are not presented as reruns. Default and native user-template paths were exercised. Internal visual comparison used unchanged frozen v1.0 code, identical CNNM4 Figure assets and the same five scientific goals. User acceptance remains pending.
+本轮24项定向测试最终通过：首次22/24，修复后仅重跑失败两项。真实PowerPoint导出3张新图，Word导出22页手册并逐页视觉检查。既有CNNM4主稿、Review、A图与82页历史实验卡只读核查，未重制。用户接受与独立初学者理解测试尚待完成；程序通过不等于科研终审。
 
-Codex reads the paper and creates the source-bound knowledge model; users do not author JSON. The standalone PDF CLI still stops at REVIEWED_KNOWLEDGE_REQUIRED rather than inventing verified claims. This is Agent-assisted paper understanding, not unattended scientific inference.
+保留18项实验/控制/计算/共享任务与342项Methods字段，未知样本量和原文冲突不猜测。缺失补充材料、Table S1、部分来源语义核验与机制假说保留为PARTIAL。本软件依赖Agent阅读整理；仅运行PDF索引不构成无人辅助科研理解。
 
-Optional Methods inventory retains 18 source tasks (11 experiments, two controls, three computational analyses and two shared workflows/preparations), not 18 independent experiments. Missing supplementary data, unknown n/repetitions and source conflicts remain explicit. Structural snapshots are not motion movies, and tentative mechanisms remain hypotheses. Independent scientific final review is not claimed.
+安装包只含明确列入清单的源码、schema、文字参考、默认模板、自著布局示例和合成测试，不含真实论文PDF、Figure、私有fixture、学习手册或开发缓存。原个人非商业使用许可证不变。本轮未覆盖已安装Skill、未修改冻结v1.0。
 
-The ZIP includes code, schemas, references, default template and a self-authored layout demonstration. It excludes real-paper PDFs/Figures, private fixtures and development logs. The original Personal Non-Commercial Use License is unchanged. Existing v1.0 Git history and already-tracked legacy demonstrations are preserved; no new third-party research media are added by this candidate.
-
-Release publication is blocked until an authenticated Release/attachment-upload channel is available. The connected GitHub integration supports repository operations but exposes no Release upload tool; local gh is signed out. No remote branch, default branch, tag or release has been modified by this preparation.
+发布条件：用户明确接受最终视觉产物、技术门槛满足、可用的GitHub Release及附件上传认证。当前连接器可读仓库，但本机gh未登录；发布前须再次检查main和v1.1.0 Tag。不强推、不覆盖Tag、不将本地包误报为已发布。

@@ -91,7 +91,7 @@ export async function renderEvidenceProducts(o){
        for(let j=1;j<points.length;j++){
          const[x,y]=points[j-1],[xx,yy]=points[j];const name='RC_EDGE_'+scene.id+'_'+a.id+'_'+j;
          orientations[name]={flipH:xx<x,flipV:yy<y};
-         slide.shapes.add({name,geometry:'connector',kind:'straight',position:{left:Math.min(x,xx),top:Math.min(y,yy),width:Math.abs(xx-x),height:Math.abs(yy-y)},line:{fill:a.color||plan.style.accent,width:product.kind==='main'?1.7:2.2,style:a.dashed?'dashed':'solid'},head:{type:'none'},tail:{type:a.arrow&&j===points.length-1?'triangle':'none',width:'sm',length:'sm'}});
+         slide.shapes.add({name,geometry:'connector',kind:'straight',position:{left:Math.min(x,xx),top:Math.min(y,yy),width:Math.abs(xx-x),height:Math.abs(yy-y)},line:{fill:a.color||plan.style.accent,width:a.stroke_width||(product.kind==='main'?1.7:2.2),style:a.dashed?'dashed':'solid'},head:{type:'none'},tail:{type:a.arrow&&j===points.length-1?'triangle':'none',width:a.arrow_size||'sm',length:a.arrow_size||'sm'}});
        }
      }
      for(const e of scene.elements.filter(x=>x.kind==='text'))text(slide,'RC_'+scene.id+'_'+e.id,e.text,e.position,e.font_size,e.bold,e.color,e.align);

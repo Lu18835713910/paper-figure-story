@@ -956,6 +956,8 @@ def build(json_path, out_path, template, mode, allow_missing):
     for old_id in original_ids: remove_slide(prs,old_id)
     out_path.parent.mkdir(parents=True,exist_ok=True)
     prs.save(str(out_path))
+    from apply_script_fonts import apply_fonts
+    apply_fonts(out_path)
     print(f'PPTX: {out_path} | slides={len(prs.slides)} | mode={resolved_mode} | template={template_path.name}')
     for w in warnings: print('WARN:',w)
     return out_path
