@@ -1,5 +1,9 @@
 # 运行与测试
 
+## Visual Polish（2026-10-27）
+
+`python -B tests/test_visual_polish.py`执行独立合成回归：原稿/媒体保持、真实字体属性、来源与数值漂移、panel/关键区域、F类缺口上游处理、关系身份、备注保留、隐藏页科学限制、真实CLI及自动入口/关闭选项。此测试不启动Office、不重做论文分析。真实六组样页、两份balanced及一次有记录的视觉修复在私有开发记录中检查；软件PASS不代表视觉或科学终审。
+
 发行包中的`tests/test_inventory_synthetic.py`为自著完整性样例，使用Python标准库；它不证明真实论文语义正确。运行：`python -B tests/test_inventory_synthetic.py`。
 
 本版采用轻量验收：既有缓存/来源复用；同论文同原图对照；CNNM4关键页；5页综述＋1张图；State定向容量/小数；备注、实际PPTX字体/可编辑性和PowerPoint边界；隔离目录代表性生成。开发日志与真实论文材料不随公开包分发。每次具体交付的科学/视觉审核独立记录，不以软件测试数代替。

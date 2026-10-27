@@ -104,6 +104,8 @@ quick/balanced/full复用同一事实、RSU、关系和图片索引；quick压�
 
 ### 4. 质量审核（集中批量检查，疑点定点复核）
 
+成品主PPT生成后使用独立[Visual Polish](references/visual_polish.md)，不重做科研理解。`run_pfs.py run`默认接入；成熟旧生成入口由Agent接着运行`run_pfs.py polish`或`polish_presentation.py`，可按需关闭。先看真实PNG再定向修改，复核受影响页，最多两轮有记录的修复；无来源缺口反馈上游，不能在视觉层补造。原稿、媒体、来源、PARTIAL及重要限制必须保留。程序检查、编写者图片审阅、用户接受分开记录。
+
 1. 用 `scripts/audit_pptx.py` 对PPTX进行程序检查。
 2. 一次批量渲染全部页面为图片，并制作联系表；重点查看总框架、最密集的结果页和统计字小的panel。
 3. **只修发现的问题页**，避免无依据地多轮全部重做；对修改页重新渲染。

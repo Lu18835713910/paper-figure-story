@@ -132,6 +132,21 @@ def plan_geometry(plan):
                     findings.append({'code':'TEXT_HEIGHT_RISK','slide':slide['id'],'element':e['id'],'lines':len(e['text'].split('\n'))})
     return {'valid':not findings,'findings':findings,'claim_boundary':'Planning preflight, not actual PowerPoint text or visual validation.'}
 
+
+def postprocess_main(args,run,profile):
+    """Final PPT only: no model writes, PDF parsing or deep-card regeneration."""
+    if getattr(args,'no_polish',False):return {'status':'DISABLED_BY_OPTION'}
+    import polish_presentation as polish
+    main=run/'pptx'/('main_'+profile+'.pptx')
+    if not main.is_file():raise ValueError('POLISH_MAIN_MISSING: '+str(main))
+    result=polish.polish(main,run/'visual_polish',profile,
+                         context=getattr(args,'polish_context',None),plan=getattr(args,'polish_plan',None),
+                         before_receipt=getattr(args,'polish_before_receipt',None),
+                         renderer=getattr(args,'polish_renderer','powerpoint'))
+    return {'status':result['status'],'output':result['output'],
+            'report':str(run/'visual_polish/visual_polish_report.json'),
+            'USER_ACCEPTANCE':'PENDING','scientific_review':'INHERITED_NOT_UPGRADED'}
+
 def execute(args):
     output=Path(args.outdir).resolve()
     if output.exists() and any(output.iterdir()):raise ValueError('OUTPUT_EXISTS: use a new run directory; prior results are preserved')
@@ -190,10 +205,12 @@ def execute(args):
             rendered=subprocess.run(command,capture_output=True,text=True,encoding='utf-8',errors='replace',env={**os.environ,'PYTHONUTF8':'1','PYTHONDONTWRITEBYTECODE':'1'})
             (run/'render.stdout.log').write_text(rendered.stdout,encoding='utf-8');(run/'render.stderr.log').write_text(rendered.stderr,encoding='utf-8')
             if rendered.returncode:raise RuntimeError('RENDER_FAILED: see '+str(run/'render.stderr.log'))
+            polish_result=postprocess_main(args,run,profile)
         results.append({'profile':profile,'main_slides':len(plan['products'][0]['slides']),
                         'detailed_canvas_slides':sum(len(p['slides']) for p in plan['products'] if p['kind']=='detail'),
                         'generated_product_kinds':[p['kind'] for p in plan['products']],
-                        'network_snapshot':network['snapshot'],'preflight':geometry,'plan_only':args.plan_only})
+                        'network_snapshot':network['snapshot'],'preflight':geometry,'plan_only':args.plan_only,
+                        'visual_polish':polish_result if not args.plan_only else {'status':'NOT_RUN_PLAN_ONLY'}})
     receipt={'version':'pfs-run-1','status':'GENERATED_FOR_REVIEW' if not args.plan_only else 'PLANNED','automation':'curated_M1_replay_with_automatic_projection',
              'cache_reused':index['cache_hit'],'pdf_parse_calls':index['parse_calls'],'network_snapshot':network['snapshot'],
              'profiles':results,'scientific_review_status':'PARTIAL','formal_ready':False,'visual_review_status':'NOT_YET_RENDERED'}
@@ -202,6 +219,11 @@ def execute(args):
     return 0
 
 def main(argv=None):
+    argv=list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0]=='polish':
+        import polish_presentation
+        try:return polish_presentation.main(argv[1:])
+        except (OSError,ValueError,KeyError,TypeError,RuntimeError) as exc:print(str(exc),file=sys.stderr);return 2
     p=argparse.ArgumentParser(description=__doc__);sub=p.add_subparsers(dest='command',required=True)
     run=sub.add_parser('run');run.add_argument('--pdf',required=True);run.add_argument('--knowledge');run.add_argument('--narrative');run.add_argument('--assets');run.add_argument('--relations');run.add_argument('--figure-story');run.add_argument('--guidance');run.add_argument('--inventory');run.add_argument('--cache-dir');run.add_argument('--metadata');run.add_argument('--outdir',required=True)
     run.add_argument('--modes',nargs='+',choices=['quick','balanced','full'],default=['balanced']);run.add_argument('--template');run.add_argument('--plan-only',action='store_true');run.add_argument('--development-preview',action='store_true')
@@ -210,6 +232,11 @@ def main(argv=None):
     run.add_argument('--slides',nargs='+',help='Explicit existing scene IDs for a targeted sample; omitted pages remain recorded as deferred.')
     run.add_argument('--node',default=shutil.which('node'));run.add_argument('--artifact-module');run.add_argument('--presentation-skill')
     run.add_argument('--research-logic',help='Source-adjudicated logic model created after reading, Methods task identification and result mapping; shares A/B topology.')
+    run.add_argument('--no-polish',action='store_true',help='Skip the shared final-PPT Visual Polish stage; original PPT remains available.')
+    run.add_argument('--polish-context',help='Read-only source/panel/relationship context for the final PPT.')
+    run.add_argument('--polish-plan',help='Fingerprint-bound, explicitly reviewed targeted edit plan; no plan invents no content.')
+    run.add_argument('--polish-before-receipt',help='Reuse actual PowerPoint previews only when input and PNG fingerprints match.')
+    run.add_argument('--polish-renderer',choices=['powerpoint','none'],default='powerpoint',help='none is a diagnostic run and cannot pass visual acceptance.')
     val=sub.add_parser('validate-products');val.add_argument('--network',required=True);val.add_argument('--plan',required=True);val.add_argument('--metadata')
     args=p.parse_args(argv)
     try:
