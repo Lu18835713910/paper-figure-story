@@ -97,5 +97,7 @@ class VisualPolish(unittest.TestCase):
   a=dict(id='a',kind='table',slide=1,remove_shapes=[2],headers=['条件'],rows=[[self.text('WT')]],position=[1,1,8,2],font_size=16)
   b=dict(id='b',kind='insert_table_slide',slide=1,after=1,clear_names=['CONTENT'],headers=['条件'],rows=[[self.text('mutant')]],position=[1,1,8,2],font_size=16)
   r=self.run_polish(self.plan([a,b]));p=Presentation(r['output']);self.assertEqual(len(p.slides),3);self.assertEqual(sum(q.has_table for q in p.slides[1].shapes),1)
+ def test_31_title_claim_without_mapping_is_unresolved(self):
+  p=Presentation(self.src);p.slides[0].shapes[0].text='Figure 3A–C';p.save(self.src);r=v.audit_input(self.src);issue=next(x for x in r['slides'][0]['issues'] if x['code']=='PANEL_MAPPING_UNRESOLVED');self.assertEqual(issue['panels'],['3A','3B','3C'])
 
 if __name__=='__main__':unittest.main(verbosity=2)

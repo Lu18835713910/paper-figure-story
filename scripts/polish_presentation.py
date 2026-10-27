@@ -48,6 +48,18 @@ def shape_id(shape):
  n=shape.find('.//p:cNvPr',NS);return int(n.get('id')) if n is not None else None
 def shape_name(shape):
  n=shape.find('.//p:cNvPr',NS);return n.get('name','') if n is not None else ''
+
+def declared_panels(text):
+ # A literal panel claim is a requirement to check, never proof that the panel
+ # exists. Without a source map the result is UNRESOLVED, not fabricated OCR.
+ out=[]
+ for m in re.finditer(r'(?:Figure|Fig\.?)\s*(\d+)\s*([A-Ha-h])(?:\s*[–—-]\s*([A-Ha-h]))?\b',text,re.I):
+  first=ord(m[2].upper());last=ord((m[3] or m[2]).upper())
+  if first>last:continue
+  for letter in range(first,last+1):
+   panel=m[1]+chr(letter)
+   if panel not in out:out.append(panel)
+ return out
 def top_shape(root,sid):
  for s in root.find('p:cSld/p:spTree',NS):
   if shape_id(s)==int(sid):return s
@@ -96,7 +108,7 @@ def audit_input(path,context=None):
    for region in asset.get('critical_regions',[]):
     a,b,c,d=region['bbox_px']
     if not (visible[0]<=a and visible[1]<=b and visible[2]>=c and visible[3]>=d):issues.append(dict(category='Figure Integrity',code='CRITICAL_REGION_CLIPPED',shape=im['id'],region=region['id'],status='REVIEW_REQUIRED'))
-  expected=hint.get('expected_panels',[])
+  expected=list(dict.fromkeys(hint.get('expected_panels',[])+declared_panels(text)))
   missing=[x for x in expected if x not in mapped]
   if missing:issues.append(dict(category='Figure Integrity',code='PANEL_MAPPING_UNRESOLVED',panels=missing,status='REVIEW_REQUIRED',detail='Missing or not registered; no OCR/semantic verification is claimed.'))
   if hint.get('scientific_image') and not images:issues.append(dict(category='Figure Integrity',code='MISSING_FIGURE',status='REVIEW_REQUIRED'))
