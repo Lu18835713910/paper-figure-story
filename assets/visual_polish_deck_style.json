@@ -1,0 +1,30 @@
+{
+  "version": "pfs-deck-style-1",
+  "fonts": {"east_asia": "Microsoft YaHei", "latin": "Times New Roman"},
+  "canvas_inches": [13.333333, 7.5],
+  "primary": "174994",
+  "ink": "17345E",
+  "secondary": "596E89",
+  "margin": 0.5,
+  "title_box": [0.5, 0.24, 12.3, 0.63],
+  "title_rule": [0.5, 0.99, 12.3, 0.008],
+  "group_gap": 0.24,
+  "roles": {
+    "title": {"font_size": 27, "bold": true, "color": "17345E", "line_spacing": 1.05},
+    "method": {"font_size": 18, "bold": false, "color": "596E89", "line_spacing": 1.1},
+    "body": {"font_size": 18, "bold": false, "color": "17345E", "line_spacing": 1.1},
+    "result": {"font_size": 20, "bold": true, "color": "174994", "line_spacing": 1.1},
+    "conclusion": {"font_size": 18, "bold": true, "color": "174994", "line_spacing": 1.1},
+    "boundary": {"font_size": 13.5, "bold": false, "color": "596E89", "line_spacing": 1.08},
+    "terms": {"font_size": 13.5, "bold": false, "color": "596E89", "line_spacing": 1.08},
+    "source": {"font_size": 12, "bold": false, "color": "596E89", "line_spacing": 1.05},
+    "page_number": {"font_size": 10, "bold": false, "color": "596E89", "line_spacing": 1.05},
+    "node": {"font_size": 16, "bold": false, "color": "17345E", "line_spacing": 1.08},
+    "node_result": {"font_size": 16, "bold": true, "color": "17345E", "line_spacing": 1.08},
+    "node_anchor": {"font_size": 18, "bold": true, "color": "174994", "line_spacing": 1.05},
+    "edge_label": {"font_size": 11.5, "bold": false, "color": "596E89", "line_spacing": 1.05},
+    "table_body": {"font_size": 17, "bold": false, "color": "17345E", "line_spacing": 1.08},
+    "table_header": {"font_size": 18, "bold": true, "color": "FFFFFF", "line_spacing": 1.05}
+  },
+  "notes": "No science generation. Roles are presentation-object bindings, not scientific entities. Never shrink below the original object minimum to fit. Figures retain original bytes and crop."
+}

@@ -19,7 +19,7 @@ from pptx.enum.text import MSO_ANCHOR
 from apply_script_fonts import apply_fonts,font_availability
 from audit_script_fonts import check as check_fonts
 
-VERSION='pfs-visual-polish-1'
+VERSION='pfs-visual-polish-locked-2'
 HERE=Path(__file__).resolve().parent
 NS={'p':'http://schemas.openxmlformats.org/presentationml/2006/main','a':'http://schemas.openxmlformats.org/drawingml/2006/main','r':'http://schemas.openxmlformats.org/officeDocument/2006/relationships'}
 REL='http://schemas.openxmlformats.org/package/2006/relationships';CT='http://schemas.openxmlformats.org/package/2006/content-types'
@@ -230,6 +230,7 @@ def insert_slide(data,source,partname,after,baseline=None):
  types=xml(data,'[Content_Types].xml');E.SubElement(types,'{'+CT+'}Override',PartName='/'+partname,ContentType='application/vnd.openxmlformats-officedocument.presentationml.slide+xml');put(data,'[Content_Types].xml',types)
  return partname
 def mutate(data,original,parts,action,context,index):
+ raise PolishError('LEGACY_CONTENT_MUTATION_DISABLED: Visual Polish is layout/style only')
  kind=action['kind'];part=parts[int(action['slide'])-1]
  if kind=='insert_table_slide':part=insert_slide(data,part,'ppt/slides/visualPolish'+str(index)+'.xml',int(action['after']),original)
  root=xml(data,part);removed=[]
@@ -311,7 +312,8 @@ def before_after(before,after,out):
  except OSError:font=ImageFont.load_default()
  draw.text((20,12),'Before',fill='#174994',font=font);draw.text((1040,12),'After - user review pending',fill='#174994',font=font);im.paste(a,(20,50));im.paste(b,(1040,50));im.save(out)
 
-def polish(input_path,outdir,profile='balanced',context=None,plan=None,before_receipt=None,renderer='powerpoint',cycle=1):
+def _legacy_polish(input_path,outdir,profile='balanced',context=None,plan=None,before_receipt=None,renderer='powerpoint',cycle=1):
+ raise PolishError('LEGACY_CONTENT_MUTATION_DISABLED: use the content-locked v2 entry')
  src=Path(input_path).resolve();out=Path(outdir).resolve()
  if profile not in MODES or cycle not in [1,2]:raise PolishError('PROFILE_OR_CYCLE')
  if out.exists() and any(out.iterdir()):raise PolishError('OUTPUT_EXISTS: preserve earlier run; use a new output directory')
@@ -399,9 +401,10 @@ def write_report(out,r):
  lines=['# Visual Polish report','',f"状态：{r['status']}；自动检查：{r['automatic_checks']}；最终图像审阅：{r['agent_visual_review']}；USER_ACCEPTANCE=PENDING。",'',f"输入{r['slides_before']}页，输出{r['slides_after']}页；原稿保存在original.pptx。已应用{len(r['actions'])}项定向操作，未执行{len(r['failed_actions'])}项。",'','此模块不重新理解论文，不更改科研事实模型；对象/文件校验不等于科学终审。','', '## 应用记录']
  lines += [f"- {a['id']}：原第{a['original_slide']}页，{a['kind']}。" for a in r['actions']]
  lines += ['','## 不能安全修复/仍待核对']+[f"- 第{x.get('slide','?')}页：{x.get('code',x.get('reason'))}" for x in r['unresolved']+r['failed_actions']]
- lines += ['', '原图/来源保持校验：'+str(r['invariants'])+'。新内容仅接受显式上游来源绑定，不视为视觉模块的科学发现。','前后预览在before_after/，完整最终预览在previews/after/；实际Office边界检查独立保存。']
+ boundary='仅调整原页已有信息的展示；页数、顺序、正文、备注、Figure归属和逻辑关系锁定；内容不足只报告UPSTREAM_CONTENT_ISSUE。' if r.get('version')=='pfs-visual-polish-locked-2' else '历史边界：上游内容绑定不构成科学终审。'
+ lines += ['', '原图/来源保持校验：'+str(r['invariants'])+'。'+boundary,'前后预览在before_after/，完整最终预览在previews/after/；实际Office边界检查独立保存。']
  (Path(out)/'visual_polish_report.md').write_text('\n'.join(lines)+'\n','utf-8')
-def finish_review(report_path,decisions):
+def _legacy_finish_review(report_path,decisions):
  p=Path(report_path);r=read(p);v=read(decisions) if isinstance(decisions,(str,Path)) else decisions;receipt=read(p.parent/'previews/after/receipt.json');pages={x['slide']:x for x in receipt['rendered']}
  if v.get('output_sha256')!=digest(r['output']):raise PolishError('FINAL_REVIEW_OUTPUT_DRIFT')
  needed=set(r['changed_pages']) or {1};reviewed=set()
@@ -418,6 +421,16 @@ def finish_review(report_path,decisions):
  r['agent_visual_review']='REVIEWED' if needed<=reviewed else 'PARTIAL';r['independent_user_or_reader_test']='NOT_PERFORMED';r['USER_ACCEPTANCE']='PENDING';r['visual_decisions']=v
  r['status']='POLISHED_AGENT_REVIEWED' if needed<=reviewed and r['automatic_checks']=='PASS' and not r['unresolved'] else 'PARTIAL'
  save(p,r);write_report(p.parent,r);return r
+def polish(input_path,outdir,profile='balanced',context=None,plan=None,before_receipt=None,renderer='powerpoint',cycle=1):
+ # The default and automatic PFS entry share the same content-locked boundary.
+ # Legacy insert/backup/replace-image/upstream edit plans are intentionally refused.
+ from visual_polish_locked import polish as locked_polish
+ return locked_polish(input_path,outdir,profile,context,plan,before_receipt,renderer,cycle)
+
+def finish_review(report_path,decisions):
+ from visual_polish_locked import finish_review as locked_review
+ return locked_review(report_path,decisions)
+
 def main(argv=None):
  argv=list(sys.argv[1:] if argv is None else argv)
  if argv and argv[0]=='review':

@@ -1,19 +1,15 @@
-# Paper Figure Story v1.1.0 — 候选发布说明
+# Paper Figure Story v1.1.0
 
-状态：本地候选安装包；USER_ACCEPTANCE=PENDING；尚未创建正式Tag、GitHub Release或附件。
+从论文中蒸馏科研逻辑，构建可追溯证据关系，生成可解释的科研PPT与学习资料。
 
-2026-10-27增加[Visual Polish](references/visual_polish.md)：完成PPT之后的独立渲染、诊断与有界修复。支持自动及独立调用，保留优化前版本，F类缺失内容交回上游。无来源第三方PPT不宣称科学审核。此项候选仍待用户查看真实前后对照；历史测试结果与本轮记录分开。
+新增/整合：多分支科研逻辑图、逐Figure讲述、共享来源合同、可编辑PPT、Research Logic Workbook、内容锁定Visual Polish。普通阅读引导为清晰原生竖直直线；科研拓扑连接允许正交路由。quick/balanced/full为深度差异，不是准确性等级。
 
-本版从统一、有来源的科研事实和关系生成三类产物：简洁开场逻辑框架、可选完整关系大画布、逐Figure原图旁科研故事。quick/balanced/full共享同一事实与来源；综述保持主题与论证结构，不伪装成原创实验。
+科学判断由使用Skill的Agent及研究者完成；CLI索引不等于无人辅助科研理解。PARTIAL科学资料不升级，用户仍须审查Figure、样本量、机制解释和版权。无Agent视觉计划只有QA_ONLY。已验证Windows/指定字体及Office环境，通用SVG/OCR不作承诺。
 
-本次最终修复集中在详细图方向箭头、分支可读性、初学者手册和实际字体。展示注释以模型指纹与来源绑定，不能更改科学身份或隐藏核心关系。蓝色实线、蓝色虚线、棕色虚线分别保留证据衔接、论证推进和机制解释的区别，共享技术独立说明。学习手册包含实验卡、邻近解释和完整Methods附录，正文避免机器身份堆积。
+## English
 
-中文采用Microsoft YaHei；英文和数字采用Times New Roman。PPTX实际Latin/EastAsia、DOCX ASCII/HAnsi/EastAsia和PDF实际字体均有专用检查；Windows缺少必需字体时不静默替代。原始论文图像内容保持不变，其栅格字体不能强制转换。
+PFS reconstructs source-bound research logic and produces editable Figure-centered presentations, overview/detail evidence maps, and a Research Logic Workbook. Content-locked Visual Polish separates orthogonal scientific graph connectors from straight downward reading guides. Quick, balanced and full share the same scientific accuracy requirements.
 
-本轮24项定向测试最终通过：首次22/24，修复后仅重跑失败两项。真实PowerPoint导出3张新图，Word导出22页手册并逐页视觉检查。既有CNNM4主稿、Review、A图与82页历史实验卡只读核查，未重制。用户接受与独立初学者理解测试尚待完成；程序通过不等于科研终审。
+Scientific interpretation remains Agent-assisted and requires researcher review. PDF indexing alone is not unattended scientific understanding. Office, fonts and proprietary runtimes are not redistributed. Source-available for personal non-commercial use; not an OSI open-source license. Third-party paper rights are separate.
 
-保留18项实验/控制/计算/共享任务与342项Methods字段，未知样本量和原文冲突不猜测。缺失补充材料、Table S1、部分来源语义核验与机制假说保留为PARTIAL。本软件依赖Agent阅读整理；仅运行PDF索引不构成无人辅助科研理解。
-
-安装包只含明确列入清单的源码、schema、文字参考、默认模板、自著布局示例和合成测试，不含真实论文PDF、Figure、私有fixture、学习手册或开发缓存。原个人非商业使用许可证不变。本轮未覆盖已安装Skill、未修改冻结v1.0。
-
-发布条件：用户明确接受最终视觉产物、技术门槛满足、可用的GitHub Release及附件上传认证。当前连接器可读仓库，但本机gh未登录；发布前须再次检查main和v1.1.0 Tag。不强推、不覆盖Tag、不将本地包误报为已发布。
+Install the folder containing SKILL.md from the versioned ZIP; check SHA256SUMS and MANIFEST. The original v1.0.0 tag/release remains available independently.

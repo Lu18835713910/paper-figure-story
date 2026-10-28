@@ -1,3 +1,22 @@
+# 最终源码的测试与边界
+
+正式发布检查从最终候选源码/解压安装运行，不用历史日志替代：Python AST、MJS语法、核心合同、Visual Polish锁定/字形/阅读直线及相交负例、三档缓存投影、隔离最小调用、模板/依赖和包内容/相对链接检查。实际数量及结果以发布报告为准，不累计下方历史记录。
+
+独立合成测试：
+
+```text
+python -B tests/test_inventory_synthetic.py
+python -B tests/test_research_logic_contract.py
+python -B tests/test_visual_polish_locked.py
+python -B tests/test_visual_polish_deck_style.py
+python -B tests/test_visual_polish_connectors.py
+python -B tests/test_visual_polish_reading_guides.py
+```
+
+legacy_visual_polish_v1.py是旧合同记录，不作为当前验收套件。真实论文科学来源、模板、PNG可读性和用户接受状态独立记录。无Agent计划为QA_ONLY；PPT可打开和软件测试通过不能代替科学/视觉审阅。首次用户目标需要Agent读论文并整理模型，不宣称纯CLI已无人辅助完成。
+
+## 历史验证记录（不代表本次重跑）
+
 # 运行与测试
 
 ## Visual Polish（2026-10-27）

@@ -1,3 +1,21 @@
+# CHANGELOG
+
+## 1.1.0 — 2026-10-28
+
+- 科研问题、Methods、Figure、结果、作者解释及限制共享来源和知识模型。
+- 简要/详细多分支科研逻辑图、逐Figure故事及可编辑PPT；不将Figure编号当成实验时序。
+- Research Logic Workbook DOCX与实际Word/PDF路径，图节点在配套PPTX中编辑。
+- 内容锁定Visual Polish：Agent计划、原生对象编辑、独立QA/回退；科研网络折线与普通阅读竖直直线分开。
+- 普通阅读箭头修复已进入正式源码；不重新引入L/U回指。
+- 补全直接使用的lxml及成熟PDF入口PyMuPDF依赖；不改科研算法。
+- 原创角色/确认版海报、准确README、个人非商业许可和v1.0历史归档。
+
+## 1.0.0 — 历史补充归档
+
+指向原公开提交cbdcb825db500a53c9bfef0c40c4b41882130735。归档创建日期不代表最初公开日期，原代码和LICENSE不变。
+
+## 既有开发记录
+
 # Changelog
 
 ## v1.1.0 本地候选更新 — 2026-10-27（Visual Polish；待用户视觉确认）

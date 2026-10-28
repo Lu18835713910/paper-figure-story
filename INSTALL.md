@@ -1,46 +1,64 @@
 # 安装与使用｜v1.1.0
 
-## 安装
+## 选择版本
 
-1. 从作者实际发布的Release或本地候选包取得`Paper-Figure-Story-v1.1.0.zip`；候选报告若标RELEASE_BLOCKED即尚未正式发布，不承诺已有下载链接。
-2. 解压后检查`paper-figure-story/SKILL.md`。选择个人Codex skills目录，保留既有版本再安装；本包不执行安装脚本或自动覆盖。
-3. 新会话调用`$paper-figure-story`。提供PDF、目标听众、时长和可选补件/模板即可，内部M1由Codex创建。
+从实际创建的GitHub Release取得ZIP；候选目录不等于已上线。v1.1.0与v1.0.0固定Tag分别保留，main为最新版。请查看Release提供的SHA256，避免误用历史RC包。
 
-## 环境
+## ZIP安装
 
-Python模块见[requirements.txt](requirements.txt)。Codex桌面通过`load_workspace_dependencies`提供Node与`@oai/artifact-tool`；后者不是本包重分发内容。需要微软雅黑和Times New Roman用于规定字体。实际PNG验收使用Microsoft PowerPoint；本包不分发Office或字体，也不承诺Linux/无Office渲染等价。
+解压`Paper-Figure-Story-v1.1.0.zip`，取内部`paper-figure-story`目录，放到个人`~/.codex/skills/`。正确结构为`~/.codex/skills/paper-figure-story/SKILL.md`。已有版本先移到Skills目录以外的备份位置，勿静默覆盖或保留两个同名Skill。安装后在新会话调用`$paper-figure-story`。
 
-## Codex工作流
+## 固定Tag安装
 
-详[PDF到PPT工作流](references/pdf_to_ppt_workflow.md)。Codex从原文与原图创建/验证M1及资产；不会让用户自己写JSON。索引缓存按PDF SHA复用。扫描稿、关键图缺失、来源冲突保留明确状态，受影响的事实不正式通过。
-
-低层入口供Agent/开发者使用：
-
-```text
-python scripts/run_pfs.py run --pdf paper.pdf --knowledge reviewed_M1.json --assets figures.json --cache-dir cache --outdir new_run --modes balanced --products presentation --plan-only
+```powershell
+$skillTarget = Join-Path $env:USERPROFILE '.codex/skills/paper-figure-story'
+if (Test-Path -LiteralPath $skillTarget) { throw '目标已存在：请先备份到Skills目录以外。' }
+git clone --branch v1.1.0 --single-branch https://github.com/Lu18835713910/paper-figure-story.git $skillTarget
 ```
 
-不带knowledge时exit3并写`agent_handoff.json`。当前Codex据此读原文、完成模型并用新输出目录重入；不能取消科学审核门。PPT导出需提供当前环境的`--node`、`--artifact-module`和`--presentation-skill`，显式`--development-preview`用于含PARTIAL科学资料的待审核文献报告。正式软件版本不等于每篇文献已完成独立科学终审。
+历史版将`v1.1.0`替换为`v1.0.0`。仓库根目录就是Skill内容，clone到目标后不要再套一层paper-figure-story。固定Tag只在实际发布后可用。
+
+升级/回退：确认本地无未保存修改，再`git fetch origin --tags`及`git switch --detach v1.1.0`或`git switch --detach v1.0.0`。不要强制推送、reset --hard或删除旧版本来升级。
+
+## 环境与依赖
+
+Python 3.10+；依赖按`python -m pip install -r requirements.txt`安装：python-pptx、Pillow、pdfplumber、python-docx、lxml、PyMuPDF。PyMuPDF用于成熟index_pdf.py入口。Word/PPT处理使用本地已安装Microsoft Office；字体为Microsoft YaHei与Times New Roman。Codex桌面的load_workspace_dependencies可提供Node及Artifact Tool；它们不随本包重分发，普通Python环境不能据此承诺已具备PPT渲染能力。
+
+已验证Windows；其他系统、无Office或缺字体环境未通过等价视觉验收。不要从仓库下载Office、专有字体或API凭据。
+
+## Agent快速使用
+
+提供主PDF及实际取得的补件，可选PPTX模板，指定balanced与目标听众。Agent先读原文、Methods及图注，形成共享模型；再产出简图、逐Figure讲述和所需详细图/Workbook。用户不必手写JSON。
+
+缺knowledge的纯CLI返回exit3及REVIEWED_KNOWLEDGE_REQUIRED/agent_handoff.json；由当前Agent继续语义整理，不取消来源审核门。索引不是科学理解。缺补件/未知n保持未核验，不把PARTIAL升为正式终审。
+
+## 真实CLI（供Agent或开发者）
+
+```text
+python scripts/run_pfs.py run --pdf paper.pdf --knowledge reviewed_M1.json --assets figures.json --cache-dir cache --outdir new_run --modes quick balanced full --products presentation --plan-only
+python scripts/run_pfs.py polish --pptx finished.pptx --outdir qa_run
+python scripts/build_research_workbook.py --help
+```
+
+plan-only生成并核验计划，不等于已生成PPT。导出需传--node、--artifact-module、--presentation-skill及显式--development-preview；它表示案例仍供人工科学复核，不是软件预发布标识。没有Agent视觉计划时polish仅QA_ONLY。详[PDF工作流](references/pdf_to_ppt_workflow.md)及[Visual Polish](references/visual_polish.md)。
 
 ## 模板
 
-默认[学术蓝模板](assets/default_academic_blue_174994.pptx)为16:9，无Logo。新统一入口`--template path.pptx`支持同类PFS命名版式，按source SHA校验。
-
-普通PPTX使用保留的成熟路径：
+默认[学术蓝模板](assets/default_academic_blue_174994.pptx)为16:9，无Logo。统一入口--template支持PFS兼容命名版式；普通PPTX使用成熟路径：
 
 ```text
 python scripts/inspect_template.py user_template.pptx
 python scripts/build_pptx.py reviewed_slides.json --template user_template.pptx --template-mode native --output report.pptx
 ```
 
-native采样母版/比例与颜色，tagged复用PFS命名槽位；复杂动画、任意Logo/母版的像素级还原未承诺。成熟Figure槽最多2幅图片；更多须按问题拆页，v1.1会显式报错而不是丢图。用户模板的首次使用须实际打开/渲染核对。
+native适配母版/比例与颜色，tagged复用命名槽位。任意动画或母版的像素级复刻不承诺。成熟Figure槽最多2幅图片，更多须按问题拆页，不静默丢图。原论文图中的文字保持原貌。
 
-## 深度整理与交付
+## 深度产物与手册
 
-`--products with-network`追加独立详细图。`--products deep --inventory Full_Experimental_Inventory.json`调用已有实验层、详细图、卡片和审查清单。未知数量不补造。主PPT、来源表、audit JSON与讲者备注共享ID；发给听众的备注不包含机器JSON。
+--products with-network追加独立详细大画布；deep --inventory使用已有Methods清单生成卡片/审查资料，任务数不等于独立实验次数。quick/balanced/full共用来源和关系，仅改变展开。图输出PPTX/PNG；暂无通用SVG导出器。
 
-quick/balanced/full是展开规则，可能同页数，不改变事实与基础关系。默认先做关键样张；一次集中检查，只重渲染修改页，保留每次失败和来源冲突。
+build_research_workbook.py --reader可生成短句/对照表/图相邻的DOCX手册，再用实际Word导出PDF并逐页检查。文档文字与表可编辑，嵌入图的节点在配套PPTX中编辑。报告实际引擎，不把未运行的Word/Office检查写成通过。
 
-可选初学者手册通过`build_research_workbook.py --reader`使用同模型图及有源显示注释生成DOCX，附原Methods结构记录。实际使用Word打开/导出PDF并逐页检查；内置LibreOffice渲染器不可用时明确记录实际引擎，不虚报通过。手册中的图为配套原生PPT的确切PNG，文档文字/表可编辑，节点编辑在PPT中完成。
+## 许可与版本边界
 
-字体是交付约束：PPT拉丁/东亚属性、DOCX的ASCII/HAnsi/EastAsia以及PDF实际字体都需检查。可用`audit_script_fonts.py ... --output font_audit.json`读取实际产物。生成器在Windows缺少指定字体文件时报错，不静默替换。论文原始Figure内的字体属于作者图像，保持原貌，不重绘实验数据。
+个人非商业使用｜源码可查看；不是OSI开源许可。完整授权见LICENSE。原图、PDF、Office、字体和用户资料的权利不由本包转授。v1.0历史原代码不修补，已知演示缺图等限制见历史Release说明。

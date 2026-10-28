@@ -1,5 +1,9 @@
-# Publication notes — v1.1 candidate
+# 公开材料、版权和许可
 
-The installable v1.1 ZIP is built from an explicit source allowlist. It includes a self-authored layout example and excludes local research PDFs, extracted Figures, reviewed scientific fixtures and internal development records. Existing tracked v1.0 examples remain unchanged in history and in this preparation; their third-party content does not become covered by the project license.
+代码及原创材料使用Personal Non-Commercial Use License v1.0：个人非商业使用｜源码可查看；不是MIT、Apache或OSI意义开源许可。商业/组织化部署及再分发按LICENSE执行。
 
-The project retains its Personal Non-Commercial Use License v1.0. It is source-available, not OSI open source. Commercial use, organizational deployment and redistribution are governed by that original license. Third-party materials require separate rights and citation checks. No actual GitHub Release is claimed until the Tag, Release and attached ZIP have been verified remotely.
+保留的Atera公开案例为原有脱敏副本，已移除第三方论文Figure，不是含原图的最终报告；同目录README保留来源和权利说明。默认模板、自著布局及本次功能示意不包含真实实验结果。
+
+主宣传海报由用户本次提供并指定为确认版，文件内容原样保留。科学家角色由作者提供，本次只清理原红框/红箭头/文字并保留造型。宣传图里的网络、图表和文档是原创概念/教学示意，不代表真实实验或自动生成截图。来源哈希和清理提示保存在marketing/v1.1.0/ASSET_PROVENANCE.md，未公开个人源路径。
+
+内部CNNM4、State、组织模型综述的PDF/Word/表格、原Figure、M1缓存、私有稿件及审计日志不分发。PFS许可不覆盖论文、Figure、数据、字体、Office和用户材料；使用者需确认自己的引用和再分发权限。

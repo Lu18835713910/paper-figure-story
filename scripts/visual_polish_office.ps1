@@ -29,7 +29,7 @@ try {
     $frame=$shape.TextFrame2;$available=$shape.Height-$frame.MarginTop-$frame.MarginBottom
     $overflow=$frame.TextRange.BoundHeight -gt ($available+3)
     if($overflow){$issues+=@{code='TEXT_HEIGHT_OVERFLOW';shape=$shape.Name;id=$shape.Id;actual=$frame.TextRange.BoundHeight;available=$available}}
-    $objects+=@{id=$shape.Id;name=$shape.Name;text=$shape.TextFrame.TextRange.Text;bounds=@($shape.Left,$shape.Top,$shape.Width,$shape.Height);text_height=$frame.TextRange.BoundHeight;available_height=$available;overflow=$overflow}
+    $objects+=@{id=$shape.Id;name=$shape.Name;text=$shape.TextFrame.TextRange.Text;bounds=@($shape.Left,$shape.Top,$shape.Width,$shape.Height);text_bounds=@($frame.TextRange.BoundLeft,$frame.TextRange.BoundTop,$frame.TextRange.BoundWidth,$frame.TextRange.BoundHeight);text_height=$frame.TextRange.BoundHeight;available_height=$available;overflow=$overflow}
    }
    if($shape.HasTable){
     for($row=1;$row -le $shape.Table.Rows.Count;$row++){
