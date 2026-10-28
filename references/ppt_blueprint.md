@@ -45,7 +45,7 @@
 
 ## JSON页面数据的最小结构
 
-见 `examples/sample_slides.json`，核心结构为：
+可运行的自著示例见 `examples/layout_demo.json`。下列字段示意同时展示Figure与关系图接口；其中占位对象不能作为科学事实：
 
 ```json
 {

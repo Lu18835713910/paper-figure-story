@@ -1,7 +1,9 @@
-# Publication notes
+# 公开材料、版权和许可
 
-This public-source bundle excludes `examples/tomato_test/` (paper figures extracted from an external publication, and local test outputs) and `references/user_overview_reference.png` (a user-provided figure). It retains the implementation, documentation, example JSON, and default editable academic PPTX template.
+代码及原创材料使用Personal Non-Commercial Use License v1.0：个人非商业使用｜源码可查看；不是MIT、Apache或OSI意义开源许可。商业/组织化部署及再分发按LICENSE执行。
 
-The original full ZIP is a local development/testing distribution. When publishing screenshots or paper figures, verify the rights and citation/licensing requirements separately.
+保留的Atera公开案例为原有脱敏副本，已移除第三方论文Figure，不是含原图的最终报告；同目录README保留来源和权利说明。默认模板、自著布局及本次功能示意不包含真实实验结果。
 
-LICENSE now contains the project's custom Personal Non-Commercial Use License v1.0. The repository is source-available, not OSI open source; individual noncommercial use and private local modification are allowed, while commercial use, organizational deployment, and redistribution require written permission. Third-party materials remain excluded.
+主宣传海报由用户本次提供并指定为确认版，文件内容原样保留。科学家角色由作者提供，本次只清理原红框/红箭头/文字并保留造型。宣传图里的网络、图表和文档是原创概念/教学示意，不代表真实实验或自动生成截图。来源哈希和清理提示保存在marketing/v1.1.0/ASSET_PROVENANCE.md，未公开个人源路径。
+
+内部CNNM4、State、组织模型综述的PDF/Word/表格、原Figure、M1缓存、私有稿件及审计日志不分发。PFS许可不覆盖论文、Figure、数据、字体、Office和用户材料；使用者需确认自己的引用和再分发权限。

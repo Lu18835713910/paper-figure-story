@@ -1,0 +1,6 @@
+python-pptx
+Pillow
+pdfplumber
+python-docx
+lxml
+PyMuPDF
