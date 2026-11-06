@@ -131,14 +131,14 @@ Visual Polish只决定已确定内容怎样展示得更好：锁定页数/页序
 当前正式版本为 **`1.1.1`**；该版本已发布Tag与Release。请使用正式Release ZIP安装：
 
 ```powershell
-# 发布前：从RC压缩包或本地候选目录安装；目标目录须不存在，已有安装请先备份到Skills目录以外。
+# 从正式Release ZIP安装；目标目录须不存在，已有安装请先备份到Skills目录以外。
 $skillTarget = Join-Path $env:USERPROFILE '.codex/skills/paper-figure-story'
 if (Test-Path -LiteralPath $skillTarget) { throw '目标已存在：请先备份到Skills目录以外。' }
 Expand-Archive -LiteralPath .\Paper-Figure-Story-v1.1.1.zip -DestinationPath $env:TEMP\pfs_rc
 Copy-Item -Recurse "$env:TEMP\pfs_rc\paper-figure-story" $skillTarget
 ```
 
-`v1.1.0` 及更早版本的固定 Tag 安装方式保持不变（见[INSTALL.md](INSTALL.md)）。`git clone --branch v1.1.1` 只能在负责人发布授权并创建 Tag 之后使用，现在执行会失败。
+`v1.1.1` Tag已经发布，`git clone --branch v1.1.1 --single-branch https://github.com/Lu18835713910/paper-figure-story.git`可用于固定首发代码版本。最新文档勘误见main；正式Release ZIP含勘误后的安装说明。旧版本安装见[INSTALL.md](INSTALL.md)。
 
 在支持本地Skills的Agent中提供论文及可用补件，然后输入：
 
@@ -150,17 +150,17 @@ Copy-Item -Recurse "$env:TEMP\pfs_rc\paper-figure-story" $skillTarget
 列出实际取得的材料、来源审核状态及待人工核实事项。
 ```
 
-Python依赖见[requirements.txt](requirements.txt)；PPT导出使用Codex提供的Node/Artifact Tool；实际PNG验收使用本机PowerPoint，手册PDF使用Word。Office、字体及专有运行时不随包分发。其他系统/缺字体或Office环境未通过等价视觉验收。
+Python依赖见[requirements.txt](requirements.txt)。原生逻辑A/B的portable路径已验证；普通Figure主稿需要按[宿主能力说明](docs/HOST_REQUIREMENTS.md)确认所选后端，Artifact宿主路径仍为NOT_TESTED，不能由portable成功推定可用。PowerPoint/Word导出仅在验收机器验证，Office、字体与专有运行时不随包分发，其他环境未完成等价视觉验收。
 
 ## 版本选择、升级与回退
 
 |版本|定位|固定入口|
 |---|---|---|
-|v1.1.1（目标版本，Tag 未创建）|逻辑导航交付合同、完整B拓扑守恒、具备身份核验的发布回归门禁、依赖版本约束|发布授权后由Release提供；当前请用RC压缩包|
+|v1.1.1（已发布）|逻辑导航交付合同、完整B拓扑守恒、身份核验与发布回归门禁|[正式Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.1.1)|
 |v1.1.0|共享科研证据关系、逐图故事、Workbook和内容锁定Visual Polish|[Release入口](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.1.0)|
 |v1.0.0|原始逐Figure故事、默认模板与Atera公开案例|[历史Release入口](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.0.0)|
 
-Release入口、附件及SHA256须以实际发布结果为准；本地候选不等于已上线，上表 v1.1.1 行不表示该Tag已存在。`main`用于最新版，复现请固定Tag。已有Git安装在工作区干净时可执行`git fetch origin --tags`，再用`git switch --detach v1.1.0`升级或`git switch --detach v1.0.0`回退；不使用强制重置。ZIP安装请保留旧版到Skills目录以外，再安装对应版本。
+v1.1.1 Tag与Release已公开；下载时核对Release中的当前SHA256文件。`main`用于最新版，复现请固定Tag。已有Git安装在工作区干净时可执行`git fetch origin --tags`，再用`git switch --detach v1.1.1`固定当前正式功能版本，或用`git switch --detach v1.1.0`回退；不使用强制重置。ZIP安装请保留旧版到Skills目录以外，再安装对应版本。
 
 ## 示例与历史
 
@@ -199,11 +199,11 @@ AI辅助不能取代研究者的科学审查。来源定位成功、统计关联
 
 ## 正式发布包身份复核
 
-目录名、ZIP名和Git HEAD不能代替实际文件身份。请用本候选的同一工具复核解压后的Skill根目录；输出JSON保存在候选目录外，避免把结果本身再纳入候选。
+目录名、ZIP名和Git HEAD不能代替实际文件身份。请用本版本的同一工具复核解压后的Skill根目录；输出JSON保存在候选目录外，避免把结果本身再纳入候选。
 
 ```text
 python -B scripts/candidate_fingerprint.py --root <解压后的paper-figure-story目录>
-python -B scripts/candidate_fingerprint.py --zip <候选ZIP> --zip-root paper-figure-story
+python -B scripts/candidate_fingerprint.py --zip <正式ZIP> --zip-root paper-figure-story
 ```
 
 两次输出的`files`、`file_count`及`aggregate_sha256`必须一致。算法沿用rc.2正式清单：根相对POSIX路径排序，每行`路径 空格 文件SHA256`，以UTF-8、LF连接且末行不追加换行，再做SHA-256；仅排除Office的`~$*`锁文件。ZIP校验同时读取CRC与实际内容。当前为正式v1.1.1版本；首次G5盲测失败和科学PARTIAL记录不因工程修复改判。

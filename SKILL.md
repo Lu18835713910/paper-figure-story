@@ -13,7 +13,7 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 
 长任务按[五阶段保存与续跑](references/agent_staged_resume.md)执行。新会话核对指纹后从最近有效阶段续跑，不重复解析全文。读真实进程退出码及execution/failure/几何报告，不以stdout中的状态或exit 0单独宣称完成。便携A/B可用不等于Figure主稿Artifact宿主可用；先单独检查宿主，再开展昂贵资产工作。
 
-## 维护候选的标准路径与安全门
+## 标准路径与安全门
 
 先读[受支持的PDF→模型→A/B→Figure→PPT/原生Workbook路径](references/maintenance_workflow_v1_1_1.md)。复用按SHA匹配的缓存；Agent完成科学语义，不改已安装代码。scientific_index骨架必须保持PENDING，完成来源填充并验证后才能组装research_logic。Figure必须登记原PDF/页码/panel/区域/指纹；像素匹配、panel审核与科学语义分别记录，禁止用黑像素阈值拒绝合法黑底。
 
@@ -23,14 +23,14 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 
 ## 贡献覆盖与表达审阅
 
-本段是基于两份V0.1讨论稿的受控候选，不代表讨论稿已成为发布标准或既有案例科学终审升级。先按[维护流程中的贡献覆盖审阅](references/maintenance_workflow_v1_1_1.md#候选维护贡献覆盖与表达审阅)检查已登记事实，再制作展示；不新增科学事实库。
+本段实施贡献覆盖与表达审阅；不代表两份V0.1讨论稿整体成为正式规范，也不升级既有案例科学终审。先按[维护流程中的贡献覆盖审阅](references/maintenance_workflow_v1_1_1.md#候选维护贡献覆盖与表达审阅)检查已登记事实，再制作展示；不新增科学事实库。
 
 - 不把标题问题、一个中心入口或最后一张Figure等同于全文唯一贡献。用既有claim、RSU、statement、research_logic与source ID列出候选贡献，分开作者定位、实际支持、核心/支撑/背景及理由；允许一条、多条或共享证据的主线，不预设技术/应用双主线。
 - 每项候选核心贡献登记A、B、主稿、Figure Story、Workbook和最终结论中的实际位置，或不适用/省略理由与影响。共享证据沿用同一身份，不因分支、页面或测量重分组而增加独立验证。
 - 先清楚呈现正面发现，再准确限定支持范围；结论覆盖已审核心贡献。保留清楚的标题，解释抽象研究动作与必要缩写，关键参数分层呈现。逐句核对简化是否把推断升级为证实、关联升级为因果；Visual Polish不得代做科学修订。
 - 贡献覆盖审阅、来源科学审核、软件检查、视觉验收分别报告。COVERED_REGISTERED_CLAIMS/BRANCHES只说明已登记输入的投影范围，不证明论文全部核心贡献已被识别。
 
-## RC1候选：A/B与局部图的科研表达分工
+## A/B与局部图的科研表达分工
 
 - A为16:9科研逻辑概览：呈现一条或多条“问题—探索—发现—进一步探索—综合认识”的骨架，使读者看清主要研究任务、关键发现及其真实联系。这是表达原则，不是固定五步、固定节点数或线性实验模板。
 - B在同一有源骨架下展开具体实验/分析、操作与材料、数据与读数、结果、支持证据及必要限制，保留独立、完整、原生可编辑、可缩放的大画布。不以整图缩到16:9后的字号作为唯一验收尺度。
@@ -190,7 +190,7 @@ quick/balanced/full复用同一事实、RSU、关系和图片索引；quick压�
 - [五阶段保存与续跑](references/agent_staged_resume.md)：中断后核对指纹续跑。
 - [受支持的维护路径](references/maintenance_workflow_v1_1_1.md)：PDF→模型→A/B→Figure→PPT/Workbook，含贡献覆盖与表达审阅。
 - [PDF到PPT工作流](references/pdf_to_ppt_workflow.md)：只给PDF时的完整闭环。
-- [RC集成合同](references/rc_integration_contract.md)：候选身份、入口与不可声称事项。
+- [RC集成合同](references/rc_integration_contract.md)：版本身份、入口与能力边界。
 
 **合同与Schema**
 - [科研逻辑与科学索引合同](references/research_logic_contract.md)：12类字段与手册入口。
