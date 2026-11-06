@@ -34,14 +34,17 @@ def wrap(text,width,size,bold=False):
     text=re.sub(r'\b(Mg|Ca)2\+',lambda m:m.group(1)+'²⁺',text)
     text=re.sub(r'\b(Na|K)\+',lambda m:m.group(1)+'⁺',text)
     text=re.sub(r'\bCO2\b','CO₂',text)
-    lines=[];available=max(10,width-10)
+    # Width is the caller's usable content width (frame insets already removed).
+    # Never deduct a second hidden margin here.
+    if width<=0:raise ValueError('TEXT_CONTENT_WIDTH_REQUIRED')
+    lines=[];available=width
     unit=r'(?:μM|µM|mM|nM|pM|M|μL|µL|mL|nm|μm|µm|mm|ms|s|min|h|kDa|Å|%|°C)'
-    pattern=r'\d+(?:\.\d+)?\s*'+unit+r'|[A-Za-z][A-Za-z0-9_./+−–-]*|\d+(?:\.\d+)?|\s+|.'
+    pattern=r'\d+(?:\.\d+)?\s*±\s*\d+(?:\.\d+)?(?:\*)?|\d+(?:\.\d+)?\s*'+unit+r'|[A-Za-z][A-Za-z0-9_./+−–-]*|\d+(?:\.\d+)?|\s+|.'
     for para in text.split('\n'):
         paragraph_start=len(lines)
         row=''
         for token in re.findall(pattern,para):
-            numeric=bool(re.fullmatch(r'\d+(?:\.\d+)?(?:\s*'+unit+r')?',token))
+            numeric=bool(re.fullmatch(r'\d+(?:\.\d+)?\s*±\s*\d+(?:\.\d+)?(?:\*)?',token)) or bool(re.fullmatch(r'\d+(?:\.\d+)?(?:\s*'+unit+r')?',token))
             if row and measure(row+token,size,bold)>available:
                 if token in '，。；：、！？）》】,.!?;:':
                     tail=re.search(r'(?:\d+(?:\.\d+)?(?:\s*'+unit+r')?|[A-Za-z][A-Za-z0-9_./+−–-]*|.)$',row).group(0)

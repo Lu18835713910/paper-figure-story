@@ -196,7 +196,13 @@ class PresentationProjector:
                     for j,text in enumerate(pointer_value(self.model,ref)):
                         if text not in [x['text'] for x in bs]:bs.append(block('limit',text,ref+'/'+str(j)))
             for start in range(0,min(len(bs),10),5):page('limitations','研究限制与结论强度' if not nonexp else '实践建议的前提与局限',blocks=bs[start:start+5],layout='limitations')
-        page('conclusion','研究主要发现' if not nonexp else '核心论点与实践启示',blocks=[block('finding' if not nonexp else 'argument',pointer_value(self.model,u['finding_refs'][0]),u['finding_refs'][0]) for u in units],layout='conclusion')
+        finding_refs=planning.unique(ref for u in units for ref in u['finding_refs'])
+        # A merged unit can contain several registered findings. Keep their IDs
+        # and page capacity, rather than silently taking only its first finding.
+        for start in range(0,max(1,len(finding_refs)),6):
+            refs=finding_refs[start:start+6]
+            p=page('conclusion',('研究主要发现' if not nonexp else '核心论点与实践启示')+('（续）' if start else ''),blocks=[block('finding' if not nonexp else 'argument',pointer_value(self.model,ref),ref) for ref in refs],layout='conclusion')
+            p['finding_coverage']=dict(expected_refs=finding_refs,displayed_refs=refs,omitted_refs=[],other_summary_refs=[r for r in finding_refs if r not in refs],scope='all_conclusion_pages',scientific_contribution_review='NOT_ASSESSED_BY_PROJECTOR')
         # Formal readiness is source/asset completeness, independent of the scientific review verdict.
         for p in slides:
             if not p['source_refs']:

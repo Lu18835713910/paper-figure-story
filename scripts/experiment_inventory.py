@@ -12,7 +12,7 @@ import validate_knowledge as knowledge
 
 VERSION='pfs-experiment-inventory-1'
 SCHEMA=Path(__file__).resolve().parents[1]/'schemas/experiment_inventory_v1_1.schema.json'
-STATUSES=('VERIFIED','PARTIAL','NOT_REPORTED','NOT_VERIFIED','CONFLICT')
+STATUSES=('VERIFIED','PARTIAL','NOT_REPORTED','NOT_VERIFIED','CONFLICT','NOT_APPLICABLE')
 CORE_FIELDS=('question','materials','groups','group_count','sample_count','sample_unit',
              'biological_replicates','technical_replicates','independent_runs',
              'treatments','acquisition','analysis','statistics','result','interpretation','limitations')
@@ -129,6 +129,9 @@ def _validate(inventory,model,*,base_dir,knowledge_path=None,verify_files=True):
             if status=='NOT_REPORTED':
                 _need(bool(rawrefs),'INVENTORY_NOT_REPORTED_SCOPE','NOT_REPORTED needs actually checked source scope, not merely missing extraction')
                 _need(not _has_numeric(value),'INVENTORY_NOT_REPORTED_NUMBER','NOT_REPORTED cannot supply a numeric count')
+            if status=='NOT_APPLICABLE':
+                _need(f.get('applicable') is False and bool(f.get('reason')) and bool(rawrefs),'INVENTORY_APPLICABILITY_REQUIRED',eid+'/'+key+': explicit non-applicability, reason and checked source scope required')
+                _need(not _has_numeric(value),'INVENTORY_APPLICABILITY_CONFLICT',eid+'/'+key+': an inapplicable field cannot assert a numeric result')
             if status=='CONFLICT':_need(bool(f.get('candidates') or isinstance(value,(list,dict))), 'INVENTORY_CONFLICT_CANDIDATES','Conflicting candidates must be retained, not silently selected')
             if key in COUNT_FIELDS and status in ('VERIFIED','PARTIAL') and _has_numeric(value):
                 unit=f.get('unit') or (e['fields'].get('sample_unit',{}).get('value') if key=='sample_count' else None)
@@ -175,7 +178,7 @@ def _status(fields):
     values=[f.get('status','NOT_VERIFIED') for f in fields.values()]
     for v in ('CONFLICT','NOT_VERIFIED','PARTIAL','NOT_REPORTED'):
         if v in values:return v
-    return 'VERIFIED'
+    return 'NOT_APPLICABLE' if values and all(v=='NOT_APPLICABLE' for v in values) else 'VERIFIED'
 
 def _methods_refs(inventory,e):
     result=list(e.get('methods_refs',[]))
@@ -203,6 +206,8 @@ def _applicable(e,key):
     return True
 
 def audit_inventory(inventory):
+    # Do not add zero-valued audit keys to historical network fingerprints.
+    statuses=STATUSES if any(f.get('status')=='NOT_APPLICABLE' for e in inventory['experiments'] for f in e['fields'].values()) else STATUSES[:-1]
     es=inventory['experiments'];n=len(es);fields={k:Counter() for k in CORE_FIELDS};appcounts={k:Counter() for k in CORE_FIELDS};excluded={k:[] for k in CORE_FIELDS}
     methods=0;actual_methods=0;method_status=Counter();rows=[]
     missing_ids={eid for m in inventory.get('missing_materials',[]) if isinstance(m,dict) for eid in m.get('affected_experiment_ids',[])}
@@ -224,8 +229,8 @@ def audit_inventory(inventory):
                      'actual_methods_source_located':actual,'method_source_status':ms,
                      'field_status':{k:e['fields'].get(k,{}).get('status','NOT_VERIFIED') for k in CORE_FIELDS},
                      'overall_extraction_status':_status(e['fields'])})
-    byfield={k:{'denominator':n,**{s:c.get(s,0) for s in STATUSES},'applicable_denominator':n-len(excluded[k]),
-               'applicable_status_counts':{s:appcounts[k].get(s,0) for s in STATUSES},'not_applicable_experiment_ids':excluded[k]} for k,c in fields.items()}
+    byfield={k:{'denominator':n,**{s:c.get(s,0) for s in statuses},'applicable_denominator':n-len(excluded[k]),
+               'applicable_status_counts':{s:appcounts[k].get(s,0) for s in statuses},'not_applicable_experiment_ids':excluded[k]} for k,c in fields.items()}
     known=[e['experiment_id'] for e in es if e['fields'].get('sample_count',{}).get('status')=='VERIFIED' and _applicable(e,'sample_count')]
     conflict=[e['experiment_id'] for e in es if any(f.get('status')=='CONFLICT' for f in e['fields'].values())]
     needed=_unique(eid for m in inventory.get('missing_materials',[]) if isinstance(m,dict) for eid in m.get('affected_experiment_ids',[]))
@@ -236,7 +241,7 @@ def audit_inventory(inventory):
              'task_type_counts':dict(Counter(e['task_type'] for e in es)),
              'methods_localization':{'numerator':methods,'denominator':n,'status':'located_only_not_full_semantic_verification'},
              'actual_methods_source_localization':{'numerator':actual_methods,'denominator':n,'scope':'Methods/STAR source distinguished from Results/legend-only location'},
-             'method_source_status_counts':{'denominator':n,**{s:method_status.get(s,0) for s in STATUSES},'scope':'Extractor Methods scope, not independent scientific final review; missing supplement/partial section downgrades completeness'},
+             'method_source_status_counts':{'denominator':n,**{s:method_status.get(s,0) for s in statuses},'scope':'Extractor Methods scope, not independent scientific final review; missing supplement/partial section downgrades completeness'},
              'field_status_counts':byfield,'verified_sample_count_experiment_ids':known,'conflicting_experiment_ids':conflict,
              'supplement_needed_experiment_ids':needed,'key_result_binding':{'numerator':result_bound,'denominator':len(key_results)},
              'identification_coverage':{'status':'PARTIAL','denominator':'all substantive tasks in inspected corpus; total not independently certified','registered_tasks':n},
@@ -255,10 +260,10 @@ def audit_inventory(inventory):
         f=e['fields'].get(k,{});return (_text(f.get('value'))+' ['+f.get('status','NOT_VERIFIED')+']').replace('|','／').replace('\n','<br>')
     for e,r in zip(es,rows):
         md.append('|'+ '|'.join([e['experiment_id'],e['display_name'],val(e,'materials'),val(e,'group_count'),val(e,'sample_count')+' / '+val(e,'sample_unit'),val(e,'biological_replicates'),val(e,'technical_replicates'),val(e,'independent_runs'),('Methods/STAR ' if r['actual_methods_source_located'] else '仅Results/legend或尚未定位 ')+r['method_source_status'],val(e,'statistics'),val(e,'result'),r['overall_extraction_status']])+'|')
-    md+=['','## 分状态统计（所有分母分别列明）','','|字段|分母|VERIFIED|PARTIAL|NOT_REPORTED|NOT_VERIFIED|CONFLICT|','|---|---:|---:|---:|---:|---:|---:|']
-    for key,v in byfield.items():md.append('|'+key+'|'+str(n)+'|'+'|'.join(str(v[s]) for s in STATUSES)+'|')
-    md+=['','## 适用任务分母（不把计算任务当湿实验重复）','','|字段|适用分母|VERIFIED|PARTIAL|NOT_REPORTED|NOT_VERIFIED|CONFLICT|排除ID|','|---|---:|---:|---:|---:|---:|---:|---|']
-    for key,v in byfield.items():md.append('|'+key+'|'+str(v['applicable_denominator'])+'|'+'|'.join(str(v['applicable_status_counts'][s]) for s in STATUSES)+'|'+','.join(v['not_applicable_experiment_ids'])+'|')
+    md+=['','## 分状态统计（所有分母分别列明）','','|字段|分母|'+'|'.join(statuses)+'|','|---|---:|'+'---:|'*len(statuses)]
+    for key,v in byfield.items():md.append('|'+key+'|'+str(n)+'|'+'|'.join(str(v[s]) for s in statuses)+'|')
+    md+=['','## 适用任务分母（不把计算任务当湿实验重复）','','|字段|适用分母|'+'|'.join(statuses)+'|排除ID|','|---|---:|'+'---:|'*len(statuses)+'---|']
+    for key,v in byfield.items():md.append('|'+key+'|'+str(v['applicable_denominator'])+'|'+'|'.join(str(v['applicable_status_counts'][s]) for s in statuses)+'|'+','.join(v['not_applicable_experiment_ids'])+'|')
     md+=['','Methods来源完整度分状态：'+_text(summary['method_source_status_counts']),
          '','定义：VERIFIED仅表示已定位实际Methods且该任务的已登记方法范围已核实；有缺补资料/部分方法小节时降为PARTIAL。不是独立人工终审，也不以7/7找到ref冒充7/7完整方法。']
     md+=['','## 每项可核实细节与来源','']
@@ -317,7 +322,7 @@ def build_experiment_layer(inventory,model,*,base_dir='.',knowledge_path=None,ve
                'analysis_unit':f.get('unit','not_checked'),'inputs':[],'outputs':[],'limits':[],'source_field':copy.deepcopy(f)}
             nodes.append(n);associations.append({'id':'INV.ASSOC.'+fid,'from':eid,'to':fid,'type':'has_experiment_field','identity':'association',
                                                 'basis_pointer':n['m1_pointer'],'scientific_dependency':False,'scope':'registered_field_membership_only'})
-            if f.get('value') not in (None,'',[],{}) and f['status'] not in ('NOT_VERIFIED','NOT_REPORTED'):
+            if f.get('value') not in (None,'',[],{}) and f['status'] not in ('NOT_VERIFIED','NOT_REPORTED','NOT_APPLICABLE'):
                 statements.append({'id':'INV.'+fid,'text':text,'role':role,'entity_ids':[eid]+e['m1_evidence_ids'],'rsu_ids':[],
                     'figure_ids':e.get('figure_ids',[]),'source_refs':refs[(eid,key)],
                     'source_pointer':{'input_kind':'experiment_inventory','pointer':f'/experiments/{i}/fields/{key}/value'},
@@ -349,3 +354,4 @@ def main(argv=None):
         print(json.dumps(report,ensure_ascii=False));return 0 if report['valid'] else 2
     except (OSError,ValueError,TypeError,KeyError) as exc:print(json.dumps({'valid':False,'message':str(exc)}));return 2
 if __name__=='__main__':raise SystemExit(main())
+

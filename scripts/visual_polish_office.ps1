@@ -11,6 +11,16 @@ $before=FileSha $source
 if($spec.input_sha256 -and $before -ne $spec.input_sha256){throw 'RENDER_INPUT_DRIFT'}
 $out=[IO.Path]::GetFullPath($spec.outdir)
 New-Item -ItemType Directory -Path $out -Force | Out-Null
+if($spec.kind -eq 'docx'){
+ $word=New-Object -ComObject Word.Application
+ $word.Visible=$false;$word.DisplayAlerts=0;$doc=$null
+ try {
+  $doc=$word.Documents.Open($source,$false,$true)
+  $doc.ExportAsFixedFormat([string]$spec.pdf,17)
+  @{input=$source;input_sha256=$before;engine='Microsoft Word';pdf=$spec.pdf;pages=$doc.ComputeStatistics(2);source_unchanged=($before -eq (FileSha $source));visual_acceptance='PENDING'} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $spec.receipt -Encoding UTF8
+ } finally {if($null -ne $doc){$doc.Close(0)};$word.Quit()}
+ Write-Output 'Word PDF export completed';exit 0
+}
 $app=New-Object -ComObject PowerPoint.Application
 $initialCount=$app.Presentations.Count
 $presentation=$null;$owned=$false;$records=@()
@@ -48,6 +58,7 @@ try {
   $slide.Export($png,'PNG',$width,$height)
   $records+=@{slide=$slide.SlideIndex;png=$png;png_sha256=(FileSha $png);width=$width;height=$height;issues=$issues;text_objects=$objects;table_cells=$tables}
  }
+ if($spec.pdf){$presentation.SaveCopyAs([string]$spec.pdf,32)}
  $receipt=@{input=$source;input_sha256=$before;engine='Microsoft PowerPoint';version=$app.Version;slides=$presentation.Slides.Count;width_pt=$presentation.PageSetup.SlideWidth;height_pt=$presentation.PageSetup.SlideHeight;rendered=$records;source_unchanged=($before -eq (FileSha $source));visual_acceptance='PENDING'}
 } finally {
  if($owned -and $null -ne $presentation){$presentation.Close()}

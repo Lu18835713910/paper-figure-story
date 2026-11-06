@@ -1,18 +1,62 @@
-<div align="center">
+# Paper Figure Story（PFS）
 
-# Paper Figure Story
+**让每张Figure都有逻辑，让每项结论都有依据。**
 
-**从论文中蒸馏科研逻辑，构建可追溯的证据关系，生成可解释的科研PPT与学习资料。**
+从论文的科学问题出发，梳理实验设计、真实发现和证据关系，生成可编辑的科研PPT、逻辑图与学习手册。
 
-*From Research Papers to Traceable Scientific Logic, Explainable Presentations and Research Learning Materials.*
+![PFS品牌与真实成果](docs/images/v1.1.1/hero.png)
 
-![Paper Figure Story v1.1](docs/images/hero.png)
+## 8秒看看真实成果
 
-**v1.1.0 · quick / balanced / full · 个人非商业使用｜源码可查看**
+![真实产物轮播，非自动运行录像](docs/images/v1.1.1/outputs-demo.gif)
 
-[快速使用](#安装与快速使用) · [版本选择](#版本选择升级与回退) · [示例](#示例与历史) · [详细宣传海报](docs/images/pfs-v1.1-poster.png)
+[静态替代图](docs/images/v1.1.1/outputs-demo-static.png) · [下载安装v1.1.1](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.1.1) · [安装说明](INSTALL.md)
 
-</div>
+## 从整体到细节：科研逻辑A/B
+
+![实际科研逻辑A](docs/images/v1.1.1/logic-a.png)
+
+![完整B的可读局部](docs/images/v1.1.1/logic-b-preview.png)
+
+[打开完整B大画布](docs/images/v1.1.1/logic-b-complete.png)。B包含详细实验、证据与限制，不适合直接缩印A4；主稿采用可读局部视图。
+
+## 逐Figure科研故事与可编辑PPT
+
+![最终P6原生讲述区](docs/images/v1.1.1/figure-story.png)
+
+真实15页主稿的讲述文字局部，公开演示不含原论文Figure。PPT标题、文字、节点与箭头为原生对象；原论文Figure内部文字仍是图像。
+
+## Research Logic Workbook
+
+![真实Workbook Methods表](docs/images/v1.1.1/workbook.png)
+
+最终64页Workbook中的Methods教学表，帮助结合原图学习实验、对照、读数与边界；公开示例未包含第三方原图或内部科学索引。
+
+**PFS让你不只知道论文做了什么，更能看懂它为什么这样做、证据如何连接、结论从哪里来。**
+
+研究可以并行、分叉与汇合，不强制线性Figure顺序。科研解释需要Agent与研究者审核，不是只上传PDF即可保证科学正确的一键PPT生成器。
+
+|模式|用途|
+|---|---|
+|quick|快速抓住问题、主要任务和发现|
+|balanced|兼顾Figure讲述与证据解释|
+|full|请求范围内完整产品与严格交付检查；仍需合法科学输入|
+
+## 安装与开始使用
+
+从[正式Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.1.1)下载`Paper-Figure-Story-v1.1.1.zip`及SHA文件，Windows原生或Python zipfile解压，按[INSTALL](INSTALL.md)配置依赖，再在支持Skills的Agent调用：
+
+> 使用 $paper-figure-story，按balanced模式梳理这篇论文。保留来源、真实实验设计与科学限制，先验证输入和运行环境，再生成产品。
+
+原始科研事实由执行Agent登记；portable已验证，Windows Office仅在验收环境验证，Artifact宿主NOT_TESTED。科学终审PARTIAL、核心贡献审核NOT_ASSESSED。完整维护回归依赖50项私有夹具文件，公开ZIP不能独立复现全部297项。Full复验使用已有模型与输入，不是仅PDF自动建模的证明。
+
+展示案例：Huang et al. (2024), [DOI:10.1038/s41467-024-47364-8](https://doi.org/10.1038/s41467-024-47364-8)。[素材来源与裁切说明](docs/images/v1.1.1/ASSET_PROVENANCE.md) · [已知限制](docs/RC4_ACCEPTED_LIMITATIONS.md) · [版本说明](RELEASE_NOTES_v1.1.1.md)
+
+**Personal Non-Commercial Use License，非MIT/Apache等OSI开源许可。** [LICENSE](LICENSE) · [更新历史](CHANGELOG.md) · [问题反馈](https://github.com/Lu18835713910/paper-figure-story/issues)
+
+---
+
+## 完整功能、使用与历史说明
 
 PFS是面向科研阅读、文献精读和组会汇报的Agent Skill。它帮助研究者理解文章为什么这样研究、实验如何形成证据、不同Figure之间有哪些真实关系，再将这些理解转为可编辑、可追溯的成果。它不只是把论文内容搬进幻灯片。
 
@@ -84,10 +128,17 @@ Visual Polish只决定已确定内容怎样展示得更好：锁定页数/页序
 
 详细环境、ZIP安装、固定Tag及回退步骤见[INSTALL.md](INSTALL.md)。仓库根目录即Skill目录，安装后应直接看到`paper-figure-story/SKILL.md`，不要多嵌套一层。
 
+当前正式版本为 **`1.1.1`**；该版本已发布Tag与Release。请使用正式Release ZIP安装：
+
 ```powershell
-# 固定版本；目标目录须不存在，已有安装请先备份到Skills目录以外。
-git clone --branch v1.1.0 --single-branch https://github.com/Lu18835713910/paper-figure-story.git "$env:USERPROFILE/.codex/skills/paper-figure-story"
+# 发布前：从RC压缩包或本地候选目录安装；目标目录须不存在，已有安装请先备份到Skills目录以外。
+$skillTarget = Join-Path $env:USERPROFILE '.codex/skills/paper-figure-story'
+if (Test-Path -LiteralPath $skillTarget) { throw '目标已存在：请先备份到Skills目录以外。' }
+Expand-Archive -LiteralPath .\Paper-Figure-Story-v1.1.1.zip -DestinationPath $env:TEMP\pfs_rc
+Copy-Item -Recurse "$env:TEMP\pfs_rc\paper-figure-story" $skillTarget
 ```
+
+`v1.1.0` 及更早版本的固定 Tag 安装方式保持不变（见[INSTALL.md](INSTALL.md)）。`git clone --branch v1.1.1` 只能在负责人发布授权并创建 Tag 之后使用，现在执行会失败。
 
 在支持本地Skills的Agent中提供论文及可用补件，然后输入：
 
@@ -105,10 +156,11 @@ Python依赖见[requirements.txt](requirements.txt)；PPT导出使用Codex提供
 
 |版本|定位|固定入口|
 |---|---|---|
+|v1.1.1（目标版本，Tag 未创建）|逻辑导航交付合同、完整B拓扑守恒、具备身份核验的发布回归门禁、依赖版本约束|发布授权后由Release提供；当前请用RC压缩包|
 |v1.1.0|共享科研证据关系、逐图故事、Workbook和内容锁定Visual Polish|[Release入口](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.1.0)|
 |v1.0.0|原始逐Figure故事、默认模板与Atera公开案例|[历史Release入口](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.0.0)|
 
-Release入口、附件及SHA256须以实际发布结果为准；本地候选不等于已上线。`main`用于最新版，复现请固定Tag。已有Git安装在工作区干净时可执行`git fetch origin --tags`，再用`git switch --detach v1.1.0`升级或`git switch --detach v1.0.0`回退；不使用强制重置。ZIP安装请保留旧版到Skills目录以外，再安装对应版本。
+Release入口、附件及SHA256须以实际发布结果为准；本地候选不等于已上线，上表 v1.1.1 行不表示该Tag已存在。`main`用于最新版，复现请固定Tag。已有Git安装在工作区干净时可执行`git fetch origin --tags`，再用`git switch --detach v1.1.0`升级或`git switch --detach v1.0.0`回退；不使用强制重置。ZIP安装请保留旧版到Skills目录以外，再安装对应版本。
 
 ## 示例与历史
 
@@ -128,6 +180,10 @@ Release入口、附件及SHA256须以实际发布结果为准；本地候选不�
 
 **支持所有文献和扫描PDF吗？** 支持原创研究、方法/资源型、综述及观点的相应论证组织，不强求虚构实验。扫描稿需要OCR；本版未验收通用OCR。DOCX/表格可由Agent配套工具阅读，底层统一CLI以PDF入口为准。
 
+**没有Artifact宿主能做什么？** 能完成PDF索引、逻辑A/B/局部图的可移植原生渲染、合稿进已有主稿、Workbook生成与交付核验；**从零生成自适应主稿需要Artifact宿主**，本机不具备该能力。三件套依赖与预检步骤见[宿主依赖与能力边界](docs/HOST_REQUIREMENTS.md)。
+
+**已知限制与交付范围** 逐条列在[已知限制](docs/KNOWN_LIMITATIONS.md)（含8项P2、字号与版面边界、科学审核边界）与[交付包合同](docs/DELIVERY_PACKAGE.md)（交付数量由正式请求与适用性决定；49项仅为历史UniPert案例数量）。
+
 ## 科研准确性、版权与许可
 
 AI辅助不能取代研究者的科学审查。来源定位成功、统计关联、结构差异、作者假说及因果验证必须分别表述。未取得或未核实的补充材料不能宣称已读，样本量、重复、统计与结果不能补造。论文论证顺序不冒充实际实验历史。
@@ -138,4 +194,30 @@ AI辅助不能取代研究者的科学审查。来源定位成功、统计关联
 
 ## 变更与版本历史
 
-[CHANGELOG](CHANGELOG.md) · [发布说明](RELEASE_NOTES_v1.1.0.md) · [测试边界](TESTING.md) · [长期方向](ROADMAP.md)
+[CHANGELOG](CHANGELOG.md) · [发布说明](RELEASE_NOTES_v1.1.0.md) · [测试与验收边界](TESTING.md) · [已知限制](docs/KNOWN_LIMITATIONS.md) · [交付包合同](docs/DELIVERY_PACKAGE.md) · [宿主依赖](docs/HOST_REQUIREMENTS.md) · [长期方向](ROADMAP.md)
+
+
+## 正式发布包身份复核
+
+目录名、ZIP名和Git HEAD不能代替实际文件身份。请用本候选的同一工具复核解压后的Skill根目录；输出JSON保存在候选目录外，避免把结果本身再纳入候选。
+
+```text
+python -B scripts/candidate_fingerprint.py --root <解压后的paper-figure-story目录>
+python -B scripts/candidate_fingerprint.py --zip <候选ZIP> --zip-root paper-figure-story
+```
+
+两次输出的`files`、`file_count`及`aggregate_sha256`必须一致。算法沿用rc.2正式清单：根相对POSIX路径排序，每行`路径 空格 文件SHA256`，以UTF-8、LF连接且末行不追加换行，再做SHA-256；仅排除Office的`~$*`锁文件。ZIP校验同时读取CRC与实际内容。当前为正式v1.1.1版本；首次G5盲测失败和科学PARTIAL记录不因工程修复改判。
+
+
+## 正式v1.1.1能力与验证边界
+
+- portable路径已验证；建议先选择该路径并按INSTALL/宿主文档预检。Windows Office导出已在独立验收机器验证，不代表所有机器均已测试。
+- Artifact宿主路径为NOT_TESTED；普通Figure主稿若依赖Artifact，须先验证宿主API与真实创建/导出，不得由portable成功推定宿主可用。
+- 本次Full端到端复验复用已有科研模型及相关输入，不是“仅输入PDF即可全自动完成所有科学建模”的独立验证。M1、来源和解释由执行Agent依据论文登记与审核。
+- 本案例科学终审PARTIAL，贡献核心审阅NOT_ASSESSED；工程Full不能升级科学审阅。
+- Source Data未完整获得；多文档Supplementary一级来源登记存在限制，不能宣称补充材料科学来源完整闭环。
+- Logic_B是独立可缩放大画布，不适合直接缩印A4；汇报使用可读局部视图。
+- 297项测试经过独立复验，其中依赖的50项私有夹具文件不随公开ZIP分发（不是指只有50项测试）；普通用户不能仅凭公开ZIP复现完整维护回归。可执行公开合成测试，但不能冒充297项门禁。
+- 旧版Info-ZIP可能使中文文件名乱码；推荐Windows原生Expand-Archive或Python zipfile解压，解压后核对逐文件SHA。
+- 已接受的非阻断排版瑕疵（P8/P15换行、P14句号孤行、索引短续表留白）列入v1.1.2待办，不影响本次原生内容读取；不因此重开排版引擎开发。
+- 正式发布身份以v1.1.1 Tag与Release资产SHA为准。

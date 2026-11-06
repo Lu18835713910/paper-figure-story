@@ -41,7 +41,12 @@ async function scaffold(template,count,build){
 }
 
 export async function renderEvidenceProducts(o){
- for(const k of ['network','plan','output-dir','build-dir','python','artifact-module','presentation-skill'])if(!o[k])throw Error('Missing --'+k);
+ for(const k of ['network','plan','output-dir','python'])if(!o[k])throw Error('Missing --'+k);
+ if(!o['artifact-module']||!o['presentation-skill']||!(await fs.stat(o['artifact-module']).catch(()=>null))||!(await fs.stat(path.join(o['presentation-skill'],'container_tools/artifact_tool_utils.mjs')).catch(()=>null))){
+   const out=mustRun(o.python,[path.join(HERE,'render_logic.py'),'--network',o.network,'--plan',o.plan,'--output-dir',o['output-dir'],...(o.metadata?['--metadata',o.metadata]:[]),...(o.preview?['--development-preview']:[])]);
+   return {backend:'portable-python-pptx',result:out.trim()};
+ }
+ if(!o['build-dir'])throw Error('Missing --build-dir for optional Artifact backend');
  if(!o.preview)throw Error('Independent scientific review is incomplete; explicit --development-preview required.');
  process.env.RUNTIME_NODE_MODULES ||= path.resolve(path.dirname(o['artifact-module']),'../../..');
  const net=JSON.parse(await fs.readFile(o.network,'utf8')),plan=JSON.parse(await fs.readFile(o.plan,'utf8'));
@@ -105,7 +110,7 @@ export async function renderEvidenceProducts(o){
        narrative_arrows:(scene.elements||[]).filter(x=>x.kind==='down_arrow').map(x=>({id:x.id,identity:'presentation'})),
        scientific_edges_added:0,figure_ids:scene.figure_ids,coverage:scene.coverage,notes:scene.notes,formal_ready:false,
        ...(scene.logic_snapshot?{logic_snapshot:scene.logic_snapshot,source_logic_node_ids:scene.source_logic_node_ids,source_logic_relation_ids:scene.source_logic_relation_ids}: {})});
-     slide.speakerNotes.text=humanSpeakerNotes(scene,net,plan.profile);
+     slide.speakerNotes.text=humanSpeakerNotes({...scene,logic_snapshot:scene.logic_snapshot||plan.logic_snapshot},net,plan.profile);
    }
    const auditRoot=path.join(workspace,'audit');await fs.mkdir(auditRoot,{recursive:true});
    await fs.writeFile(path.join(auditRoot,product.kind+'_'+plan.profile+'.json'),JSON.stringify({version:'pfs-machine-notes-1',network_snapshot:net.snapshot,inputs:net.inputs,pages:machinePages},null,2));

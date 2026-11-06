@@ -61,6 +61,10 @@ def validate_guidance(network, guidance):
     if overview['title_id'] not in records or overview['limit_id'] not in records:
         raise ValueError('GUIDANCE_OVERVIEW_TEXT')
     nodes = {n['id']: n for n in overview['nodes']}
+    if len(nodes) != len(overview['nodes']):
+        raise ValueError('GUIDANCE_DUPLICATE_NODE')
+    if len({e['id'] for e in overview['edges']}) != len(overview['edges']):
+        raise ValueError('GUIDANCE_DUPLICATE_EDGE')
     for n in nodes.values():
         if n['text_id'] not in records:
             raise ValueError('GUIDANCE_NODE_TEXT')

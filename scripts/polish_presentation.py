@@ -53,7 +53,7 @@ def declared_panels(text):
  # A literal panel claim is a requirement to check, never proof that the panel
  # exists. Without a source map the result is UNRESOLVED, not fabricated OCR.
  out=[]
- for m in re.finditer(r'(?:Figure|Fig\.?)\s*(\d+)\s*([A-Ha-h])(?:\s*[–—-]\s*([A-Ha-h]))?\b',text,re.I):
+ for m in re.finditer(r'(?:Figure|Fig\.?)\s*(\d+)\s*([A-Za-z])(?:\s*[–—-]\s*([A-Za-z]))?\b',text,re.I):
   first=ord(m[2].upper());last=ord((m[3] or m[2]).upper())
   if first>last:continue
   for letter in range(first,last+1):
@@ -101,14 +101,35 @@ def audit_input(path,context=None):
   mapped=[]
   for im in images:
    asset=next((a for a in context.get('assets',[]) if a.get('sha256')==im['sha256']),None)
-   if asset is None:continue
+   if asset is None:
+    issues.append(dict(category='Figure Integrity',code='FIGURE_ASSET_UNREGISTERED',shape=im['id'],status='BLOCKED'));continue
+   if asset.get('role')=='decorative':continue
+   if asset.get('role')=='logic_diagram':
+    try:
+     import research_logic as rl
+     m=asset['logic_model'];model=rl.load(m['path'])
+     if rl.file_sha(m['path'])!=m['sha256'] or model['snapshot']!=asset['logic_snapshot'] or not rl.validate_model(model)['valid']:raise ValueError('LOGIC_MODEL_DRIFT')
+    except (OSError,KeyError,ValueError):issues.append(dict(category='Figure Integrity',code='LOGIC_DIAGRAM_SOURCE_BLOCKED',shape=im['id'],status='BLOCKED'))
+    continue
+   if not context.get('figure_registry') and asset.get('role')!='decorative':issues.append(dict(category='Figure Integrity',code='FIGURE_SOURCE_MAPPING_REQUIRED',shape=im['id'],status='BLOCKED'))
+   if context.get('figure_registry'):
+    from figure_assets import validate_asset
+    record=next((a for a in context['figure_registry'].get('assets',[]) if a.get('sha256')==im['sha256']),None)
+    checked=validate_asset(record or {})
+    if not checked['valid']:issues.append(dict(category='Figure Integrity',code='FIGURE_FIDELITY_BLOCKED',shape=im['id'],status='BLOCKED'))
+    elif record.get('panel_mapping_status') not in ['CHECKED','AGENT_LABELS_CHECKED']:
+     issues.append(dict(category='Figure Integrity',code='PANEL_MAPPING_UNRESOLVED',shape=im['id'],status='REVIEW_REQUIRED',detail='Authority registry has not completed panel review; context cannot upgrade it.'))
    bbox=asset.get('bbox_px',[0,0,*im['pixels']]);x,y,xx,yy=bbox;v=im['crop'];visible=[x+(xx-x)*v[0],y+(yy-y)*v[1],x+(xx-x)*v[2],y+(yy-y)*v[3]]
+   if asset.get('panel_mapping_status')!='CHECKED' or not asset.get('panels') or 'all' in asset.get('panels',[]):
+    issues.append(dict(category='Figure Integrity',code='PANEL_MAPPING_UNRESOLVED',shape=im['id'],status='REVIEW_REQUIRED',detail='Source pixels do not prove fine panel mapping; a citation-only exclusion cannot waive an unreviewed asset.'))
    for panel in asset.get('panels',[]) if asset.get('panel_mapping_status')=='CHECKED' else []:
     if panel!='all':mapped.append(panel)
    for region in asset.get('critical_regions',[]):
     a,b,c,d=region['bbox_px']
     if not (visible[0]<=a and visible[1]<=b and visible[2]>=c and visible[3]>=d):issues.append(dict(category='Figure Integrity',code='CRITICAL_REGION_CLIPPED',shape=im['id'],region=region['id'],status='REVIEW_REQUIRED'))
-  expected=list(dict.fromkeys(hint.get('expected_panels',[])+declared_panels(text)))
+  # An explicit display plan distinguishes visible evidence from a citation to
+  # another panel. Without it, literal panel claims remain conservative hints.
+  expected=list(dict.fromkeys(hint.get('expected_panels',declared_panels(text) if images else [])))
   missing=[x for x in expected if x not in mapped]
   if missing:issues.append(dict(category='Figure Integrity',code='PANEL_MAPPING_UNRESOLVED',panels=missing,status='REVIEW_REQUIRED',detail='Missing or not registered; no OCR/semantic verification is claimed.'))
   if hint.get('scientific_image') and not images:issues.append(dict(category='Figure Integrity',code='MISSING_FIGURE',status='REVIEW_REQUIRED'))
@@ -381,7 +402,7 @@ def _legacy_polish(input_path,outdir,profile='balanced',context=None,plan=None,b
  final_context['slides']=[dict(h,slide=newparts.index(parts[int(h['slide'])-1])+1) for h in context.get('slides',[])]
  post=audit_input(final,final_context);save(out/'post_diagnosis.json',post)
  auto_issues=[dict(slide=r['slide'],**v) for r in (after or {}).get('rendered',[]) for v in r['issues']]
- auto_issues += [dict(slide=p['slide'],**v) for p in post['slides'] for v in p['issues'] if v['code'] in {'OFF_CANVAS','IMAGE_ASPECT','CRITICAL_REGION_CLIPPED','MISSING_FIGURE','PANEL_MAPPING_UNRESOLVED','ISOLATED_PUNCTUATION'}]
+ auto_issues += [dict(slide=p['slide'],**v) for p in post['slides'] for v in p['issues'] if v['code'] in {'OFF_CANVAS','IMAGE_ASPECT','CRITICAL_REGION_CLIPPED','MISSING_FIGURE','PANEL_MAPPING_UNRESOLVED','ISOLATED_PUNCTUATION','FIGURE_ASSET_UNREGISTERED','FIGURE_SOURCE_MAPPING_REQUIRED','FIGURE_FIDELITY_BLOCKED','LOGIC_DIAGRAM_SOURCE_BLOCKED'}]
  def resolved(page,issue):
   ids=plan.get('resolves',{}).get(str(page)+':'+issue['code'],[])
   performed=[a for a in actions if a['id'] in ids]

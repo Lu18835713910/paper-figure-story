@@ -1,0 +1,517 @@
+{
+  "type": "object",
+  "required": [
+    "version",
+    "source_pdf",
+    "file_sha256",
+    "page_count",
+    "reading_status",
+    "methods_task_detection",
+    "result_mapping_status",
+    "article_type",
+    "formal_ready",
+    "reading_record",
+    "sources",
+    "facets"
+  ],
+  "properties": {
+    "version": {
+      "const": "pfs-scientific-index-1"
+    },
+    "formal_ready": {
+      "const": false
+    },
+    "reading_status": {
+      "enum": [
+        "PENDING",
+        "AVAILABLE_CONTENT_READ"
+      ]
+    },
+    "methods_task_detection": {
+      "enum": [
+        "PENDING",
+        "COMPLETE_AVAILABLE"
+      ]
+    },
+    "result_mapping_status": {
+      "enum": [
+        "PENDING",
+        "MAPPED_WITH_GAPS"
+      ]
+    },
+    "facets": {
+      "type": "object",
+      "required": [
+        "background_gap",
+        "core_question",
+        "hypotheses",
+        "tasks",
+        "purpose",
+        "materials",
+        "groups_controls",
+        "conditions",
+        "methods",
+        "results",
+        "author_interpretation",
+        "limitations"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "background_gap": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "core_question": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "hypotheses": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "tasks": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "purpose": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "materials": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "groups_controls": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "conditions": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "methods": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "results": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "author_interpretation": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "limitations": {
+          "type": "object",
+          "required": [
+            "status",
+            "text",
+            "sources"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "PARTIAL",
+                "CHECKED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "source_pdf": {
+      "type": "string",
+      "minLength": 1
+    },
+    "file_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "page_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "article_type": {
+      "enum": [
+        "unknown",
+        "original_research",
+        "methods_or_model",
+        "resource_atlas",
+        "review",
+        "perspective",
+        "editorial_or_voices"
+      ]
+    },
+    "reading_record": {
+      "type": "object",
+      "required": [
+        "actor",
+        "basis",
+        "scope"
+      ],
+      "properties": {
+        "actor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "basis": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "sha256"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "document_sha256",
+          "sha256",
+          "excerpt_sha256",
+          "document_id",
+          "path",
+          "excerpt",
+          "source_status",
+          "physical_page",
+          "start",
+          "end"
+        ],
+        "properties": {
+          "document_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "excerpt_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "document_id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "excerpt": {
+            "type": "string"
+          },
+          "source_status": {
+            "type": "string"
+          },
+          "physical_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "start": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PFS source-bound scientific index"
+}
