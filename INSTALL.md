@@ -25,12 +25,12 @@ Copy-Item -Recurse "$env:TEMP\pfs_rc\paper-figure-story" $skillTarget
 
 已有版本先移到Skills目录以外的备份位置，**勿静默覆盖或保留两个同名Skill**：同名多版本会让人调用到旧版却不自知。安装后在新会话调用`$paper-figure-story`，并核对`VERSION`文件为`1.1.1`。
 
-## 固定Tag安装（v1.1.0 及更早）
+## 固定Tag安装与回退
 
 ```powershell
 $skillTarget = Join-Path $env:USERPROFILE '.codex/skills/paper-figure-story'
 if (Test-Path -LiteralPath $skillTarget) { throw '目标已存在：请先备份到Skills目录以外。' }
-git clone --branch v1.1.0 --single-branch https://github.com/Lu18835713910/paper-figure-story.git $skillTarget
+git clone --branch v1.1.1 --single-branch https://github.com/Lu18835713910/paper-figure-story.git $skillTarget
 ```
 
 历史版将`v1.1.0`替换为`v1.0.0`。仓库根目录就是Skill内容，clone到目标后不要再套一层paper-figure-story。固定Tag只在实际发布后可用。
@@ -39,7 +39,7 @@ git clone --branch v1.1.0 --single-branch https://github.com/Lu18835713910/paper
 
 ## 环境与依赖
 
-Python 3.10+（本候选实际验证环境为 **CPython 3.13.14 / Windows**）；依赖按`python -m pip install -r requirements.txt`安装：python-pptx、Pillow、pdfplumber、python-docx、lxml、PyMuPDF。`requirements.txt`已给出**本轮实测通过的最低版本**，更低版本未经验证。
+Python 3.10+（已记录的维护验收环境为 **CPython 3.13.14 / Windows**）；依赖按`python -m pip install -r requirements.txt`安装：python-pptx、Pillow、pdfplumber、python-docx、lxml、PyMuPDF。`requirements.txt`已给出**本轮实测通过的最低版本**，更低版本未经验证。
 
 Word/PPT处理使用本地已安装Microsoft Office；字体为Microsoft YaHei与Times New Roman。Codex桌面的load_workspace_dependencies可提供Node及Artifact Tool；它们不随本包重分发，普通Python环境不能据此承诺已具备PPT渲染能力。
 
@@ -104,19 +104,19 @@ build_research_workbook.py --reader可生成短句/对照表/图相邻的DOCX手
 
 ## 许可与版本边界
 
-个人非商业使用｜源码可查看；不是OSI开源许可。完整授权见LICENSE。原图、PDF、Office、字体和用户资料的权利不由本包转授。v1.0历史原代码不修补，已知演示缺图等限制见历史Release说明。本候选的8项P2、字号/版面边界与科学审核边界见[已知限制](docs/KNOWN_LIMITATIONS.md)。
+个人非商业使用｜源码可查看；不是OSI开源许可。完整授权见LICENSE。原图、PDF、Office、字体和用户资料的权利不由本包转授。v1.0历史原代码不修补，已知演示缺图等限制见历史Release说明。历史案例与当前已披露的字号/版面及科学审核边界见[已知限制](docs/KNOWN_LIMITATIONS.md)。
 
 
-## 解压后的候选身份核对
+## 解压后的正式包身份核对
 
-先在解压后的`paper-figure-story`根目录执行下列只读命令。核对结果与候选随包提供、存放在目录外的文件Manifest；不得只核对VERSION字符串。
+先在解压后的`paper-figure-story`根目录执行下列只读命令。核对结果与Release提供、存放在目录外的文件Manifest；不得只核对VERSION字符串。
 
 ```text
 python -B scripts/candidate_fingerprint.py --root .
 python -B scripts/candidate_fingerprint.py --zip <原始ZIP完整路径> --zip-root paper-figure-story
 ```
 
-包装目录`paper-figure-story/`只在ZIP比较时按显式参数去除。嵌套多一层、乱码改名、成员缺失、CRC损坏或内容SHA变化都需要先调查；不要自行修改文件或覆盖现有安装来“修正”身份。具体聚合算法见README的“候选身份复核”。本轮没有执行安装、覆盖或正式发布。
+包装目录`paper-figure-story/`只在ZIP比较时按显式参数去除。嵌套多一层、乱码改名、成员缺失、CRC损坏或内容SHA变化都需要先调查；不要自行修改文件或覆盖现有安装来“修正”身份。具体聚合算法见README的“正式发布包身份复核”。正式Release附件已发布；安装前应核对当前SHA，勿覆盖未备份的旧安装。
 
 
 ## 正式v1.1.1能力与验证边界
@@ -131,3 +131,6 @@ python -B scripts/candidate_fingerprint.py --zip <原始ZIP完整路径> --zip-r
 - 旧版Info-ZIP可能使中文文件名乱码；推荐Windows原生Expand-Archive或Python zipfile解压，解压后核对逐文件SHA。
 - 已接受的非阻断排版瑕疵（P8/P15换行、P14句号孤行、索引短续表留白）列入v1.1.2待办，不影响本次原生内容读取；不因此重开排版引擎开发。
 - 正式Tag、Release及ZIP SHA共同标识本版本。
+
+
+Tag v1.1.1保留首次发布快照，不移动旧Tag。本次仅文档勘误；最新说明见main及当前Release ZIP，功能文件与首发版本相同。

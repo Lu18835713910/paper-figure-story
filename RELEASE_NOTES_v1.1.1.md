@@ -21,3 +21,8 @@
 ## 本次公开分发
 
 本次更新中文README、作者角色和最终真实产物GIF，原软件功能文件与已验收正式基线逐字节相同。第三方论文Figure未包含在新展示中，Figure Story仅展示实际讲述区；见docs/images/v1.1.1/ASSET_PROVENANCE.md。GitHub自动Source code ZIP是Tag仓库快照；独立Skill ZIP以随附FILE_MANIFEST为受管文件身份，不能把两类ZIP的SHA视为相同。297项回归和Full引用rc.4独立验收，未声称本新ZIP重跑。
+
+
+## 2026-11-06 文档勘误
+
+清除当前README中Tag未创建、RC安装与旧升级目标残留，明确portable和Artifact能力边界，同步INSTALL/SKILL。仅Markdown变化，所有功能文件与首次发布完全一致。v1.1.1 Tag保持首发快照不移动；main和本Release附件包含文档勘误版，当前ZIP SHA以随附清单为准。GitHub自动Source code ZIP仍对应原Tag，不等同于更新后的Skill分发ZIP。297项与Full证据仍继承rc.4，未因本次文档修改重新执行。
