@@ -38,6 +38,9 @@ def validate_model(model,network=None,verify_files=True):
     if network is not None:need(n['snapshot']==network['snapshot'],'LOGIC_NETWORK_MISMATCH')
     need(n['snapshot']==model.get('network_snapshot'),'LOGIC_NETWORK_DRIFT')
     index=load(model['inputs']['scientific_index']['path'])
+    if index.get('version')=='pfs-scientific-index-1':
+        from scientific_index import validate as validate_index
+        for issue in validate_index(index)['errors']:need(False,issue)
     need(index.get('reading_status')=='AVAILABLE_CONTENT_READ','READING_FIRST_REQUIRED')
     need(index.get('methods_task_detection')=='COMPLETE_AVAILABLE','METHODS_FIRST_REQUIRED')
     need(index.get('result_mapping_status')=='MAPPED_WITH_GAPS','RESULT_MAPPING_FIRST_REQUIRED')

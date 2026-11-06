@@ -16,6 +16,8 @@ export function humanSpeakerNotes(scene,network,profile){
    .map(([key,f])=>e.experiment_id+' / '+key+'：'+clean(f.value)+'（原文冲突待核）'));
  const restrictions=[...new Set([...limits.map(e=>clean(e.text)),...displayLimits,...statements.filter(s=>s.role==='limitation').map(s=>clean(s.text)),...inventoryConflicts])];
  const lines=['本页问题：'+clean(scene.title)];
+ const snapshot=scene.logic_snapshot||scene.notes?.logic_model_snapshot;
+ if(snapshot)lines.push('模型快照：'+snapshot);
  if(terms.length)lines.push('对象与术语：'+terms.map(e=>clean(e.text)).join('；'));
  if(methods.length)lines.push('方法与对照：'+methods.slice(0,3).join('；'));
  if(body.length){lines.push('讲述顺序：');body.forEach((e,i)=>lines.push((i+1)+'．'+clean(e.text)));}
@@ -23,6 +25,7 @@ export function humanSpeakerNotes(scene,network,profile){
  if(restrictions.length)lines.push('证据边界：'+restrictions.join('；'));
  if(scene.notes?.logic_relations?.length)lines.push('研究衔接：'+scene.notes.logic_relations.map(e=>e.label+'：'+e.rationale+' 边界：'+e.alternatives).join('\n'));
  if(scene.product==='B2')lines.push('本页仅为该Experiment ID的分页；未知n与重复仍待核，不能按散点、粒子、泳道或页数推算。');
+ if(scene.notes?.speaker_script)lines.push('补充讲述：'+scene.notes.speaker_script);
  lines.push('来源：'+clean(scene.citation));
  lines.push('来源索引：'+(scene.source_statement_ids||[]).slice(0,6).join('，')+'；完整映射见同名独立audit JSON。');
  lines.push('审核：来源按已标状态保留；未核事实、作者假说与汇报连接分别对待。');

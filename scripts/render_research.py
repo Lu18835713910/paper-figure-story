@@ -9,8 +9,10 @@ import plan_research
 
 def save(p,v):p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n','utf-8')
 def main(argv=None):
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('knowledge',type=Path);p.add_argument('--assets',required=True,type=Path);p.add_argument('--outdir',required=True,type=Path);p.add_argument('--profile',choices=['quick','balanced','full','all'],default='balanced');p.add_argument('--template',type=Path);p.add_argument('--template-mode',choices=['auto','tagged','native'],default='auto');p.add_argument('--node',default=shutil.which('node'));p.add_argument('--artifact-module',required=True);p.add_argument('--plan-only',action='store_true')
- a=p.parse_args(argv);started=time.monotonic();script=Path(__file__).resolve().parent;m=json.loads(a.knowledge.read_text('utf-8'));assets=json.loads(a.assets.read_text('utf-8'));projector=PresentationProjector(m,assets,verify_files=True,base_dir=a.knowledge.parent)
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('knowledge',type=Path);p.add_argument('--assets',required=True,type=Path);p.add_argument('--outdir',required=True,type=Path);p.add_argument('--profile',choices=['quick','balanced','full','all'],default='balanced');p.add_argument('--template',type=Path);p.add_argument('--template-mode',choices=['auto','tagged','native'],default='auto');p.add_argument('--node',default=shutil.which('node'));p.add_argument('--artifact-module');p.add_argument('--plan-only',action='store_true')
+ a=p.parse_args(argv)
+ if not a.plan_only and (not a.artifact_module or not Path(a.artifact_module).is_file() or not a.node):raise ProjectionError('HOST_BACKEND_REQUIRED','This adaptive path needs its optional host; no legacy scaffold is delivered as a finished PPT. Use run_pfs render-products for portable registered logic views.')
+ started=time.monotonic();script=Path(__file__).resolve().parent;m=json.loads(a.knowledge.read_text('utf-8'));assets=json.loads(a.assets.read_text('utf-8'));projector=PresentationProjector(m,assets,verify_files=True,base_dir=a.knowledge.parent)
  plans=projector.project_all() if a.profile=='all' else {a.profile:projector.project(a.profile)};results=[]
  # Validate the whole requested batch before authoring the first slide.
  for mode,plan in plans.items():

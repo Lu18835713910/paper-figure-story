@@ -1,0 +1,39 @@
+{
+  "version": "pfs-display-guidance-1",
+  "paper_id": "__CURRENT_NETWORK_PAPER_ID__",
+  "knowledge_sha256": "__CURRENT_KNOWLEDGE_FILE_SHA256__",
+  "formal_ready": false,
+  "records": [
+    {
+      "id": "TITLE",
+      "text": "__SOURCE_BOUND_OVERVIEW_QUESTION__",
+      "source_statement_ids": ["__EXISTING_STATEMENT_ID__"],
+      "source_node_ids": [],
+      "source_spans": [],
+      "semantic_review_status": "PARTIAL"
+    },
+    {
+      "id": "GROUP_TEXT",
+      "text": "__REVIEWED_TASK_METHOD_AND_FINDING__",
+      "source_statement_ids": ["__EXISTING_STATEMENT_ID__"],
+      "source_node_ids": ["__EXISTING_ENTITY_ID__"],
+      "source_spans": [],
+      "semantic_review_status": "PARTIAL"
+    },
+    {
+      "id": "LIMIT",
+      "text": "__SOURCE_BOUND_EVIDENCE_LIMIT__",
+      "source_statement_ids": ["__EXISTING_LIMITATION_STATEMENT_ID__"],
+      "source_node_ids": [],
+      "source_spans": [],
+      "semantic_review_status": "PARTIAL"
+    }
+  ],
+  "overview": {
+    "title_id": "TITLE",
+    "limit_id": "LIMIT",
+    "nodes": [{"id": "DISPLAY_GROUP", "text_id": "GROUP_TEXT"}],
+    "edges": []
+  },
+  "figure_pages": []
+}

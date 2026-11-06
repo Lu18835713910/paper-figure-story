@@ -386,7 +386,7 @@ def _graph_bounds(slide):
     raise ValueError('自定义模板的logic/route页面需要PFS_GRAPH_AREA插槽；旧版PFS_STAGE_*布局可自动升级。')
 
 
-def _graph_layout(nodes, edges, W, H):
+def _graph_layout(nodes, edges, W, H, detail_min=None):
     # Explicit normalized card-center coordinates preserve purposeful user/story arrangement.
     if all(isinstance(n.get('x'), (int,float)) and isinstance(n.get('y'), (int,float)) for n in nodes):
         for n in nodes:
@@ -421,9 +421,17 @@ def _graph_layout(nodes, edges, W, H):
             for row,nid in enumerate(ids):
                 pos[nid]=(0.5 if cols==1 else col/(cols-1), (row+1)/(len(ids)+1))
     if cols>5 or max_rows>3 or len(nodes)>10:
-        raise ValueError('逻辑图过密：每页建议至多5列、3行、10节点。请依据子问题拆成两页，不要压缩关键科研信息。')
+        raise ValueError('逻辑图过密：每页建议至多5列、3行、10节点。完整网络请用project_research_logic.py生成独立B大画布及主稿总览，再添加局部放大页；局部图不能替代完整B。')
     cw = min(2.55, (W-.30-(cols-1)*.22)/max(1,cols))
     ch = min(1.45, (H-.27-(max_rows-1)*.17)/max(1,max_rows))
+    if detail_min:
+        from layout_preflight import card_stack
+        required=[]
+        for n in nodes:
+            s=card_stack(str(n.get('title') or n.get('label') or ''),str(n.get('detail','')),str(n.get('figure_ref','')),cw,100,detail_min)
+            required.append(s['figure_y']+s['figure_h']+.07)
+        ch=max(ch,max(required,default=ch))
+        if ch>(H-.27-(max_rows-1)*.17)/max(1,max_rows):raise ValueError('DETAIL_MIN_CAPACITY: use complete B and zooms')
     if cw<1.65 or ch<.88:
         raise ValueError('逻辑图节点过多导致字体不可读，请拆页')
     return pos,cw,ch
@@ -454,7 +462,7 @@ def render_argument_graph(slide, record, style=None):
     for shp in list(slide.shapes):
         if shp.name.startswith('PFS_STAGE_') or shp.name.startswith('DECOR_stage') or shp.name.startswith('DECOR_arrow'):
             slide.shapes._spTree.remove(shp.element)
-    pos,cw,ch=_graph_layout(nodes,edges,W,H)
+    pos,cw,ch=_graph_layout(nodes,edges,W,H,(record.get('graph') or {}).get('detail_min'))
     coords={}
     for n in nodes:
         cx=x0+cw/2+.14+(W-cw-.28)*pos[n['id']][0]
@@ -491,10 +499,12 @@ def render_argument_graph(slide, record, style=None):
         # Descriptive links live in their own small labels, not as invented causal arrows.
         lbl=str(e.get('label','')).strip()
         if lbl and abs(xb-xa)>.33:
-            tx=(xa+xb)/2-.48; ty=(ya+yb)/2-.14
+            from presentation_typography import measure
+            lw=max(.24,min(2.0,measure(lbl,8.5)/72+.12));lh=.24
+            tx=(xa+xb)/2-lw/2; ty=(ya+yb)/2-.14
             if e.get('label_y') is not None:ty=y0+H*float(e['label_y'])
-            textbox(slide,'PFS_EDGE_LABEL',max(x0+.03,min(x0+W-.98,tx)),ty,.95,.26,
-                    lbl[:15],size=8.5,color='body',fill='white',align=PP_ALIGN.CENTER,
+            textbox(slide,'PFS_EDGE_LABEL',max(x0+.03,min(x0+W-lw-.03,tx)),ty,lw,lh,
+                    lbl,size=8.5,color='body',fill='white',align=PP_ALIGN.CENTER,
                     style=style,margin=.01)
     for n in nodes:
         cx,cy=coords[n['id']]
@@ -509,13 +519,16 @@ def render_argument_graph(slide, record, style=None):
         fig=str(n.get('figure_ref','')).strip()
         if not title or not detail:
             raise ValueError(f'逻辑图节点{n["id"]}必须有科学问题/发现标题和具体实验/结论说明')
-        textbox(slide,'PFS_GRAPH_NODE_TITLE',x+.11,y+.13,cw-.22,min(.57,ch*.38),title,
+        from layout_preflight import card_stack
+        stack=card_stack(title,detail,fig,cw,ch,(record.get('graph') or {}).get('detail_min',0))
+        textbox(slide,'PFS_GRAPH_NODE_TITLE',x+.11,y+stack['title_y'],cw-.22,stack['title_h'],title,
                 size=12.5 if cw>2 else 11,color='dark',bold=True,style=style)
-        textbox(slide,'PFS_GRAPH_NODE_DETAIL',x+.11,y+.55,cw-.22,max(.31,ch-.79),detail,
+        textbox(slide,'PFS_GRAPH_NODE_DETAIL',x+.11,y+stack['detail_y'],cw-.22,stack['detail_h'],detail,
                 size=10.2 if cw>2 else 9.3,color='body',style=style,valign=MSO_ANCHOR.TOP)
         if fig:
-            textbox(slide,'PFS_GRAPH_FIGREF',x+.1,y+ch-.22,cw-.2,.18,fig,
+            textbox(slide,'PFS_GRAPH_FIGREF',x+.1,y+stack['figure_y'],cw-.2,stack['figure_h'],fig,
                     size=8,color='accent',style=style)
+
 
 
 def validate_framework(record, slide_i):
@@ -840,8 +853,42 @@ def validate_argument_graph(record,slide_i):
         raise ValueError('无连线图必须明确diagram_type是parallel_tracks/comparison/independent_axes')
 
 
+def body_content(record, slide_i):
+    """Resolve the existing body fields for the page's actual named text slot.
+
+    Cover, Figure and graph pages have separate contracts below.  A lead or
+    title does not complete a text/question/conclusion page's body.  Both input
+    spellings remain supported, but conflicting nonempty values are rejected.
+    """
+    kind = record.get('kind')
+    if kind not in ('question','conclusion','technology','text'):
+        return None
+    primary = 'bullets' if kind == 'question' else 'points'
+    secondary = 'points' if primary == 'bullets' else 'bullets'
+    def present(value, field):
+        if value is None or value == [] or value == '':return False
+        if not isinstance(value,(str,list)):
+            raise ValueError(f'PAGE_BODY_TYPE: 第{slide_i}页 /slides/{slide_i-1}/{field}: expected text or list of text')
+        lines = value if isinstance(value,list) else [value]
+        for j,line in enumerate(lines):
+            if not isinstance(line,str):
+                raise ValueError(f'PAGE_BODY_TYPE: 第{slide_i}页 /slides/{slide_i-1}/{field}/{j}: expected text')
+            content = line.strip().strip('•●▪◦·*-–— \t\r\n')
+            if not content or re.fullmatch(r'\d+[.)、]',content):
+                raise ValueError(f'PAGE_BODY_EMPTY: 第{slide_i}页 /slides/{slide_i-1}/{field}/{j}: empty body/bullet')
+        return bool(lines)
+    a,b = record.get(primary),record.get(secondary)
+    has_a,has_b = present(a,primary),present(b,secondary)
+    if has_a and has_b and a != b:
+        raise ValueError(f'PAGE_BODY_CONFLICT: 第{slide_i}页 /slides/{slide_i-1}/{primary} and {secondary}: choose one body field')
+    if not has_a and not has_b:
+        raise ValueError(f'PAGE_BODY_REQUIRED: 第{slide_i}页 /slides/{slide_i-1}/{primary}: substantive body required (or {secondary})')
+    return a if has_a else b
+
+
 def populate_slide(slide, record, json_path, index, short_citation, allow_missing):
     kind = record['kind']
+    body = body_content(record,index)
     values = {
         'PFS_SECTION': record.get('section', 'RESEARCH PRESENTATION' if kind=='cover' else f'FIGURE STORY  /  {kind.upper()}'),
         'PFS_TITLE': record.get('title',''),
@@ -849,8 +896,8 @@ def populate_slide(slide, record, json_path, index, short_citation, allow_missin
         'PFS_CITATION': record.get('citation', short_citation),
         'PFS_NUMBER': f'{index:02d}',
         'PFS_LEAD': record.get('lead', ''),
-        'PFS_BULLETS': record.get('bullets', []),
-        'PFS_POINTS': record.get('points', []),
+        'PFS_BULLETS': body if kind=='question' else record.get('bullets', []),
+        'PFS_POINTS': body if kind in ('conclusion','technology','text') else record.get('points', []),
         'PFS_QUESTION': record.get('question', ''),
         'PFS_DESIGN': record.get('design', ''),
         'PFS_RESULT': ('\n'.join(filter(None,[record.get('result',''), record.get('takeaway','')]))),
@@ -862,6 +909,14 @@ def populate_slide(slide, record, json_path, index, short_citation, allow_missin
         if shape.name in values:
             val = values[shape.name]
             styled_text(shape, val, is_list=shape.name in ('PFS_BULLETS', 'PFS_POINTS'))
+            prefix={'PFS_LEAD':'lead','PFS_TRANSITION':'transition','PFS_RESULT':'result'}.get(shape.name)
+            if prefix:
+                if record.get(prefix+'_height') is not None:shape.height=Inches(float(record[prefix+'_height']))
+                if record.get(prefix+'_size') is not None:
+                    size=float(record[prefix+'_size'])
+                    if size<8.5:raise ValueError('MINIMUM_READABLE_SLOT_FONT')
+                    for para in shape.text_frame.paragraphs:
+                        for run in para.runs:run.font.size=Pt(size)
     if kind == 'figure' and record.get('story_steps'):
         render_figure_story_steps(slide,record,style=getattr(slide,'_pfs_style',COLORS))
     if kind == 'figure':
@@ -882,6 +937,7 @@ def populate_slide(slide, record, json_path, index, short_citation, allow_missin
     if record.get('lead'):note.append('背景与边界：'+str(record['lead']))
     if record.get('story_steps'):
         note.append('讲述顺序：\n'+'\n'.join(str(i+1)+'．'+str(s['text']) for i,s in enumerate(record['story_steps'])))
+    elif body is not None:note.append('讲述要点：\n'+ ('\n'.join(body) if isinstance(body,list) else body))
     elif record.get('bullets'):note.append('讲述要点：\n'+'\n'.join(map(str,record['bullets'])))
     if record.get('limitation'):note.append('证据边界：'+str(record['limitation']))
     if record.get('transition'):note.append('衔接：'+str(record['transition']))
@@ -896,6 +952,7 @@ def check_input(manifest):
     for i, item in enumerate(manifest['slides'], start=1):
         if item.get('kind') not in VALID_KINDS: raise ValueError(f'第{i}页kind无效: {item.get("kind")}')
         if not str(item.get('title','')).strip(): raise ValueError(f'第{i}页缺少title')
+        body_content(item,i)
         if item['kind']=='framework':
             if item.get('study_map'):validate_study_map(item,i)
             else:validate_framework(item,i)
@@ -912,11 +969,13 @@ def check_input(manifest):
                         raise ValueError(f'第{i}页旧版Figure说明缺少 {need}；推荐改用story_steps讲述链。')
 
 
-def build(json_path, out_path, template, mode, allow_missing):
+def build(json_path, out_path, template, mode, allow_missing, precheck_only=False):
     if Image is None:
         raise RuntimeError('缺少 Pillow：pip install Pillow')
     manifest = json.loads(json_path.read_text(encoding='utf-8'))
     check_input(manifest)
+    from figure_assets import validate_manifest_images
+    validate_manifest_images(manifest,json_path.parent)
     template_path = Path(template) if template else DEFAULT_PATH
     if not template_path.exists() and not template:
         make_default_template(DEFAULT_PATH)
@@ -954,6 +1013,11 @@ def build(json_path, out_path, template, mode, allow_missing):
     else:
         raise ValueError('模板模式仅支持auto/tagged/native')
     for old_id in original_ids: remove_slide(prs,old_id)
+    from layout_preflight import preflight_prs
+    capacity=preflight_prs(prs)
+    if precheck_only:
+        return capacity
+    if manifest.get('enforce_preflight') and not capacity['valid']:raise ValueError('LAYOUT_PREFLIGHT: '+str(capacity['errors']))
     out_path.parent.mkdir(parents=True,exist_ok=True)
     prs.save(str(out_path))
     from apply_script_fonts import apply_fonts
@@ -971,12 +1035,16 @@ def main():
     parser.add_argument('--template-mode',choices=['auto','tagged','native'],default='auto')
     parser.add_argument('--output',type=Path)
     parser.add_argument('--allow-missing-images',action='store_true',help='仅限演示/草稿')
+    parser.add_argument('--precheck',action='store_true',help='Build native objects in memory and report deterministic slot capacity without saving/rendering')
     a=parser.parse_args()
     if a.make_default_template:
         print('Created:', make_default_template(a.make_default_template)); return 0
     if not a.data or not a.output:
         parser.error('生成PPTX需要data JSON与--output；或用--make-default-template')
-    try: build(a.data.resolve(),a.output.resolve(),a.template,a.template_mode,a.allow_missing_images)
+    try:
+        result=build(a.data.resolve(),a.output.resolve(),a.template,a.template_mode,a.allow_missing_images,a.precheck)
+        if a.precheck:
+            print(json.dumps(result,ensure_ascii=False));return 0 if result['valid'] else 2
     except Exception as e:
         print('ERROR:',e,file=sys.stderr);return 1
     return 0

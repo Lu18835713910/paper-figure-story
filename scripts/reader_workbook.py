@@ -52,8 +52,8 @@ def build_reader(model_path,manifest_path,output,annotations_path,sample=False):
  def teaching(key):
   row=next(r for r in a['rows'] if r.get('key')==key);doc.add_heading(row['title'],2);p(row['text']);p(source(row['source_ids']),'Caption')
  def branch(group):
-  sec=doc.add_section(WD_SECTION_START.NEW_PAGE);page_setup(sec,group.get('page_width',16.54),group.get('page_height',11.69));doc.add_heading(group['title'],1)
-  diagram(group['view'],group.get('page_width',16.54)-1.2,group.get('diagram_height',7.5));teaching(group['teaching_key'])
+  sec=doc.add_section(WD_SECTION_START.NEW_PAGE);page_setup(sec);doc.add_heading(group['title'],1)
+  diagram(group['view'],10.4,4.1);teaching(group['teaching_key'])
   sec=doc.add_section(WD_SECTION_START.NEW_PAGE);page_setup(sec)
   fresh_section[0]=True
  def cards(eids,title):
@@ -94,8 +94,12 @@ def build_reader(model_path,manifest_path,output,annotations_path,sample=False):
    if group.get('view'):
     branch(group)
    for k in range(0,len(group['experiment_ids']),2):cards(group['experiment_ids'][k:k+2],'第三部分 '+group['card_title'])
-  # A poster page keeps detailed-node body type readable at its native scale.
-  sec=doc.add_section(WD_SECTION_START.NEW_PAGE);page_setup(sec,20,17);doc.add_heading('第四部分 不同实验怎样互相支持',1);diagram('B',18.5,14.7)
+  # A regular-page overview links to the unchanged editable poster.
+  sec=doc.add_section(WD_SECTION_START.NEW_PAGE);page_setup(sec);doc.add_heading('第四部分 不同实验怎样互相支持',1);diagram('B',10.4,4.65)
+  poster=out.parent/'Complete_B.editable.pptx'
+  if poster.exists() and rl.file_sha(poster)!=graphs['B']['pptx_sha256']:raise ValueError('COMPANION_OUTPUT_EXISTS')
+  if Path(graphs['B']['pptx']).resolve()!=poster.resolve():shutil.copy2(graphs['B']['pptx'],poster)
+  p('本页只作完整网络总览；节点、来源及关系标签请在独立原尺寸可编辑大画布中放大阅读。');hyperlink(p('完整B大画布：'),poster.name,poster.name)
   sec=doc.add_section(WD_SECTION_START.NEW_PAGE);page_setup(sec);doc.add_heading('把证据与解释分开读',1)
   relation_rows=[]
   for rec in a['relationships']:

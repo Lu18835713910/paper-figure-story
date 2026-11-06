@@ -1,0 +1,33 @@
+# Distribution guards for Paper Figure Story.
+#
+# 1. Internal audit material must never reach an archive export. The two
+#    directories below are removed from the 1.1.1-rc.1 candidate; the rules
+#    stay here so a future working branch cannot silently reintroduce them.
+# 2. Generated papers, deliverables and archives are local working output.
+#    Only the two shipped demo decks are whitelisted in .gitignore.
+#
+# git has no "export only these paths" rule, so the authoritative distribution
+# list is the release whitelist generated with the package
+# (dist/RC_FILE_MANIFEST.txt, 140 paths + SHA256). export-ignore below is the
+# second line of defence, not the whitelist itself.
+
+_g1_validation/** export-ignore
+G1_REVIEW/** export-ignore
+
+*.pdf export-ignore
+*.docx export-ignore
+*.zip export-ignore
+output/** export-ignore
+outputs/** export-ignore
+_cache/** export-ignore
+cache/** export-ignore
+__pycache__/** export-ignore
+*.py[cod] export-ignore
+.venv/** export-ignore
+venv/** export-ignore
+.env export-ignore
+.env.* export-ignore
+.idea/** export-ignore
+.vscode/** export-ignore
+.DS_Store export-ignore
+Thumbs.db export-ignore

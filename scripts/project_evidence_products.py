@@ -87,8 +87,9 @@ def _citation(network, metadata, figures, statements):
     labels = {f['id']:f.get('label', f['id']) for f in network['figures']}
     author = metadata.get('citation_short', network['paper'].get('title','来源论文'))
     doi = metadata.get('doi') or '待核实'
-    sources = '、'.join(labels.get(f, f) for f in figures) or ('PDF p.' + ','.join(map(str, _source_pages(statements))))
-    return f'{author} · {sources} · DOI {doi}'
+    pages=_source_pages(statements)
+    sources = '、'.join(labels.get(f, f) for f in figures) or ('PDF p.' + ','.join(map(str,pages)) if pages else '')
+    return ' · '.join(x for x in [author,sources,'DOI '+doi] if x)
 
 def _notes(network, statements, question, meta, figure_ids):
     return {'scientific_question':question, 'paper_type':network['paper']['paper_type'],
@@ -457,7 +458,18 @@ def overview(network,profile,meta):
     # Cyclic/cross-comparison nodes stay explicit in a side rank; no edge dropped.
     maxrank=max(rank.values(),default=0);cols=min(6,max(2,maxrank+1));buckets={c:[] for c in range(cols)}
     for n in ids:buckets[min(cols-1,int(rank[n]*(cols-1)/max(1,maxrank)))].append(n)
-    if max(map(len,buckets.values()))>6:raise ValueError('A_NEEDS_GUIDANCE: source graph needs meaningful aggregation')
+    if max(map(len,buckets.values()))>6:
+        raise ValueError(
+            'A_NEEDS_GUIDANCE: default overview has a rank bucket of '
+            +str(max(map(len,buckets.values())))+' source nodes (capacity 6). '
+            'Keep the evidence network intact. After source-bound contribution review, '
+            'provide --research-logic research_logic.json (existing inputs/network, '
+            'scientific_index, sources, nodes/edges, core and snapshot), or '
+            '--guidance display.guidance.json (records with statement IDs/exact cache '
+            'spans and overview title_id/limit_id/nodes/edges). '
+            'See references/a_overview_recovery.md and examples/a_overview_guidance/. '
+            'Reuse --cache-dir and retry --plan-only in a NEW --outdir; do not '
+            'remove contributions, change scientific edges or shrink fonts to bypass capacity.')
     q,qids=_question(network);els=[textbox('A_title',wrap(q,1160,29),60,64,1160,67,29,True,statement_ids=qids)];positions={};cw=(1160-26*(cols-1))/cols
     for col,items in buckets.items():
         gap=15;h=min(100,(455-gap*(len(items)-1))/max(1,len(items)))
@@ -684,6 +696,13 @@ def project_products(network, profile='balanced', metadata=None, template=None, 
                 'formal_ready':False,'review_status':'PARTIAL','automation_boundary':'Agent-adjudicated research logic; display only, no added M1 entities or causal relations.',
                 'input_formats':{'paper':'Reviewed evidence network and source-bound logic','template':'PPTX'},'projection_hash':digest(products),
                 'delivery':copy.deepcopy(delivery),'research_logic':copy.deepcopy(meta['research_logic']),'logic_snapshot':logic['snapshot'],**({'logic_display':copy.deepcopy(meta['logic_display'])} if meta.get('logic_display') else {})}
+    # Validate an explicit model BEFORE trying a default overview/detail which
+    # would be discarded. Default capacity gates still apply when no model is given.
+    logic=None;logic_display=None
+    if meta.get('research_logic'):
+        from project_research_logic import read_model,read_display,build_scene
+        logic=read_model(network,meta)
+        logic_display=read_display(logic,meta)
     g=load_guidance(network,meta)
     figure_scenes=stories(network,profile,meta)
     if g:
@@ -695,22 +714,18 @@ def project_products(network, profile='balanced', metadata=None, template=None, 
             elif not any(f in active for f in s['figure_ids']):merged.append(s)
         figure_scenes=merged
     if profile=='full':figure_scenes+=full_source_context(network,meta)
-    main={'kind':'main','width':1280,'height':720,'slides':[overview(network,profile,meta)]+figure_scenes}
+    first=build_scene(network,logic,'A')['slides'][0] if logic else overview(network,profile,meta)
+    main={'kind':'main','width':1280,'height':720,'slides':[first]+figure_scenes}
     products=[main]
     scope=(delivery or {}).get('scope','deep')
-    if scope in ('with-network','deep'):products.append(detailed(network,profile,meta))
+    if scope in ('with-network','deep'):
+        products.append(build_scene(network,logic,'B',logic_display) if logic else detailed(network,profile,meta))
     if scope=='deep' and network.get('experiment_layer'):
         from experiment_products import build_cards
         cards=build_cards(network,profile,meta)
         if cards:products.append(cards)
         from experiment_products import build_network_canvas
         products.append(build_network_canvas(network,meta))
-    if meta.get('research_logic'):
-        from project_research_logic import read_model,read_display,build_scene
-        logic=read_model(network,meta)
-        products[0]['slides'][0]=build_scene(network,logic,'A')['slides'][0]
-        display=read_display(logic,meta)
-        products=[build_scene(network,logic,'B',display) if p['kind']=='detail' else p for p in products]
     if delivery:
         from presentation_delivery import compose_delivery
         products=compose_delivery(network,products,meta,delivery)
