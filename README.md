@@ -1,205 +1,160 @@
-<div align="center">
+# Paper Figure Story（PFS）
 
-# Paper Figure Story
+**让每张 Figure 都有逻辑，让每项结论都有依据。**
 
-**从论文中蒸馏科研逻辑，构建可追溯的证据关系，生成可解释的科研PPT与学习资料。**
+从论文的科学问题出发，梳理实验设计、观察结果、论证关系与证据边界；生成科研逻辑图、逐 Figure 故事、可编辑汇报材料及学习手册。**v1.2.0 新增 Research Logic Diagnostics（RLD）**，进一步辅助检查科研推理、语言表述和论证结构。
 
-*From Research Papers to Traceable Scientific Logic, Explainable Presentations and Research Learning Materials.*
+![PFS 品牌与真实成果展示](docs/images/v1.1.1/hero.png)
 
-![Paper Figure Story v1.1](docs/images/hero.png)
+**当前正式版本：v1.2.0（已发布）** · quick / balanced / full · 个人非商业使用 · 源码可查看
 
-**v1.1.1（正式版本封包，待负责人批准发布）· quick / balanced / full · 个人非商业使用｜源码可查看**
+[**下载 v1.2.0**](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0) · [安装说明](INSTALL.md) · [本版更新](RELEASE_NOTES_v1.2.0.md) · [RLD 最小示例](examples/minimal_rld/README.md) · [历史版本](CHANGELOG.md)
 
-[快速使用](#安装与快速使用) · [版本选择](#版本选择升级与回退) · [示例](#示例与历史) · [详细宣传海报](docs/images/pfs-v1.1-poster.png)
+> **定位**：PFS 帮助研究者读懂“为什么这样研究、证据如何连接”；RLD 帮助检查“这些推理、措辞与证据是否匹配”。Agent 与研究者需要审核原文，软件结构验证不等于科学事实或因果结论已经获得认证。
 
-</div>
+## 8 秒看看 PFS 的真实成果
 
-PFS是面向科研阅读、文献精读和组会汇报的Agent Skill。它帮助研究者理解文章为什么这样研究、实验如何形成证据、不同Figure之间有哪些真实关系，再将这些理解转为可编辑、可追溯的成果。它不只是把论文内容搬进幻灯片。
+![v1.1.1 已验收的真实产物演示，非自动运行录像](docs/images/v1.1.1/outputs-demo.gif)
 
-## v1.1主要更新
+[查看静态预览](docs/images/v1.1.1/outputs-demo-static.png) · [素材来源与裁切说明](docs/images/v1.1.1/ASSET_PROVENANCE.md)
 
-|能力|用途与实际边界|
-|---|---|
-|科研逻辑蒸馏|整理问题、设计、观察、证据、作者解释和未解决问题；不止于摘要|
-|非单线程科研逻辑图|按来源呈现递进、并行、分叉、比较、互补和汇合；简图与详细大画布PPTX共享身份|
-|逐Figure科研故事|保留原图及panel来源，说明为什么做、怎样比较、实际看到什么和结论边界|
-|可编辑学术PPT|标题、正文、结构图与箭头为原生对象；原论文Figure为可替换图片，图内数据不重绘|
-|Research Logic Workbook|生成科研逻辑拆解学习手册DOCX，配合实际Word导出PDF；不是另写一篇综述|
-|Visual Polish|在科研内容完成后统一视觉、处理连接线与阅读箭头，保留原稿和安全回退|
+*以上为 v1.1.1 阶段的真实展示案例，沿用至 v1.2.0；并非新版本 RLD 自动诊断的录像，也不代表任何论文的科学终审通过。*
 
-## 完整研究工作流
+## v1.2.0 新增：Research Logic Diagnostics（RLD）
 
-当前Agent完整阅读可用正文、Figure legends、Methods与实际取得的补充资料，建立共享科学事实及来源索引；再重建文章的论证关系，生成简要框架、独立详细图、逐Figure汇报及所需学习手册；最后执行Visual Polish与实际预览检查。quick/balanced/full复用同一来源和缓存，不为每档重新读整篇。
+RLD 接收**同一篇论文**已经建立的 Scientific Index、Evidence Network 和 Research Logic，从有源节点与语句派生论证单元，再进行分层诊断。它不是脱离 PFS 的“任意 PDF 一键审稿器”。
 
-**科研理解由使用Skill的Agent执行。** 纯CLI能够索引PDF、验证模型并投影产物；缺少经审核的知识模型时会输出`REVIEWED_KNOWLEDGE_REQUIRED`及Agent交接记录，不会无人辅助证明机制或跳过科学审核。
+```text
+论文全文、Figure、Methods 与可用补件
+          │  Agent 依据原文登记、核对
+          ▼
+ Scientific Index ── Evidence Network ── Research Logic
+          │                    │                │
+          └────────────────────┴────────────────┘
+                               ▼
+                    论证单元（argument_units）
+                               ▼
+        科研逻辑检查 · 语言逻辑检查 · 表达逻辑检查
+                               │
+                               ▼
+               有来源的疑点、归因候选、待核查事项
+               （数值主张可调用单独的可信比较路径）
+```
 
-## 科研逻辑蒸馏
-
-围绕中心科学问题，整理研究背景与缺口、对象及材料、关键对照、方法测量的指标、真实观察、最小可支持结论、作者解释和仍待回答的问题。Methods任务、实验次数、生物学重复、技术重复、细胞/spot/粒子数量分别记录；缺失字段保持未核验状态。
-
-## 非单线程科研逻辑关系图
-
-论文可能有并行支线、独立验证、跨模块比较、共享方法和证据汇合。PFS按实际来源表达这些关系，**不把Fig.1–6机械连成时间线**，也不为美观创造依赖。
-
-这里的“网络”是证据与论证关系图，**不表示使用神经网络模型，也不自动证明因果关系**。简图服务于开场；详细图采用可编辑PPTX大画布及PNG预览。当前没有通用SVG导出器。源于论文、作者解释和汇报组织的联系应分别标注。
-
-## 逐Figure科研故事
-
-每个重要Figure解释：为什么需要这组实验或分析、对象与对照是什么、指标怎样读、panel实际显示什么、支持哪层认识、还有哪些限制。可按真实科学问题拆成多页，不按panel编号机械拆页，也不以一张跨Figure总结代替逐图讲解。
-
-原始Figure是科学证据，图旁短句和箭头负责讲述。所有图像须核对坐标、分组、图例与统计标记；文件存在或SHA正确不等于panel已完成科学审核。
-
-## 可解释、可编辑的学术PPT
-
-默认16:9、学术蓝`#174994`、无机构Logo；中文Microsoft YaHei（微软雅黑），英文及数字Times New Roman。原生标题、文字、框图、连接线可编辑；原始Figure内部文字仍属于栅格图，保持原貌。讲者备注面向科研讲述，机器审计和完整ID另存。
-
-支持用户自定义PPTX模板。新入口支持PFS兼容16:9版式，普通模板可用成熟native/tagged适配；复杂母版/动画的像素级复刻不作承诺。详见[安装与运行](INSTALL.md)。
-
-## Research Logic Workbook
-
-科研逻辑拆解学习手册沿“问题—设计/分析—观察—认识—限制—后续问题”帮助读者学习全文。正文使用短句、对照表、同模型图和必要术语解释；Methods与完整字段可放附录。支持DOCX及实际导出的PDF，图节点在配套PPTX中编辑。它不是普通摘要或论文改写。
-
-## Visual Polish
-
-Visual Polish只决定已确定内容怎样展示得更好：锁定页数/页序、科学内容、Figure/panel分配、节点和边、关系方向/类型、备注、来源与主稿/备份归属，再执行视觉设计、程序编辑和独立QA阶段。
-
-- 科研逻辑连接线可按真实拓扑使用正交折线，不删除或新造关系。
-- 普通阅读引导默认使用模块留白中的**原生竖直向下直线箭头**，清楚可见，禁止L/U形回指；并列解释不自动加箭头。
-- Agent依据真实PNG制定设计计划；无Agent计划时只做`QA_ONLY`，不能声称完成专业重设计。技术通过不代替用户视觉接受或科学终审。
-- 删除的是经明确批准的生成管理标签/纯书目页脚，原文存入audit；实质事实和科学限制不能借美化删掉。失败页可回退。
-
-独立入口及详细合同见[Visual Polish规范](references/visual_polish.md)。
-
-## 三档讲解深度
-
-|模式|目标|适用场景|
+| 诊断方向 | 主要检查什么 | 必须保留的边界 |
 |---|---|---|
-|quick|压缩展开，保留核心问题、关键结果和限制|快速理解|
-|balanced（默认）|平衡逐Figure解释、方法背景与汇报可读性|正式科研汇报、组会|
-|full|更充分展开有源Methods、panel、证据边界和学习资料|深度科研精读|
+| **科研逻辑** | 主张与证据是否对应，干预、对照和读出是否支持所述推理 | 网络中有干预不等于当前结论有因果证据 |
+| **语言逻辑** | 因果断言、假说、相关性、否定与保留语的混用 | 中英语义识别是候选诊断，不是论文错误判决 |
+| **表达逻辑** | 论证链、研究分支、结论与限制的衔接 | 缺失关系可能是 PFS 重建遗漏，不必然是论文缺陷 |
+| **数值与来源核验** | 在可信登记簿中按组别、指标、时期、单位和比较基准复核指定主张 | 报告均值比较不证明统计显著性、实验因果或机制 |
 
-三档区别是深度与展开程度，不是科学准确性；页数由论文与任务决定，不承诺固定页数。
+真实论文回归中，烟草案例从 PFS 工件派生 **15 个论证单元 / 9 条诊断疑点**；另一篇 Cell Reports 案例派生 **29 个论证单元 / 2 条疑点**。烟草预设的 30 条均值主张计算为 **14 SUPPORTS / 16 REFUTES**，与独立复算逐条一致。**这些数字是特定测试集上的流程和数值回归，不是论文错误计数、RLD准确率或普遍科学有效性。**
 
-## 安装与快速使用
+[阅读 RLD 诊断合同](references/rld_diagnosis_contract.md) · [查看可运行合成示例](examples/minimal_rld/README.md) · [v1.2.0 发布说明](RELEASE_NOTES_v1.2.0.md)
 
-详细环境、ZIP安装、固定Tag及回退步骤见[INSTALL.md](INSTALL.md)。仓库根目录即Skill目录，安装后应直接看到`paper-figure-story/SKILL.md`，不要多嵌套一层。
+## PFS 原有能力：从科研问题到可编辑成果
 
-当前封包版本为 **`1.1.1`**，待负责人批准实际发布；该版本尚未创建 Git Tag、未发布 Release。发布候选阶段请用本地目录或 ZIP 安装：
+### 1. 科研逻辑 A/B：概览与完整证据网络
+
+研究并非按 Figure 编号机械排列。PFS 可以按有来源的真实关系呈现**并行、分叉、递进、比较与证据汇合**，且不把叙事顺序伪装成实验发生的时间顺序。
+
+![PFS 实际科研逻辑 A 概览](docs/images/v1.1.1/logic-a.png)
+
+![PFS 科研逻辑 B 的可读局部](docs/images/v1.1.1/logic-b-preview.png)
+
+[打开完整 B 大画布](docs/images/v1.1.1/logic-b-complete.png) · *详细 B 为独立可编辑大画布，不能强行压进普通 16:9 幻灯片。*
+
+### 2. 逐 Figure 科研故事与可编辑 PPT
+
+每个重要 Figure 围绕“**为什么做 → 怎样比较 → 实际看到什么 → 支持哪层认识 → 还有什么限制**”组织讲述，不凭美观增加实验依赖。
+
+![PFS 真实 PPT 逐 Figure 讲述区](docs/images/v1.1.1/figure-story.png)
+
+*标题、文字与结构关系可使用 PowerPoint 原生对象；原论文 Figure 作为图片保留，不会伪造图内数据。示例未公开第三方论文原图。*
+
+### 3. Research Logic Workbook
+
+![PFS 真实 Research Logic Workbook Methods 页面](docs/images/v1.1.1/workbook.png)
+
+结合 Methods、实验对照、结果、来源与限制生成学习资料（DOCX；PDF 需在相应宿主实际导出及检查）。示例来自先前已验收案例，不代表新版本在任意环境的 Word/Office 导出均通过。
+
+### 4. Visual Polish 与三档深度
+
+Visual Polish 在科研内容已确认后处理视觉表达：统一版面、连接线、留白与阅读方向，**不擅自修改科学事实、证据边或结论强度**。
+
+| 模式 | 主要用途 |
+|---|---|
+| `quick` | 快速抓住科学问题、主要任务与发现 |
+| `balanced`（默认） | 平衡逐 Figure 讲述与证据解释，适合组会、正式汇报 |
+| `full` | 在有充分原文、方法和证据输入时展开完整请求范围，并执行更严格的交付检查 |
+
+模式代表展开深度，不是自动科学准确性等级；页数和产物以任务、来源及宿主能力为准。
+
+## 安装与快速开始
+
+请从**[正式 v1.2.0 Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0)**下载：
+
+- [`Paper-Figure-Story-v1.2.0.zip`](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.0/Paper-Figure-Story-v1.2.0.zip)
+- [`Paper-Figure-Story-v1.2.0.zip.sha256`](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.0/Paper-Figure-Story-v1.2.0.zip.sha256)
+
+正式 ZIP SHA-256：
+
+```text
+14b216a5188b9bf811bd1443a23d049ea301f39ce3edb6eec5d16ad3d1c43a42
+```
+
+在 Windows PowerShell 中，下载后于 ZIP 所在目录运行以下示例；**已有同名Skill请先备份到Skills目录之外，不静默覆盖。**
 
 ```powershell
-# 发布前：从RC压缩包或本地候选目录安装；目标目录须不存在，已有安装请先备份到Skills目录以外。
-$skillTarget = Join-Path $env:USERPROFILE '.codex/skills/paper-figure-story'
-if (Test-Path -LiteralPath $skillTarget) { throw '目标已存在：请先备份到Skills目录以外。' }
-Expand-Archive -LiteralPath .\Paper-Figure-Story-v1.1.1.zip -DestinationPath $env:TEMP\pfs_rc
-Copy-Item -Recurse "$env:TEMP\pfs_rc\paper-figure-story" $skillTarget
+$target = Join-Path $env:USERPROFILE '.codex\skills\paper-figure-story'
+if (Test-Path -LiteralPath $target) { throw '目标Skill已存在，请先移至Skills目录外备份。' }
+Expand-Archive -LiteralPath '.\Paper-Figure-Story-v1.2.0.zip' -DestinationPath '.\pfs_v120'
+New-Item -ItemType Directory -Force -Path (Split-Path $target) | Out-Null
+Copy-Item -LiteralPath '.\pfs_v120\paper-figure-story' -Destination $target -Recurse
 ```
 
-`v1.1.0` 及更早版本的固定 Tag 安装方式保持不变（见[INSTALL.md](INSTALL.md)）。`git clone --branch v1.1.1` 只能在负责人发布授权并创建 Tag 之后使用，现在执行会失败。
+安装后应存在 `paper-figure-story/SKILL.md`；如果解压结构不同，以实际 ZIP 内容和[安装文档](INSTALL.md)核对。也可以通过固定 Tag 获取代码：
 
-在支持本地Skills的Agent中提供论文及可用补件，然后输入：
-
-```text
-使用 $paper-figure-story，balanced模式。
-先阅读全部当前可用正文、Methods、图注和补件，整理科学问题、实验/论据与证据边界。
-按真实关系生成简要科研逻辑图、独立详细逻辑图和逐Figure可编辑中文PPTX，
-再生成科研逻辑拆解学习手册DOCX/PDF，并执行不改变科研内容的Visual Polish。
-列出实际取得的材料、来源审核状态及待人工核实事项。
+```bash
+git clone --branch v1.2.0 --single-branch https://github.com/Lu18835713910/paper-figure-story.git
 ```
 
-Python依赖见[requirements.txt](requirements.txt)；PPT导出使用Codex提供的Node/Artifact Tool；实际PNG验收使用本机PowerPoint，手册PDF使用Word。Office、字体及专有运行时不随包分发。其他系统/缺字体或Office环境未通过等价视觉验收。
+在支持本地Skills的Agent里提供论文和可用补件，例如：
 
-## 版本选择、升级与回退
+> 使用 $paper-figure-story，按 balanced 模式梳理这篇论文。先核对全文、Methods、Figure 图注和来源，重建科研问题、真实实验与证据链；生成科研逻辑 A/B、逐 Figure 汇报材料和所需学习手册，保留限制及待人工核查事项。
 
-|版本|定位|固定入口|
-|---|---|---|
-|v1.1.1（目标版本，Tag 未创建）|逻辑导航交付合同、完整B拓扑守恒、具备身份核验的发布回归门禁、依赖版本约束|发布授权后由Release提供；当前请用RC压缩包|
-|v1.1.0|共享科研证据关系、逐图故事、Workbook和内容锁定Visual Polish|[Release入口](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.1.0)|
-|v1.0.0|原始逐Figure故事、默认模板与Atera公开案例|[历史Release入口](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.0.0)|
+**需要运行RLD时**，先让Agent完成有来源的PFS三件工件，再使用包内入口（以下文件名为示例）：
 
-Release入口、附件及SHA256须以实际发布结果为准；本地候选不等于已上线，上表 v1.1.1 行不表示该Tag已存在。`main`用于最新版，复现请固定Tag。已有Git安装在工作区干净时可执行`git fetch origin --tags`，再用`git switch --detach v1.1.0`升级或`git switch --detach v1.0.0`回退；不使用强制重置。ZIP安装请保留旧版到Skills目录以外，再安装对应版本。
-
-## 示例与历史
-
-- **[Atera v1.0公开案例](examples/atera/README.md)**及[30页可编辑示例](examples/atera/atera-research-story-demo-30-slides.pptx)保留。该公开副本已移除第三方论文Figure，只展示原生讲述结构，不可作为含原图成品验收。
-- [自著布局示例](examples/layout_demo.json)不含第三方论文图像或真实科研数据。
-- CNNM4与组织模型综述用于内部真实案例验证；未授权论文原图、未公开稿件、模型缓存和内部日志不随公开版本分发。
-- [完整v1.0首页历史](docs/legacy/README_v1.0.md)保留原介绍、示例、安装、版权及边界。v1.0.0为历史补充归档，不改写最初公开日期；历史Tag不随main更新。
-- [v1.1宣传素材与文案](https://github.com/Lu18835713910/paper-figure-story/tree/v1.1.0/marketing/v1.1.0)中的科研图形为原创教学示意，不代表真实实验结果或自动生成截图。
-
-## 常见问题与已知限制
-
-**只有PDF就能运行吗？** Agent可以从原文整理内部模型；用户不必手写JSON。纯CLI只做索引/验证/投影，缺模型时交接给Agent。
-
-**补件缺失或科学审核PARTIAL怎么办？** 明确列出缺失范围，保留未核状态；有充分来源的部分可供人工检查。PARTIAL是案例科学边界，不等于软件故障，也不能伪装正式终审。
-
-**所有PPT都自动达到出版级吗？** 不能保证。复杂原图、科学解释和大网络需要人工复核；空间不足需报告，不能以删事实、假连接或缩字掩盖。
-
-**支持所有文献和扫描PDF吗？** 支持原创研究、方法/资源型、综述及观点的相应论证组织，不强求虚构实验。扫描稿需要OCR；本版未验收通用OCR。DOCX/表格可由Agent配套工具阅读，底层统一CLI以PDF入口为准。
-
-**没有Artifact宿主能做什么？** 能完成PDF索引、逻辑A/B/局部图的可移植原生渲染、合稿进已有主稿、Workbook生成与交付核验；**从零生成自适应主稿需要Artifact宿主**，本机不具备该能力。三件套依赖与预检步骤见[宿主依赖与能力边界](docs/HOST_REQUIREMENTS.md)。
-
-**已知限制与交付范围** 逐条列在[已知限制](docs/KNOWN_LIMITATIONS.md)（含8项P2、字号与版面边界、科学审核边界）与[交付包合同](docs/DELIVERY_PACKAGE.md)（交付数量由正式请求与适用性决定；49项仅为历史UniPert案例数量）。
-
-## 科研准确性、版权与许可
-
-AI辅助不能取代研究者的科学审查。来源定位成功、统计关联、结构差异、作者假说及因果验证必须分别表述。未取得或未核实的补充材料不能宣称已读，样本量、重复、统计与结果不能补造。论文论证顺序不冒充实际实验历史。
-
-沿用[Personal Non-Commercial Use License v1.0](LICENSE)：**个人非商业使用｜源码可查看**，*Source-available for personal non-commercial use.* 本项目不是MIT、Apache或OSI意义的开源软件。商业使用、组织部署及再分发等以原许可证为准，不擅自扩大授权。
-
-原论文Figure、数据、商标和用户材料的权利不属于PFS代码许可。公开仓库/安装包不分发内部测试PDF、未获授权原图或私人材料；用户应确认自己材料的使用与分享权限。原创科学家角色由作者提供，清理版去掉了原图红标记及文字，作为项目统一视觉形象；确认版主海报原样保留。[公开材料说明](PUBLICATION_NOTES.md)
-
-## 变更与版本历史
-
-[CHANGELOG](CHANGELOG.md) · [发布说明](RELEASE_NOTES_v1.1.0.md) · [测试与验收边界](TESTING.md) · [已知限制](docs/KNOWN_LIMITATIONS.md) · [交付包合同](docs/DELIVERY_PACKAGE.md) · [宿主依赖](docs/HOST_REQUIREMENTS.md) · [长期方向](ROADMAP.md)
-
-
-## 候选身份复核（rc.4，未发布）
-
-目录名、ZIP名和Git HEAD不能代替实际文件身份。请用本候选的同一工具复核解压后的Skill根目录；输出JSON保存在候选目录外，避免把结果本身再纳入候选。
-
-```text
-python -B scripts/candidate_fingerprint.py --root <解压后的paper-figure-story目录>
-python -B scripts/candidate_fingerprint.py --zip <候选ZIP> --zip-root paper-figure-story
-```
-
-两次输出的`files`、`file_count`及`aggregate_sha256`必须一致。算法沿用rc.2正式清单：根相对POSIX路径排序，每行`路径 空格 文件SHA256`，以UTF-8、LF连接且末行不追加换行，再做SHA-256；仅排除Office的`~$*`锁文件。ZIP校验同时读取CRC与实际内容。当前仍是受控修复候选；首次G5盲测失败和科学PARTIAL记录不因工程修复改判。
-
-
-## 正式v1.1.1能力与验证边界
-
-- portable路径已验证；建议先选择该路径并按INSTALL/宿主文档预检。Windows Office导出已在独立验收机器验证，不代表所有机器均已测试。
-- Artifact宿主路径为NOT_TESTED；普通Figure主稿若依赖Artifact，须先验证宿主API与真实创建/导出，不得由portable成功推定宿主可用。
-- 本次Full端到端复验复用已有科研模型及相关输入，不是“仅输入PDF即可全自动完成所有科学建模”的独立验证。M1、来源和解释由执行Agent依据论文登记与审核。
-- 本案例科学终审PARTIAL，贡献核心审阅NOT_ASSESSED；工程Full不能升级科学审阅。
-- Source Data未完整获得；多文档Supplementary一级来源登记存在限制，不能宣称补充材料科学来源完整闭环。
-- Logic_B是独立可缩放大画布，不适合直接缩印A4；汇报使用可读局部视图。
-- 297项测试经过独立复验，其中依赖的50项私有夹具文件不随公开ZIP分发（不是指只有50项测试）；普通用户不能仅凭公开ZIP复现完整维护回归。可执行公开合成测试，但不能冒充297项门禁。
-- 旧版Info-ZIP可能使中文文件名乱码；推荐Windows原生Expand-Archive或Python zipfile解压，解压后核对逐文件SHA。
-- 已接受的非阻断排版瑕疵（P8/P15换行、P14句号孤行、索引短续表留白）列入v1.1.2待办，不影响本次原生内容读取；不因此重开排版引擎开发。
-- 本封包等待负责人批准实际发布，尚未执行安装、Git提交、推送、Tag或GitHub Release。
-
----
-
-
-
-## RLD 真实模型交接
-
-使用同一论文的 Scientific Index、Evidence Network 和 Research Logic。保留原文及其引用路径。使用随包正式 PFS 验证器，无法补足独立语义审阅时保留 PARTIAL。
-
-```text
+```bash
 python scripts/rld_units.py --index index.json --network network.json --logic logic.json --out argument_units.json
 python scripts/rld_diagnose.py --index index.json --network network.json --logic logic.json --out diagnostics.json
 ```
 
-第二条命令自动派生论证单元。Agent 检查缺失字段和 source_statement_ids，回查原页及实验对照，记录待确认的前提与限制。逻辑标签不得冒充原文。归因候选需人工核对，尤其是已有干预与当前断言的关联。科研准确性 NOT_ESTIMABLE。
+第二条命令可以从三件工件直接派生论证单元；Agent仍须回查缺失主张、前提、来源语句、实验对照和科研语境。数值复核须由**独立固定的证据登记簿与外部可信摘要**支持，详细参数及判定规则见[RLD合同](references/rld_diagnosis_contract.md)和[Skill说明](SKILL.md)。这不表示任意PDF里的数字能自动得到可靠结论。
 
-数值核验使用 rld_numeric.py --claims claims.json --registry registry.json --manifest manifest.json --manifest-anchor SHA256 --out numeric.json。规格见 references/rld_diagnosis_contract.md。外部锚点须来自独立冻结记录，同次生成的 manifest 与摘要不建立可信来源。判定仅适用于报告的均值；不认证统计显著性、机制或因果。原论文和私人数据不分发。
+## 已知限制与科学边界
 
-## 验证范围和限制
+- **科研审核**：RLD 是辅助诊断，不能替代论文作者、领域专家、人工审阅或同行评议。`scientific_accuracy=NOT_ESTIMABLE`。Cell Reports 合规输入仍为 `PARTIAL`，F5疑点保持 `OPEN`，烟草 `AU_L_CL_REG` 的归因仍待人工裁定。部分论证单元缺少直接登记的主张，必须回查原文。
+- **数值解释**：14 SUPPORTS / 16 REFUTES 仅对应事先规定的均值比较；不等于统计显著性、论文错误条数或因果结论。来源摘要必须独立保管，不能与修改后的数据一起自证。
+- **渲染与宿主**：v1.2.0 发布验收没有重跑完整PPTX渲染；Workbook和投影仍存在既有环境/输入限制。portable逻辑图、主PPT生成、Office导出和Artifact宿主属于不同能力门，成功一种不证明另一种通过。
+- **模型来源**：科研事实由执行Agent依据论文登记；只有PDF且缺少经过审核的知识模型时，CLI不会自动证明机制。未获得的补充资料不可宣称已审核。
+- **公开资产**：不分发内部科研论文、真实私有模型、canonical登记簿或未获授权的第三方Figure；公开案例及展示资料见[素材来源说明](docs/images/v1.1.1/ASSET_PROVENANCE.md)。
 
-- RLD 辅助诊断科研论证，同行评议和人工裁定仍有独立职责。科学准确性为 NOT_ESTIMABLE。
-- Cell Reports 合规变体保留 PARTIAL 语义审核，F5 机制疑点仍为 OPEN。烟草 AU_L_CL_REG 归因待人工裁决。
-- 烟草回归的 14 SUPPORTS / 16 REFUTES 针对预设均值断言，不表示论文错误计数、统计显著性或因果认证。
-- 本轮未验证完整 PPTX 渲染。Workbook 与投影仍有已知环境和输入限制。
-- 公开包保留原有 PFS 功能、正式验证器及合成示例。原始论文、私人模型及登记簿不分发。
-- 许可证为个人非商业使用。详见 LICENSE。
+[详细已知限制](docs/KNOWN_LIMITATIONS.md) · [宿主依赖](docs/HOST_REQUIREMENTS.md) · [交付包合同](docs/DELIVERY_PACKAGE.md) · [测试范围](TESTING.md)
+
+## 版本、示例与历史
+
+| 版本 | 主要更新 | 下载 |
+|---|---|---|
+| **v1.2.0（当前）** | PFS→RLD真实模型交接；科研、语言与表达逻辑候选诊断；可信数值比较 | [正式Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0) |
+| v1.1.1 | 科研逻辑A/B、逐Figure讲述、Workbook、发布校验与既有工具链 | [历史Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.1.1) |
+| v1.1.0 | 共享证据关系及视觉、内容和交付工作流完善 | [历史Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.1.0) |
+| v1.0.0 | 初期逐Figure故事和可编辑学术汇报案例 | [历史Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.0.0) |
+
+[原生Atera公开示例](examples/atera/README.md) · [PFS v1.0 历史首页](docs/legacy/README_v1.0.md) · [v1.1.1版本说明](RELEASE_NOTES_v1.1.1.md) · [v1.2.0版本说明](RELEASE_NOTES_v1.2.0.md) · [更新历史](CHANGELOG.md)
+
+## 许可证、版权与反馈
+
+本项目采用 **Personal Non-Commercial Use License**：个人非商业使用、源码可查看，**不是 MIT、Apache 或 OSI 意义的开源许可证**。科研论文原图、数据和商标受其各自权利约束。详见[LICENSE](LICENSE)及[公开材料说明](PUBLICATION_NOTES.md)。
+
+[提交问题与反馈](https://github.com/Lu18835713910/paper-figure-story/issues) · [安装与依赖](INSTALL.md) · [返回页首](#paper-figure-storypfs)
