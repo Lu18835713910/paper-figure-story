@@ -1,50 +1,108 @@
-# 安装与使用｜v1.1.1（正式封包，待批准发布）
+# 安装与使用｜PFS v1.2.0
 
-本目录为 **`1.1.1`正式版本封包**，尚待负责人批准发布。Git Tag `v1.1.1` **尚未创建**；在该Tag存在之前，任何 `git clone --branch v1.1.1` 都会失败。`v1.1.0` 与 `v1.0.0` 的历史Tag保持可用。
+**当前正式版本为v1.2.0。** 本页适用于Windows PowerShell下的Codex用户级Skill安装，以及从v1.0.0、v1.1.x升级到v1.2.0。先备份旧目录，再替换为新版；不会将旧脚本与新脚本混在同一活动Skill目录中。
 
-## 选择版本
+> **发布快照边界：** Git Tag `v1.2.0`和正式Release ZIP是已发布快照；其内部旧版`INSTALL.md`不会随主分支文档更正自动变化。本页为当前在线说明，仍下载原正式ZIP并校验原SHA；不会改变Tag或正式资产身份。
 
-| 版本 | 状态 | 安装方式 |
-|---|---|---|
-| v1.1.1 | 发布候选，未上线 | RC压缩包或本地候选目录（本页） |
-| v1.1.1 | 目标版本，**Tag未创建** | 负责人发布授权后由Release提供 |
-| v1.1.0 | 已发布 | 固定Tag或Release ZIP |
-| v1.0.0 | 历史归档 | 固定Tag |
+## 正式版本与下载
 
-候选目录不等于已上线。请用Release提供的SHA256核对压缩包，避免误用历史RC包。
+- [v1.2.0正式Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0)
+- [Paper-Figure-Story-v1.2.0.zip](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.0/Paper-Figure-Story-v1.2.0.zip)
+- [正式SHA-256文件](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.0/Paper-Figure-Story-v1.2.0.zip.sha256)
 
-## ZIP／本地目录安装（发布候选阶段）
+正式ZIP SHA-256：`14b216a5188b9bf811bd1443a23d049ea301f39ce3edb6eec5d16ad3d1c43a42`。旧版v1.1.1/v1.1.0/v1.0.0均为历史发布版，新安装与升级推荐使用v1.2.0。
 
-解压`Paper-Figure-Story-v1.1.1.zip`，取内部`paper-figure-story`目录，放到个人`~/.codex/skills/`。正确结构为`~/.codex/skills/paper-figure-story/SKILL.md`，不要多套一层。
+## Windows首次安装与安全覆盖升级
 
-```powershell
-$skillTarget = Join-Path $env:USERPROFILE '.codex/skills/paper-figure-story'
-if (Test-Path -LiteralPath $skillTarget) { throw '目标已存在：请先备份到Skills目录以外。' }
-Expand-Archive -LiteralPath .\Paper-Figure-Story-v1.1.1.zip -DestinationPath $env:TEMP\pfs_rc
-Copy-Item -Recurse "$env:TEMP\pfs_rc\paper-figure-story" $skillTarget
-```
-
-已有版本先移到Skills目录以外的备份位置，**勿静默覆盖或保留两个同名Skill**：同名多版本会让人调用到旧版却不自知。安装后在新会话调用`$paper-figure-story`，并核对`VERSION`文件为`1.1.1`。
-
-## 固定Tag安装（v1.1.0 及更早）
+在已下载ZIP的文件夹打开**Windows PowerShell**，复制运行下方完整命令。首次安装时直接安装；如果`~/.codex/skills/paper-figure-story`已有旧版，则先将旧目录整体移到`~/pfs-skill-backups/`中的唯一备份目录，再安装v1.2.0。安装过程中会验证正式ZIP SHA、ZIP目录结构和安装后版本；复制或版本校验失败时尝试恢复旧目录。
 
 ```powershell
-$skillTarget = Join-Path $env:USERPROFILE '.codex/skills/paper-figure-story'
-if (Test-Path -LiteralPath $skillTarget) { throw '目标已存在：请先备份到Skills目录以外。' }
-git clone --branch v1.1.0 --single-branch https://github.com/Lu18835713910/paper-figure-story.git $skillTarget
+$ErrorActionPreference = 'Stop'
+$zip = (Resolve-Path -LiteralPath '.\Paper-Figure-Story-v1.2.0.zip').Path
+$expectedSha = '14b216a5188b9bf811bd1443a23d049ea301f39ce3edb6eec5d16ad3d1c43a42'
+if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expectedSha) {
+    throw 'ZIP SHA-256不匹配：停止安装，请从正式Release重新下载。'
+}
+
+$skillRoot = Join-Path $HOME '.codex\skills'
+$target = Join-Path $skillRoot 'paper-figure-story'
+$backupRoot = Join-Path $HOME 'pfs-skill-backups'
+$work = Join-Path $env:TEMP ('pfs-v120-' + [guid]::NewGuid().ToString('N'))
+$backup = Join-Path $backupRoot ('paper-figure-story-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0, 6))
+$oldMoved = $false
+
+New-Item -ItemType Directory -Path $work -Force | Out-Null
+try {
+    Expand-Archive -LiteralPath $zip -DestinationPath $work
+    $source = Join-Path $work 'paper-figure-story'
+    if (-not (Test-Path -LiteralPath (Join-Path $source 'SKILL.md') -PathType Leaf) -or
+        -not (Test-Path -LiteralPath (Join-Path $source 'VERSION') -PathType Leaf)) {
+        throw 'ZIP目录结构不符合预期：未找到paper-figure-story/SKILL.md和VERSION。'
+    }
+    if ((Get-Content -LiteralPath (Join-Path $source 'VERSION') -Raw).Trim() -ne '1.2.0') {
+        throw 'ZIP内部VERSION不是1.2.0：停止安装。'
+    }
+
+    New-Item -ItemType Directory -Path $skillRoot -Force | Out-Null
+    if (Test-Path -LiteralPath $target) {
+        $existing = Get-Item -LiteralPath $target -Force
+        if (-not $existing.PSIsContainer -or
+            (($existing.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0)) {
+            throw '目标不是普通目录（可能是软链接）：请手动核对安装位置。'
+        }
+        New-Item -ItemType Directory -Path $backupRoot -Force | Out-Null
+        Move-Item -LiteralPath $target -Destination $backup
+        $oldMoved = $true
+    }
+
+    try {
+        Copy-Item -LiteralPath $source -Destination $target -Recurse
+        if ((Get-Content -LiteralPath (Join-Path $target 'VERSION') -Raw).Trim() -ne '1.2.0' -or
+            -not (Test-Path -LiteralPath (Join-Path $target 'SKILL.md') -PathType Leaf)) {
+            throw '安装后版本验证失败。'
+        }
+        Write-Host "已安装PFS v1.2.0：$target"
+        if ($oldMoved) { Write-Host "旧版本已备份：$backup" }
+    } catch {
+        if (Test-Path -LiteralPath $target) {
+            Remove-Item -LiteralPath $target -Recurse -Force
+        }
+        if ($oldMoved) { Move-Item -LiteralPath $backup -Destination $target }
+        throw
+    }
+} finally {
+    if (Test-Path -LiteralPath $work) { Remove-Item -LiteralPath $work -Recurse -Force }
+}
 ```
 
-历史版将`v1.1.0`替换为`v1.0.0`。仓库根目录就是Skill内容，clone到目标后不要再套一层paper-figure-story。固定Tag只在实际发布后可用。
+**升级原则：** 这是整个目录的安全替换，不是`Copy-Item`直接合并覆盖。你此前修改的Skill文件不被自动迁移，仍在备份目录中。请先结束正在运行的PFS任务再升级，并在升级后新开Codex会话。上述路径仅适用于Codex用户级默认安装；若实际启用的是工作区级Skill或其他Agent宿主的目录，必须先核对实际加载路径，不能假定会搜索并覆盖全电脑所有同名Skill。目标为软链接/重解析点时会主动停止，防止误操作。
 
-升级/回退：确认本地无未保存修改，再`git fetch origin --tags`及`git switch --detach v1.1.0`或`git switch --detach v1.0.0`。不要强制推送、reset --hard或删除旧版本来升级。
+### 验证当前电脑安装
+
+```powershell
+$target = Join-Path $HOME '.codex\skills\paper-figure-story'
+Get-Content -LiteralPath (Join-Path $target 'VERSION')
+Test-Path -LiteralPath (Join-Path $target 'SKILL.md')
+python (Join-Path $target 'scripts\run_pfs.py') --help
+```
+
+应分别看到`1.2.0`、`True`，且帮助中有`run`、`validate-products`、`render-products`、`deliver`、`check-delivery`五个子命令。**新会话中也应让Agent报告实际读取的SKILL.md路径和VERSION**；仓库本身显示v1.2.0不能证明旧会话已经重新加载。
+
+### Git方式（仅供全新目录或固定Tag参考）
+
+```powershell
+git clone --branch v1.2.0 --single-branch https://github.com/Lu18835713910/paper-figure-story.git "$HOME\.codex\skills\paper-figure-story"
+```
+
+已有同名目录时不要直接`git clone`到该路径；请使用前述ZIP安全升级流程。不要用`git reset --hard`、`git clean -fd`等可能丢失本地修改的操作来升级。
 
 ## 环境与依赖
 
-Python 3.10+（本候选实际验证环境为 **CPython 3.13.14 / Windows**）；依赖按`python -m pip install -r requirements.txt`安装：python-pptx、Pillow、pdfplumber、python-docx、lxml、PyMuPDF。`requirements.txt`已给出**本轮实测通过的最低版本**，更低版本未经验证。
+Python 3.10+（历史v1.1.1的实测环境为 **CPython 3.13.14 / Windows**）；依赖按`python -m pip install -r requirements.txt`安装：python-pptx、Pillow、pdfplumber、python-docx、lxml、PyMuPDF。`requirements.txt`已给出**本轮实测通过的最低版本**，更低版本未经验证。
 
 Word/PPT处理使用本地已安装Microsoft Office；字体为Microsoft YaHei与Times New Roman。Codex桌面的load_workspace_dependencies可提供Node及Artifact Tool；它们不随本包重分发，普通Python环境不能据此承诺已具备PPT渲染能力。
 
-安装后先执行以下预检，四项都应正常（命令与判读标准见[宿主依赖与能力边界](docs/HOST_REQUIREMENTS.md)）：
+依赖准备后，在Skill根目录执行下列四项预检（命令与判读标准见[宿主依赖与能力边界](docs/HOST_REQUIREMENTS.md)）：
 
 ```text
 python scripts/run_pfs.py --help
@@ -66,7 +124,7 @@ python -c "import pptx, fitz, docx, pdfplumber, lxml, PIL; print('ok')"
 `run_pfs.py`只有5个子命令：`run`、`validate-products`、`render-products`、`deliver`、`check-delivery`。
 
 ```text
-python scripts/run_pfs.py run --pdf paper.pdf --knowledge reviewed_M1.json --assets figures.json --cache-dir cache --outdir new_run --modes quick balanced full --products presentation --plan-only
+python scripts/run_pfs.py run --pdf paper.pdf --knowledge reviewed_M1.json --assets figures.json --research-logic research_logic.json --cache-dir cache --outdir new_run --modes balanced --products with-network --plan-only
 python scripts/run_pfs.py render-products --network NETWORK --plan PLAN --metadata METADATA --outdir OUT --backend portable --development-preview
 python scripts/run_pfs.py deliver --research-logic MODEL --graphs GRAPH_MANIFEST --workbook-bindings ANNOTATIONS --outdir OUT --request A B Workbook PNG PDF --office --development-preview
 python scripts/run_pfs.py check-delivery --root OUT/deliverables --profile full
@@ -79,6 +137,8 @@ python scripts/build_research_workbook.py --help
 1. **Visual Polish 不是 `run_pfs.py` 的子命令**，独立入口是`scripts/polish_presentation.py`（`--pptx` / `--outdir`，可选`--plan` / `--renderer`）。写错入口会直接报参数错误。
 2. **`deliver` 强制要求显式 `--development-preview`**（argparse 必填参数）。它表示该案例仍需人工科学复核，不是软件预发布标识；不带该flag会立即失败而不是静默降级。`validate_story.py`不带该flag同样可以严格通过。
 3. `plan-only`只生成并核验计划，不等于已生成PPT。导出需传`--node`、`--artifact-module`、`--presentation-skill`；缺少 Artifact 宿主时自适应主稿路径返回`HOST_BACKEND_REQUIRED`。没有Agent视觉计划时polish仅`QA_ONLY`。
+
+上述run示例假定Agent已根据论文准备并验证有来源的M1和Research Logic；它不会从纯PDF自动生成上述JSON。
 
 详[PDF工作流](references/pdf_to_ppt_workflow.md)、[Visual Polish](references/visual_polish.md)及[逻辑导航交付合同](references/logic_navigation_delivery.md)。
 
@@ -105,47 +165,16 @@ build_research_workbook.py --reader可生成短句/对照表/图相邻的DOCX手
 
 ## 许可与版本边界
 
-个人非商业使用｜源码可查看；不是OSI开源许可。完整授权见LICENSE。原图、PDF、Office、字体和用户资料的权利不由本包转授。v1.0历史原代码不修补，已知演示缺图等限制见历史Release说明。本候选的8项P2、字号/版面边界与科学审核边界见[已知限制](docs/KNOWN_LIMITATIONS.md)。
+个人非商业使用｜源码可查看；不是OSI开源许可。完整授权见LICENSE。原图、PDF、Office、字体和用户资料的权利不由本包转授。v1.0历史原代码不修补，已知演示缺图等限制见历史Release说明。历史v1.1.1候选的8项P2、字号/版面边界与科学审核边界见[已知限制](docs/KNOWN_LIMITATIONS.md)。
 
+## v1.2.0当前使用边界
 
-## 解压后的候选身份核对
+- `balanced`只决定内容展开深度，**不是**多分支拓扑开关。Agent必须依据实际论文识别一条或多条研究主线，不能为了好看虚构分叉。
+- **同源科研逻辑A/B**需由Agent建立并审核Research Logic，通过`--research-logic`接入；完整B需选择`--products with-network`。旧默认overview/detailed兼容路径不应冒充已审的同源A/B模型。
+- A是16:9科研逻辑概览，B是全部已登记节点和关系的原生可编辑大画布，C是逐Figure故事。真实存在的并行、比较、共享方法和证据汇合必须保留；如论文只有一条主线则应如实表达。
+- `run_pfs.py run`不是单命令无人值守论文分析。缺少`--knowledge`时返回`REVIEWED_KNOWLEDGE_REQUIRED`；科学事实由实际调用Skill的Agent从论文和可用补充材料中审核并登记。
+- RLD可选：需来自同一论文的Scientific Index、Evidence Network和Research Logic；疑点需回查原文，不能据此直接判定论文造假。
+- 逻辑图的portable后端不等于从零生成普通Figure主PPT；Artifact宿主、Office导出、Workbook完整性与人工科学/视觉验收各有独立边界。
+- 原v1.2.0 Release ZIP/Tag中的历史安装说明不会因这次在线文档更新而改变。要让离线包也带上新文档，需要另发维护版，而不应无声替换已公布SHA的正式ZIP。
 
-先在解压后的`paper-figure-story`根目录执行下列只读命令。核对结果与候选随包提供、存放在目录外的文件Manifest；不得只核对VERSION字符串。
-
-```text
-python -B scripts/candidate_fingerprint.py --root .
-python -B scripts/candidate_fingerprint.py --zip <原始ZIP完整路径> --zip-root paper-figure-story
-```
-
-包装目录`paper-figure-story/`只在ZIP比较时按显式参数去除。嵌套多一层、乱码改名、成员缺失、CRC损坏或内容SHA变化都需要先调查；不要自行修改文件或覆盖现有安装来“修正”身份。具体聚合算法见README的“候选身份复核”。本轮没有执行安装、覆盖或正式发布。
-
-
-## 正式v1.1.1能力与验证边界
-
-- portable路径已验证；建议先选择该路径并按INSTALL/宿主文档预检。Windows Office导出已在独立验收机器验证，不代表所有机器均已测试。
-- Artifact宿主路径为NOT_TESTED；普通Figure主稿若依赖Artifact，须先验证宿主API与真实创建/导出，不得由portable成功推定宿主可用。
-- 本次Full端到端复验复用已有科研模型及相关输入，不是“仅输入PDF即可全自动完成所有科学建模”的独立验证。M1、来源和解释由执行Agent依据论文登记与审核。
-- 本案例科学终审PARTIAL，贡献核心审阅NOT_ASSESSED；工程Full不能升级科学审阅。
-- Source Data未完整获得；多文档Supplementary一级来源登记存在限制，不能宣称补充材料科学来源完整闭环。
-- Logic_B是独立可缩放大画布，不适合直接缩印A4；汇报使用可读局部视图。
-- 297项测试经过独立复验，其中依赖的50项私有夹具文件不随公开ZIP分发（不是指只有50项测试）；普通用户不能仅凭公开ZIP复现完整维护回归。可执行公开合成测试，但不能冒充297项门禁。
-- 旧版Info-ZIP可能使中文文件名乱码；推荐Windows原生Expand-Archive或Python zipfile解压，解压后核对逐文件SHA。
-- 已接受的非阻断排版瑕疵（P8/P15换行、P14句号孤行、索引短续表留白）列入v1.1.2待办，不影响本次原生内容读取；不因此重开排版引擎开发。
-- 本封包等待负责人批准实际发布，尚未执行安装、Git提交、推送、Tag或GitHub Release。
-
----
-
-
-
-## RLD 真实模型交接
-
-使用同一论文的 Scientific Index、Evidence Network 和 Research Logic。保留原文及其引用路径。使用随包正式 PFS 验证器，无法补足独立语义审阅时保留 PARTIAL。
-
-```text
-python scripts/rld_units.py --index index.json --network network.json --logic logic.json --out argument_units.json
-python scripts/rld_diagnose.py --index index.json --network network.json --logic logic.json --out diagnostics.json
-```
-
-第二条命令自动派生论证单元。Agent 检查缺失字段和 source_statement_ids，回查原页及实验对照，记录待确认的前提与限制。逻辑标签不得冒充原文。归因候选需人工核对，尤其是已有干预与当前断言的关联。科研准确性 NOT_ESTIMABLE。
-
-数值核验使用 rld_numeric.py --claims claims.json --registry registry.json --manifest manifest.json --manifest-anchor SHA256 --out numeric.json。规格见 references/rld_diagnosis_contract.md。外部锚点须来自独立冻结记录，同次生成的 manifest 与摘要不建立可信来源。判定仅适用于报告的均值；不认证统计显著性、机制或因果。原论文和私人数据不分发。
+参考：[v1.2.0发布说明](RELEASE_NOTES_v1.2.0.md) · [宿主要求](docs/HOST_REQUIREMENTS.md) · [历史已知限制](docs/KNOWN_LIMITATIONS.md) · [Skill说明](SKILL.md)。
