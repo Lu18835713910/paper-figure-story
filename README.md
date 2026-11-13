@@ -1,96 +1,120 @@
 # Paper Figure Story（PFS）
 
-**让每张 Figure 都有逻辑，让每项结论都有依据。**
+<p align="center"><strong>让每张 Figure 都有逻辑，让每项结论都有依据。</strong></p>
+<p align="center">从论文中的科学问题出发，重建实验与证据之间的真实关系，形成可编辑的科研故事；再用 RLD 检查推理、措辞与论据之间的潜在断点。</p>
 
-从论文的科学问题出发，梳理实验设计、观察结果、论证关系与证据边界；生成科研逻辑图、逐 Figure 故事、可编辑汇报材料及学习手册。**v1.2.0 新增 Research Logic Diagnostics（RLD）**，进一步辅助检查科研推理、语言表述和论证结构。
+<p align="center">
+  <a href="https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0"><strong>获取正式版 v1.2.0</strong></a>
+  · <a href="INSTALL.md">安装指南</a>
+  · <a href="RELEASE_NOTES_v1.2.0.md">版本更新</a>
+  · <a href="examples/minimal_rld/README.md">运行 RLD 示例</a>
+</p>
+<p align="center"><sub>正式发布 · quick / balanced / full · Personal Non-Commercial Use</sub></p>
 
 ![PFS 品牌与真实成果展示](docs/images/v1.1.1/hero.png)
 
-**当前正式版本：v1.2.0（已发布）** · quick / balanced / full · 个人非商业使用 · 源码可查看
+## 为什么使用 PFS
 
-[**下载 v1.2.0**](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0) · [安装说明](INSTALL.md) · [本版更新](RELEASE_NOTES_v1.2.0.md) · [RLD 最小示例](examples/minimal_rld/README.md) · [历史版本](CHANGELOG.md)
+| 理解科研问题 | 表达证据关系 | 诊断潜在断点 |
+|:---|:---|:---|
+| 从实验设计、真实观察和关键对照出发，重建并行、分叉与汇合的科学逻辑 | 生成逻辑 A/B、逐 Figure 故事、可编辑 PPT 和 Research Logic Workbook | v1.2.0 新增 RLD，辅助核查科研推理、语言措辞、论证衔接与指定数值主张 |
 
-> **定位**：PFS 帮助研究者读懂“为什么这样研究、证据如何连接”；RLD 帮助检查“这些推理、措辞与证据是否匹配”。Agent 与研究者需要审核原文，软件结构验证不等于科学事实或因果结论已经获得认证。
+**PFS 是科研理解和表达工具，RLD 是建立在 PFS 来源工件上的辅助诊断层。** 两者均不替代研究者核对全文、图注、Methods 和证据。
 
-## 8 秒看看 PFS 的真实成果
+## 真实成果预览
 
-![v1.1.1 已验收的真实产物演示，非自动运行录像](docs/images/v1.1.1/outputs-demo.gif)
+<p align="center">
+  <a href="docs/images/v1.1.1/outputs-demo-static.png">
+    <img src="docs/images/v1.1.1/outputs-demo.gif" alt="PFS 实际科研逻辑图、逐 Figure 汇报和 Workbook 成果演示" width="900">
+  </a>
+</p>
+<p align="center"><sub>v1.1.1 阶段的真实验收成果，延续用于展示 v1.2.0 的 PFS 基础能力；不是 RLD 自动审稿录像。</sub></p>
+<p align="center">
+  <a href="docs/images/v1.1.1/outputs-demo-static.png">查看静态总览</a>
+  · <a href="docs/images/v1.1.1/ASSET_PROVENANCE.md">图片来源与裁切说明</a>
+</p>
 
-[查看静态预览](docs/images/v1.1.1/outputs-demo-static.png) · [素材来源与裁切说明](docs/images/v1.1.1/ASSET_PROVENANCE.md)
 
-*以上为 v1.1.1 阶段的真实展示案例，沿用至 v1.2.0；并非新版本 RLD 自动诊断的录像，也不代表任何论文的科学终审通过。*
+## v1.2.0 新增｜Research Logic Diagnostics（RLD）
 
-## v1.2.0 新增：Research Logic Diagnostics（RLD）
+**从“把论文逻辑讲清楚”，进一步走向“检查论证是否有待核对的缺口”。** RLD 使用同一篇论文已登记的 Scientific Index、Evidence Network 和 Research Logic；不能脱离来源模型，把任意 PDF 自动判定为科学正确或错误。
 
-RLD 接收**同一篇论文**已经建立的 Scientific Index、Evidence Network 和 Research Logic，从有源节点与语句派生论证单元，再进行分层诊断。它不是脱离 PFS 的“任意 PDF 一键审稿器”。
-
-```text
-论文全文、Figure、Methods 与可用补件
-          │  Agent 依据原文登记、核对
-          ▼
- Scientific Index ── Evidence Network ── Research Logic
-          │                    │                │
-          └────────────────────┴────────────────┘
-                               ▼
-                    论证单元（argument_units）
-                               ▼
-        科研逻辑检查 · 语言逻辑检查 · 表达逻辑检查
-                               │
-                               ▼
-               有来源的疑点、归因候选、待核查事项
-               （数值主张可调用单独的可信比较路径）
+```mermaid
+flowchart TB
+    A["论文正文 · Figure · Methods"] --> B["Agent 核对来源并建立 PFS 模型"]
+    B --> C["Scientific Index · Evidence Network · Research Logic"]
+    C --> D["RLD：派生有源论证单元"]
+    D --> E["科研逻辑"]
+    D --> F["语言逻辑"]
+    D --> G["表达逻辑"]
+    E --> H["可追溯疑点 · 归因候选 · 人工回源复核"]
+    F --> H
+    G --> H
+    I["冻结证据登记簿 + 独立来源锚"] -.->|仅指定数值主张| J["单独数值比较"]
+    J -.-> H
+    classDef focus fill:#eaf1fc,stroke:#174994,color:#17345d,stroke-width:1.5px
+    class B,C,D focus
 ```
 
-| 诊断方向 | 主要检查什么 | 必须保留的边界 |
-|---|---|---|
-| **科研逻辑** | 主张与证据是否对应，干预、对照和读出是否支持所述推理 | 网络中有干预不等于当前结论有因果证据 |
-| **语言逻辑** | 因果断言、假说、相关性、否定与保留语的混用 | 中英语义识别是候选诊断，不是论文错误判决 |
-| **表达逻辑** | 论证链、研究分支、结论与限制的衔接 | 缺失关系可能是 PFS 重建遗漏，不必然是论文缺陷 |
-| **数值与来源核验** | 在可信登记簿中按组别、指标、时期、单位和比较基准复核指定主张 | 报告均值比较不证明统计显著性、实验因果或机制 |
+| 诊断方向 | 实际检查内容 |
+|:---|:---|
+| **科研逻辑** | 主张与证据是否对应；干预、对照、读出是否足以支持当前推理 |
+| **语言逻辑** | 因果、相关、假说、否定和保留措辞是否被正确区分 |
+| **表达逻辑** | 论证链、研究分支、限制与结论是否衔接；缺失也可能来自 PFS 重建 |
+| **数值来源复核** | 在可信登记簿和外部来源锚支持下，按指标、组别、时期和比较基准检查指定均值主张 |
 
-真实论文回归中，烟草案例从 PFS 工件派生 **15 个论证单元 / 9 条诊断疑点**；另一篇 Cell Reports 案例派生 **29 个论证单元 / 2 条疑点**。烟草预设的 30 条均值主张计算为 **14 SUPPORTS / 16 REFUTES**，与独立复算逐条一致。**这些数字是特定测试集上的流程和数值回归，不是论文错误计数、RLD准确率或普遍科学有效性。**
+<details>
+<summary><strong>查看 v1.2.0 真实论文回归及其解释边界</strong></summary>
 
-[阅读 RLD 诊断合同](references/rld_diagnosis_contract.md) · [查看可运行合成示例](examples/minimal_rld/README.md) · [v1.2.0 发布说明](RELEASE_NOTES_v1.2.0.md)
+烟草案例从 PFS 工件派生 **15 个论证单元 / 9 条诊断疑点**；另一篇 Cell Reports 案例派生 **29 个论证单元 / 2 条疑点**。烟草预设的 30 条均值主张独立复核为 **14 SUPPORTS / 16 REFUTES**。
 
-## PFS 原有能力：从科研问题到可编辑成果
+这些结果验证了特定输入上的流程和数值比较一致性，**不代表 RLD 准确率、论文错误条数、统计显著性或因果结论**；未登记的主张仍需要 Agent 回查原文。
 
-### 1. 科研逻辑 A/B：概览与完整证据网络
+</details>
 
-研究并非按 Figure 编号机械排列。PFS 可以按有来源的真实关系呈现**并行、分叉、递进、比较与证据汇合**，且不把叙事顺序伪装成实验发生的时间顺序。
+[诊断与来源合同](references/rld_diagnosis_contract.md) · [可运行合成示例](examples/minimal_rld/README.md) · [正式发布说明](RELEASE_NOTES_v1.2.0.md)
 
-![PFS 实际科研逻辑 A 概览](docs/images/v1.1.1/logic-a.png)
 
-![PFS 科研逻辑 B 的可读局部](docs/images/v1.1.1/logic-b-preview.png)
+## PFS 经典能力｜从全篇逻辑到逐图讲述
 
-[打开完整 B 大画布](docs/images/v1.1.1/logic-b-complete.png) · *详细 B 为独立可编辑大画布，不能强行压进普通 16:9 幻灯片。*
+PFS 不强行将 Fig.1–Fig.N 连成单一时间线，而是根据来源表达研究中真实存在的**并行、递进、比较、共同方法与证据汇合**。以下均为仓库已有的真实成果展示，点击图片可打开大图。
 
-### 2. 逐 Figure 科研故事与可编辑 PPT
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="docs/images/v1.1.1/logic-a.png"><img src="docs/images/v1.1.1/logic-a.png" width="100%" alt="科研逻辑 A 全局概览"></a>
+      <strong>逻辑 A · 全局概览</strong><br>用可读的结构说明中心问题、主要研究分支和核心证据。
+    </td>
+    <td width="50%" valign="top">
+      <a href="docs/images/v1.1.1/logic-b-complete.png"><img src="docs/images/v1.1.1/logic-b-preview.png" width="100%" alt="科研逻辑 B 局部预览"></a>
+      <strong>逻辑 B · 详细证据网络</strong><br>展示实验、关系和限制；图片是局部预览，可点开完整原尺寸画布。
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="docs/images/v1.1.1/figure-story.png"><img src="docs/images/v1.1.1/figure-story.png" width="100%" alt="逐 Figure 科研故事真实示例"></a>
+      <strong>逐 Figure 科研故事</strong><br>说明为什么做、怎样比较、观察到什么及证据边界；PPT 标题、文字和结构为原生可编辑对象。
+    </td>
+    <td width="50%" valign="top">
+      <a href="docs/images/v1.1.1/workbook.png"><img src="docs/images/v1.1.1/workbook.png" width="100%" alt="Research Logic Workbook Methods 真实示例"></a>
+      <strong>Research Logic Workbook</strong><br>围绕实验设计、对照与读数整理学习手册；正文与表格可在 DOCX 中编辑。
+    </td>
+  </tr>
+</table>
 
-每个重要 Figure 围绕“**为什么做 → 怎样比较 → 实际看到什么 → 支持哪层认识 → 还有什么限制**”组织讲述，不凭美观增加实验依赖。
+> **图像与编辑边界：** 原论文 Figure 仍作为图片保留，不重绘数据或伪造 panel；逻辑图的节点在配套 PPTX 中编辑。Workbook 内嵌图是阅读预览，不能替代原尺寸 B 画布。所有公开展示均应遵守原图及素材权利。
 
-![PFS 真实 PPT 逐 Figure 讲述区](docs/images/v1.1.1/figure-story.png)
+### 三档工作深度
 
-*标题、文字与结构关系可使用 PowerPoint 原生对象；原论文 Figure 作为图片保留，不会伪造图内数据。示例未公开第三方论文原图。*
+| 模式 | 适合场景 |
+|:---|:---|
+| <code>quick</code> | 快速掌握研究问题、主要分析和发现 |
+| <code>balanced</code>（默认） | 兼顾论证过程与逐 Figure 讲述，适用于文献精读和组会 |
+| <code>full</code> | 在来源充分时展开详细分析与更严格的交付检查 |
 
-### 3. Research Logic Workbook
+Visual Polish 负责统一版面、连接线和阅读路径，**不会为视觉效果擅自增删科研事实或证据关系**。模式代表展开深度，不是科学可信度等级。
 
-![PFS 真实 Research Logic Workbook Methods 页面](docs/images/v1.1.1/workbook.png)
-
-结合 Methods、实验对照、结果、来源与限制生成学习资料（DOCX；PDF 需在相应宿主实际导出及检查）。示例来自先前已验收案例，不代表新版本在任意环境的 Word/Office 导出均通过。
-
-### 4. Visual Polish 与三档深度
-
-Visual Polish 在科研内容已确认后处理视觉表达：统一版面、连接线、留白与阅读方向，**不擅自修改科学事实、证据边或结论强度**。
-
-| 模式 | 主要用途 |
-|---|---|
-| `quick` | 快速抓住科学问题、主要任务与发现 |
-| `balanced`（默认） | 平衡逐 Figure 讲述与证据解释，适合组会、正式汇报 |
-| `full` | 在有充分原文、方法和证据输入时展开完整请求范围，并执行更严格的交付检查 |
-
-模式代表展开深度，不是自动科学准确性等级；页数和产物以任务、来源及宿主能力为准。
-
-## 安装与快速开始
+## 下载与快速开始
 
 请从**[正式 v1.2.0 Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0)**下载：
 
@@ -132,7 +156,7 @@ python scripts/rld_diagnose.py --index index.json --network network.json --logic
 
 第二条命令可以从三件工件直接派生论证单元；Agent仍须回查缺失主张、前提、来源语句、实验对照和科研语境。数值复核须由**独立固定的证据登记簿与外部可信摘要**支持，详细参数及判定规则见[RLD合同](references/rld_diagnosis_contract.md)和[Skill说明](SKILL.md)。这不表示任意PDF里的数字能自动得到可靠结论。
 
-## 已知限制与科学边界
+## 验证状态与科学边界
 
 - **科研审核**：RLD 是辅助诊断，不能替代论文作者、领域专家、人工审阅或同行评议。`scientific_accuracy=NOT_ESTIMABLE`。Cell Reports 合规输入仍为 `PARTIAL`，F5疑点保持 `OPEN`，烟草 `AU_L_CL_REG` 的归因仍待人工裁定。部分论证单元缺少直接登记的主张，必须回查原文。
 - **数值解释**：14 SUPPORTS / 16 REFUTES 仅对应事先规定的均值比较；不等于统计显著性、论文错误条数或因果结论。来源摘要必须独立保管，不能与修改后的数据一起自证。
@@ -140,7 +164,7 @@ python scripts/rld_diagnose.py --index index.json --network network.json --logic
 - **模型来源**：科研事实由执行Agent依据论文登记；只有PDF且缺少经过审核的知识模型时，CLI不会自动证明机制。未获得的补充资料不可宣称已审核。
 - **公开资产**：不分发内部科研论文、真实私有模型、canonical登记簿或未获授权的第三方Figure；公开案例及展示资料见[素材来源说明](docs/images/v1.1.1/ASSET_PROVENANCE.md)。
 
-[详细已知限制](docs/KNOWN_LIMITATIONS.md) · [宿主依赖](docs/HOST_REQUIREMENTS.md) · [交付包合同](docs/DELIVERY_PACKAGE.md) · [测试范围](TESTING.md)
+[v1.2.0 发布与验证边界](RELEASE_NOTES_v1.2.0.md) · [历史已知限制记录](docs/KNOWN_LIMITATIONS.md) · [宿主依赖](docs/HOST_REQUIREMENTS.md) · [交付包合同](docs/DELIVERY_PACKAGE.md) · [测试范围](TESTING.md)
 
 ## 版本、示例与历史
 
