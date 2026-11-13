@@ -1,0 +1,217 @@
+{
+ "schema": "rld_argument_units_v1",
+ "units": [
+  {
+   "unit_id": "AU_CL_SUP",
+   "kind": "SCIENTIFIC_INTERPRETATION",
+   "pfs_anchors": {
+    "logic_node_id": "LN_CL",
+    "statement_ids": [
+     "S_CLM"
+    ],
+    "logic_edge_ids": [],
+    "entity_ids": [
+     "EV_Y"
+    ]
+   },
+   "source_refs": [
+    {
+     "document_id": "synthetic_demo",
+     "physical_page": 1
+    }
+   ],
+   "question": {
+    "value": null,
+    "status": "INSUFFICIENT_GRAPH_INFORMATION"
+   },
+   "design": {
+    "statements": [],
+    "status": "INSUFFICIENT_GRAPH_INFORMATION"
+   },
+   "observations": {
+    "statements": [
+     "readout Y increased"
+    ],
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "claim": {
+    "value": "Compound X promotes readout Y.",
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "premises": {
+    "value": [],
+    "status": "AGENT_RECONSTRUCTED_CANDIDATE"
+   },
+   "comparison_conditions": {
+    "value": null,
+    "status": "INSUFFICIENT_GRAPH_INFORMATION"
+   },
+   "limits": {
+    "value": [
+     "single synthetic demo"
+    ],
+    "status": "EXPLICIT_IN_PFS"
+   }
+  },
+  {
+   "unit_id": "AU_CL_ORPHAN",
+   "kind": "SCIENTIFIC_INTERPRETATION",
+   "pfs_anchors": {
+    "logic_node_id": "LN_OB",
+    "statement_ids": [
+     "S_CLM"
+    ],
+    "logic_edge_ids": [],
+    "entity_ids": [
+     "CL_OBS"
+    ]
+   },
+   "source_refs": [
+    {
+     "document_id": "synthetic_demo",
+     "physical_page": 1
+    }
+   ],
+   "question": {
+    "value": "does X drive Y",
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "design": {
+    "statements": [
+     "compound X treatment only"
+    ],
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "observations": {
+    "statements": [
+     "readout Y increased"
+    ],
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "claim": {
+    "value": "Compound X drives readout Y.",
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "premises": {
+    "value": [],
+    "status": "AGENT_RECONSTRUCTED_CANDIDATE"
+   },
+   "comparison_conditions": {
+    "value": null,
+    "status": "INSUFFICIENT_GRAPH_INFORMATION"
+   },
+   "limits": {
+    "value": [
+     "none"
+    ],
+    "status": "EXPLICIT_IN_PFS"
+   }
+  },
+  {
+   "unit_id": "AU_CL_CORR",
+   "kind": "SCIENTIFIC_INTERPRETATION",
+   "pfs_anchors": {
+    "logic_node_id": "LN_OB",
+    "statement_ids": [
+     "S_CORR"
+    ],
+    "logic_edge_ids": [],
+    "entity_ids": [
+     "CL_OBS"
+    ]
+   },
+   "source_refs": [
+    {
+     "document_id": "synthetic_demo",
+     "physical_page": 1
+    }
+   ],
+   "question": {
+    "value": "is Y associated with X",
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "design": {
+    "statements": [
+     "observational sampling"
+    ],
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "observations": {
+    "statements": [
+     "readout Y increased"
+    ],
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "claim": {
+    "value": "Readout Y is associated with compound X.",
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "premises": {
+    "value": [],
+    "status": "AGENT_RECONSTRUCTED_CANDIDATE"
+   },
+   "comparison_conditions": {
+    "value": null,
+    "status": "INSUFFICIENT_GRAPH_INFORMATION"
+   },
+   "limits": {
+    "value": [
+     "none"
+    ],
+    "status": "EXPLICIT_IN_PFS"
+   }
+  },
+  {
+   "unit_id": "AU_CL_FOREIGN",
+   "kind": "SCIENTIFIC_INTERPRETATION",
+   "pfs_anchors": {
+    "logic_node_id": "LN_FO",
+    "statement_ids": [
+     "S_CLM"
+    ],
+    "logic_edge_ids": [],
+    "entity_ids": [
+     "CL_FOREIGN"
+    ]
+   },
+   "source_refs": [
+    {
+     "document_id": "synthetic_demo",
+     "physical_page": 1
+    }
+   ],
+   "question": {
+    "value": "uncovered script demo",
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "design": {
+    "statements": [
+     "not applicable"
+    ],
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "observations": {
+    "statements": [],
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "claim": {
+    "value": "クラステリンは心臓を守る。",
+    "status": "EXPLICIT_IN_PFS"
+   },
+   "premises": {
+    "value": [],
+    "status": "AGENT_RECONSTRUCTED_CANDIDATE"
+   },
+   "comparison_conditions": {
+    "value": null,
+    "status": "INSUFFICIENT_GRAPH_INFORMATION"
+   },
+   "limits": {
+    "value": [
+     "none"
+    ],
+    "status": "EXPLICIT_IN_PFS"
+   }
+  }
+ ]
+}

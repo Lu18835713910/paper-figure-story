@@ -1,18 +1,19 @@
-# 安装与使用｜v1.1.1（正式发布）
+# 安装与使用｜v1.1.1（正式封包，待批准发布）
 
-本目录为 **`1.1.1`正式版本封包**，已获负责人批准发布。正式Tag为`v1.1.1`，下载入口见GitHub Release。`v1.1.0` 与 `v1.0.0` 的历史Tag保持可用。
+本目录为 **`1.1.1`正式版本封包**，尚待负责人批准发布。Git Tag `v1.1.1` **尚未创建**；在该Tag存在之前，任何 `git clone --branch v1.1.1` 都会失败。`v1.1.0` 与 `v1.0.0` 的历史Tag保持可用。
 
 ## 选择版本
 
 | 版本 | 状态 | 安装方式 |
 |---|---|---|
-| v1.1.1 | 已发布 | 正式Release ZIP（本页） |
+| v1.1.1 | 发布候选，未上线 | RC压缩包或本地候选目录（本页） |
+| v1.1.1 | 目标版本，**Tag未创建** | 负责人发布授权后由Release提供 |
 | v1.1.0 | 已发布 | 固定Tag或Release ZIP |
 | v1.0.0 | 历史归档 | 固定Tag |
 
-请核对正式Release身份。请用Release提供的SHA256核对压缩包，避免误用历史RC包。
+候选目录不等于已上线。请用Release提供的SHA256核对压缩包，避免误用历史RC包。
 
-## ZIP／本地目录安装
+## ZIP／本地目录安装（发布候选阶段）
 
 解压`Paper-Figure-Story-v1.1.1.zip`，取内部`paper-figure-story`目录，放到个人`~/.codex/skills/`。正确结构为`~/.codex/skills/paper-figure-story/SKILL.md`，不要多套一层。
 
@@ -25,12 +26,12 @@ Copy-Item -Recurse "$env:TEMP\pfs_rc\paper-figure-story" $skillTarget
 
 已有版本先移到Skills目录以外的备份位置，**勿静默覆盖或保留两个同名Skill**：同名多版本会让人调用到旧版却不自知。安装后在新会话调用`$paper-figure-story`，并核对`VERSION`文件为`1.1.1`。
 
-## 固定Tag安装与回退
+## 固定Tag安装（v1.1.0 及更早）
 
 ```powershell
 $skillTarget = Join-Path $env:USERPROFILE '.codex/skills/paper-figure-story'
 if (Test-Path -LiteralPath $skillTarget) { throw '目标已存在：请先备份到Skills目录以外。' }
-git clone --branch v1.1.1 --single-branch https://github.com/Lu18835713910/paper-figure-story.git $skillTarget
+git clone --branch v1.1.0 --single-branch https://github.com/Lu18835713910/paper-figure-story.git $skillTarget
 ```
 
 历史版将`v1.1.0`替换为`v1.0.0`。仓库根目录就是Skill内容，clone到目标后不要再套一层paper-figure-story。固定Tag只在实际发布后可用。
@@ -39,7 +40,7 @@ git clone --branch v1.1.1 --single-branch https://github.com/Lu18835713910/paper
 
 ## 环境与依赖
 
-Python 3.10+（已记录的维护验收环境为 **CPython 3.13.14 / Windows**）；依赖按`python -m pip install -r requirements.txt`安装：python-pptx、Pillow、pdfplumber、python-docx、lxml、PyMuPDF。`requirements.txt`已给出**本轮实测通过的最低版本**，更低版本未经验证。
+Python 3.10+（本候选实际验证环境为 **CPython 3.13.14 / Windows**）；依赖按`python -m pip install -r requirements.txt`安装：python-pptx、Pillow、pdfplumber、python-docx、lxml、PyMuPDF。`requirements.txt`已给出**本轮实测通过的最低版本**，更低版本未经验证。
 
 Word/PPT处理使用本地已安装Microsoft Office；字体为Microsoft YaHei与Times New Roman。Codex桌面的load_workspace_dependencies可提供Node及Artifact Tool；它们不随本包重分发，普通Python环境不能据此承诺已具备PPT渲染能力。
 
@@ -104,19 +105,19 @@ build_research_workbook.py --reader可生成短句/对照表/图相邻的DOCX手
 
 ## 许可与版本边界
 
-个人非商业使用｜源码可查看；不是OSI开源许可。完整授权见LICENSE。原图、PDF、Office、字体和用户资料的权利不由本包转授。v1.0历史原代码不修补，已知演示缺图等限制见历史Release说明。历史案例与当前已披露的字号/版面及科学审核边界见[已知限制](docs/KNOWN_LIMITATIONS.md)。
+个人非商业使用｜源码可查看；不是OSI开源许可。完整授权见LICENSE。原图、PDF、Office、字体和用户资料的权利不由本包转授。v1.0历史原代码不修补，已知演示缺图等限制见历史Release说明。本候选的8项P2、字号/版面边界与科学审核边界见[已知限制](docs/KNOWN_LIMITATIONS.md)。
 
 
-## 解压后的正式包身份核对
+## 解压后的候选身份核对
 
-先在解压后的`paper-figure-story`根目录执行下列只读命令。核对结果与Release提供、存放在目录外的文件Manifest；不得只核对VERSION字符串。
+先在解压后的`paper-figure-story`根目录执行下列只读命令。核对结果与候选随包提供、存放在目录外的文件Manifest；不得只核对VERSION字符串。
 
 ```text
 python -B scripts/candidate_fingerprint.py --root .
 python -B scripts/candidate_fingerprint.py --zip <原始ZIP完整路径> --zip-root paper-figure-story
 ```
 
-包装目录`paper-figure-story/`只在ZIP比较时按显式参数去除。嵌套多一层、乱码改名、成员缺失、CRC损坏或内容SHA变化都需要先调查；不要自行修改文件或覆盖现有安装来“修正”身份。具体聚合算法见README的“正式发布包身份复核”。正式Release附件已发布；安装前应核对当前SHA，勿覆盖未备份的旧安装。
+包装目录`paper-figure-story/`只在ZIP比较时按显式参数去除。嵌套多一层、乱码改名、成员缺失、CRC损坏或内容SHA变化都需要先调查；不要自行修改文件或覆盖现有安装来“修正”身份。具体聚合算法见README的“候选身份复核”。本轮没有执行安装、覆盖或正式发布。
 
 
 ## 正式v1.1.1能力与验证边界
@@ -130,7 +131,21 @@ python -B scripts/candidate_fingerprint.py --zip <原始ZIP完整路径> --zip-r
 - 297项测试经过独立复验，其中依赖的50项私有夹具文件不随公开ZIP分发（不是指只有50项测试）；普通用户不能仅凭公开ZIP复现完整维护回归。可执行公开合成测试，但不能冒充297项门禁。
 - 旧版Info-ZIP可能使中文文件名乱码；推荐Windows原生Expand-Archive或Python zipfile解压，解压后核对逐文件SHA。
 - 已接受的非阻断排版瑕疵（P8/P15换行、P14句号孤行、索引短续表留白）列入v1.1.2待办，不影响本次原生内容读取；不因此重开排版引擎开发。
-- 正式Tag、Release及ZIP SHA共同标识本版本。
+- 本封包等待负责人批准实际发布，尚未执行安装、Git提交、推送、Tag或GitHub Release。
+
+---
 
 
-Tag v1.1.1保留首次发布快照，不移动旧Tag。本次仅文档勘误；最新说明见main及当前Release ZIP，功能文件与首发版本相同。
+
+## RLD 真实模型交接
+
+使用同一论文的 Scientific Index、Evidence Network 和 Research Logic。保留原文及其引用路径。使用随包正式 PFS 验证器，无法补足独立语义审阅时保留 PARTIAL。
+
+```text
+python scripts/rld_units.py --index index.json --network network.json --logic logic.json --out argument_units.json
+python scripts/rld_diagnose.py --index index.json --network network.json --logic logic.json --out diagnostics.json
+```
+
+第二条命令自动派生论证单元。Agent 检查缺失字段和 source_statement_ids，回查原页及实验对照，记录待确认的前提与限制。逻辑标签不得冒充原文。归因候选需人工核对，尤其是已有干预与当前断言的关联。科研准确性 NOT_ESTIMABLE。
+
+数值核验使用 rld_numeric.py --claims claims.json --registry registry.json --manifest manifest.json --manifest-anchor SHA256 --out numeric.json。规格见 references/rld_diagnosis_contract.md。外部锚点须来自独立冻结记录，同次生成的 manifest 与摘要不建立可信来源。判定仅适用于报告的均值；不认证统计显著性、机制或因果。原论文和私人数据不分发。

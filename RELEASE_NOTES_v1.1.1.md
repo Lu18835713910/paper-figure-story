@@ -1,4 +1,4 @@
-# Paper Figure Story v1.1.1 Release Notes（正式稿）
+# Paper Figure Story v1.1.1 Release Notes（正式稿，待批准发布）
 
 以独立验收通过的rc.4为功能基线，本次仅文档勘误与版本封包。保留OOXML合稿、FREEFORM语义检查、Workbook Figure消费与字段兼容、NOT_APPLICABLE、来源身份及分层Full门禁；未新增科学模型或渲染引擎。
 
@@ -15,14 +15,4 @@
 - 297项测试经过独立复验，其中依赖的50项私有夹具文件不随公开ZIP分发（不是指只有50项测试）；普通用户不能仅凭公开ZIP复现完整维护回归。可执行公开合成测试，但不能冒充297项门禁。
 - 旧版Info-ZIP可能使中文文件名乱码；推荐Windows原生Expand-Archive或Python zipfile解压，解压后核对逐文件SHA。
 - 已接受的非阻断排版瑕疵（P8/P15换行、P14句号孤行、索引短续表留白）列入v1.1.2待办，不影响本次原生内容读取；不因此重开排版引擎开发。
-- 正式Tag、Release及ZIP SHA共同标识本版本。
-
-
-## 本次公开分发
-
-本次更新中文README、作者角色和最终真实产物GIF，原软件功能文件与已验收正式基线逐字节相同。第三方论文Figure未包含在新展示中，Figure Story仅展示实际讲述区；见docs/images/v1.1.1/ASSET_PROVENANCE.md。GitHub自动Source code ZIP是Tag仓库快照；独立Skill ZIP以随附FILE_MANIFEST为受管文件身份，不能把两类ZIP的SHA视为相同。297项回归和Full引用rc.4独立验收，未声称本新ZIP重跑。
-
-
-## 2026-11-06 文档勘误
-
-清除当前README中Tag未创建、RC安装与旧升级目标残留，明确portable和Artifact能力边界，同步INSTALL/SKILL。仅Markdown变化，所有功能文件与首次发布完全一致。v1.1.1 Tag保持首发快照不移动；main和本Release附件包含文档勘误版，当前ZIP SHA以随附清单为准。GitHub自动Source code ZIP仍对应原Tag，不等同于更新后的Skill分发ZIP。297项与Full证据仍继承rc.4，未因本次文档修改重新执行。
+- 本封包等待负责人批准实际发布，尚未执行安装、Git提交、推送、Tag或GitHub Release。

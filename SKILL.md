@@ -1,9 +1,12 @@
 ---
 name: paper-figure-story
-description: 从科研论文PDF重构科学问题、实验或论据、实际发现及证据边界，用原始Figure和简短文字箭头链制作可编辑中文学术PPT；支持多分支总框架、综述讲述、三档深度及可选Methods和详细证据图。
+description: 从科研论文PDF重构科学问题、实验或论据、实际发现及证据边界，用原始Figure和简短文字箭头链制作可编辑中文学术PPT；支持多分支总框架、综述讲述、三档深度及可选Methods和详细证据图。附带RLD诊断模块（rld_diagnose.py），可对既有PFS模型的论证单元做科研逻辑、语言逻辑、表达逻辑三维诊断，因果判定须经PFS干预与对照结构核查，未覆盖语言显式上报而非静默跳过。
 ---
 
-# Paper Figure Story v1.1.1 正式版
+# Paper Figure Story v1.2.0
+
+> v1.1.1 既有 PFS 脚本及 schema 保留；新增内容仅限 RLD 诊断模块及其文档、测试与示例。
+> 工程测试通过不等于科学准确性认证（`scientific_accuracy=NOT_ESTIMABLE`）。
 
 ## Agent首次执行与中断恢复（先按需读这三页）
 
@@ -13,7 +16,7 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 
 长任务按[五阶段保存与续跑](references/agent_staged_resume.md)执行。新会话核对指纹后从最近有效阶段续跑，不重复解析全文。读真实进程退出码及execution/failure/几何报告，不以stdout中的状态或exit 0单独宣称完成。便携A/B可用不等于Figure主稿Artifact宿主可用；先单独检查宿主，再开展昂贵资产工作。
 
-## 标准路径与安全门
+## 维护候选的标准路径与安全门
 
 先读[受支持的PDF→模型→A/B→Figure→PPT/原生Workbook路径](references/maintenance_workflow_v1_1_1.md)。复用按SHA匹配的缓存；Agent完成科学语义，不改已安装代码。scientific_index骨架必须保持PENDING，完成来源填充并验证后才能组装research_logic。Figure必须登记原PDF/页码/panel/区域/指纹；像素匹配、panel审核与科学语义分别记录，禁止用黑像素阈值拒绝合法黑底。
 
@@ -21,16 +24,16 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 
 原生学习手册由`build_research_workbook.py`复用已登记M1/RSU、Figure Story和可选Inventory；省略`--content`时确定性组装，缺字段返回`.assembly.json`定向任务及exit 2，不生成空壳完整手册。显式`--content`继续读取原格式，原有自由文本只标记为legacy输入，不冒充字段级自动绑定。已有事实只登记一次，不为Workbook另写一套科研解释；参数和来源不足时由当前Agent定向核查。仅需逻辑索引可显式`--scope logic-only`并报告PARTIAL。旧`--reader`保留Inventory/annotations路径；与`--content`组合明确拒绝，不静默忽略。合同仍为`schemas/workbook_content_v1_1.schema.json`。
 
-## 贡献覆盖与表达审阅
+## 候选维护：贡献覆盖与表达审阅（未发布）
 
-本段实施贡献覆盖与表达审阅；不代表两份V0.1讨论稿整体成为正式规范，也不升级既有案例科学终审。先按[维护流程中的贡献覆盖审阅](references/maintenance_workflow_v1_1_1.md#候选维护贡献覆盖与表达审阅)检查已登记事实，再制作展示；不新增科学事实库。
+本段是基于两份V0.1讨论稿的受控候选，不代表讨论稿已成为发布标准或既有案例科学终审升级。先按[维护流程中的贡献覆盖审阅](references/maintenance_workflow_v1_1_1.md#候选维护贡献覆盖与表达审阅)检查已登记事实，再制作展示；不新增科学事实库。
 
 - 不把标题问题、一个中心入口或最后一张Figure等同于全文唯一贡献。用既有claim、RSU、statement、research_logic与source ID列出候选贡献，分开作者定位、实际支持、核心/支撑/背景及理由；允许一条、多条或共享证据的主线，不预设技术/应用双主线。
 - 每项候选核心贡献登记A、B、主稿、Figure Story、Workbook和最终结论中的实际位置，或不适用/省略理由与影响。共享证据沿用同一身份，不因分支、页面或测量重分组而增加独立验证。
 - 先清楚呈现正面发现，再准确限定支持范围；结论覆盖已审核心贡献。保留清楚的标题，解释抽象研究动作与必要缩写，关键参数分层呈现。逐句核对简化是否把推断升级为证实、关联升级为因果；Visual Polish不得代做科学修订。
 - 贡献覆盖审阅、来源科学审核、软件检查、视觉验收分别报告。COVERED_REGISTERED_CLAIMS/BRANCHES只说明已登记输入的投影范围，不证明论文全部核心贡献已被识别。
 
-## A/B与局部图的科研表达分工
+## RC1候选：A/B与局部图的科研表达分工
 
 - A为16:9科研逻辑概览：呈现一条或多条“问题—探索—发现—进一步探索—综合认识”的骨架，使读者看清主要研究任务、关键发现及其真实联系。这是表达原则，不是固定五步、固定节点数或线性实验模板。
 - B在同一有源骨架下展开具体实验/分析、操作与材料、数据与读数、结果、支持证据及必要限制，保留独立、完整、原生可编辑、可缩放的大画布。不以整图缩到16:9后的字号作为唯一验收尺度。
@@ -190,7 +193,7 @@ quick/balanced/full复用同一事实、RSU、关系和图片索引；quick压�
 - [五阶段保存与续跑](references/agent_staged_resume.md)：中断后核对指纹续跑。
 - [受支持的维护路径](references/maintenance_workflow_v1_1_1.md)：PDF→模型→A/B→Figure→PPT/Workbook，含贡献覆盖与表达审阅。
 - [PDF到PPT工作流](references/pdf_to_ppt_workflow.md)：只给PDF时的完整闭环。
-- [RC集成合同](references/rc_integration_contract.md)：版本身份、入口与能力边界。
+- [RC集成合同](references/rc_integration_contract.md)：候选身份、入口与不可声称事项。
 
 **合同与Schema**
 - [科研逻辑与科学索引合同](references/research_logic_contract.md)：12类字段与手册入口。
@@ -217,3 +220,17 @@ quick/balanced/full复用同一事实、RSU、关系和图片索引；quick压�
 
 
 v1.1保留的的知识模型→讲述片段→可编辑PPT入口，按需读取 [presentation_projection.md](references/presentation_projection.md)；该入口不替代上述成熟页面JSON与构建流程，验收边界以独立规则及实际测试报告为准。
+
+
+## RLD 真实模型交接
+
+使用同一论文的 Scientific Index、Evidence Network 和 Research Logic。保留原文及其引用路径。使用随包正式 PFS 验证器，无法补足独立语义审阅时保留 PARTIAL。
+
+```text
+python scripts/rld_units.py --index index.json --network network.json --logic logic.json --out argument_units.json
+python scripts/rld_diagnose.py --index index.json --network network.json --logic logic.json --out diagnostics.json
+```
+
+第二条命令自动派生论证单元。Agent 检查缺失字段和 source_statement_ids，回查原页及实验对照，记录待确认的前提与限制。逻辑标签不得冒充原文。归因候选需人工核对，尤其是已有干预与当前断言的关联。科研准确性 NOT_ESTIMABLE。
+
+数值核验使用 rld_numeric.py --claims claims.json --registry registry.json --manifest manifest.json --manifest-anchor SHA256 --out numeric.json。规格见 references/rld_diagnosis_contract.md。外部锚点须来自独立冻结记录，同次生成的 manifest 与摘要不建立可信来源。判定仅适用于报告的均值；不认证统计显著性、机制或因果。原论文和私人数据不分发。

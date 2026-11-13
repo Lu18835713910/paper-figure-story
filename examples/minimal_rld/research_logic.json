@@ -1,0 +1,89 @@
+{
+ "version": "pfs-research-logic-1",
+ "snapshot": "synthetic-example-logic-snapshot",
+ "network_snapshot": "synthetic-example-snapshot-not-a-real-model",
+ "nodes": [
+  {
+   "id": "LN_Q",
+   "identity": "AUTHOR_ARGUMENT",
+   "label": "does X change Y",
+   "statement_ids": [
+    "S_NAME"
+   ],
+   "source_entity_ids": [
+    "IV_X"
+   ]
+  },
+  {
+   "id": "LN_EV",
+   "identity": "SCIENTIFIC_EVIDENCE",
+   "label": "Y measurement",
+   "statement_ids": [
+    "S_OBS"
+   ],
+   "source_entity_ids": [
+    "EV_Y"
+   ]
+  },
+  {
+   "id": "LN_CL",
+   "identity": "AUTHOR_INTERPRETATION",
+   "label": "X promotes Y",
+   "statement_ids": [
+    "S_CLM",
+    "S_LIM"
+   ],
+   "source_entity_ids": [
+    "CL_SUP"
+   ]
+  },
+  {
+   "id": "LN_OB",
+   "identity": "AUTHOR_ARGUMENT",
+   "label": "correlation only",
+   "statement_ids": [
+    "S_CLM"
+   ],
+   "source_entity_ids": [
+    "CL_OBS"
+   ]
+  },
+  {
+   "id": "LN_FO",
+   "identity": "AUTHOR_ARGUMENT",
+   "label": "uncovered script",
+   "statement_ids": [
+    "S_CLM"
+   ],
+   "source_entity_ids": [
+    "CL_FOREIGN"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "id": "LE_1",
+   "from": "LN_Q",
+   "to": "LN_EV",
+   "type": "progression",
+   "identity": "AUTHOR_ARGUMENT",
+   "rationale": "question then measurement",
+   "alternatives": [
+    "parallel"
+   ],
+   "source_ids": []
+  },
+  {
+   "id": "LE_2",
+   "from": "LN_EV",
+   "to": "LN_CL",
+   "type": "evidence_convergence",
+   "identity": "SCIENTIFIC_EVIDENCE",
+   "rationale": "measurement supports claim",
+   "alternatives": [
+    "association only"
+   ],
+   "source_ids": []
+  }
+ ]
+}

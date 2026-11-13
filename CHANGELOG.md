@@ -1,10 +1,24 @@
-# 2026-11-06 — v1.1.1发布文档勘误
+# 1.2.0 — RLD 科研论证辅助诊断
 
-修正README/INSTALL发布状态、Tag安装与升级指引，澄清宿主路径。只改文档，不移动v1.1.1 Tag；main和Release附件为勘误文档，Tag保留首次发布快照。
+- 接入真实 PFS 三件套，派生带来源的论证单元。
+- 恢复锚定证据登记簿的报告均值比较。
+- 科学、语言与表达诊断的范围及限制见 RELEASE_NOTES_v1.2.0.md。
 
-# v1.1.1 — 正式发布（2026-11-06）
+# 1.2.0-rc.1 — RLD 诊断模块审核候选（未发布，2026-11-13）
 
-基于独立验收rc.4和正式156文件封包；仅发布文档、中文首页及真实成果展示更新，功能文件不变。297项与Full继承rc.4独立证据，不冒称新封包重跑。以下为历史准备与RC记录。
+- 基线：v1.1.1 正式封包全部文件逐字节保留，未改任何既有脚本、schema 或 references。
+- 新增 `scripts/rld_semantic.py`：8 值语义枚举（断言因果 / 假说 / 否定 / 仅相关 / 描述性受控 / 不确定 / 无因果 / 未评估），
+  子句级判定 + 否定作用域 + 连字符复合定语排除。替代"英文关键词 grep"式判定。
+- 新增 `scripts/rld_diagnose.py`：论证单元三维诊断。因果疑点必须先过 PFS 结构核查
+  （干预可达 + 原文明确报告的对照 + 连到该读出）；模型内有干预但未连到该结论时归 `PFS_RECONSTRUCTION`，
+  仅在模型内完全没有干预实体时才归 `PAPER_REASONING`。
+- 新增 `scripts/rld_numeric.py`：数值门禁四态（NOT_APPLICABLE / EVIDENCE_REQUIRED /
+  STOP_REGISTRY_NOT_CANONICAL / AVAILABLE）。**不含**主张级数值判定。
+- 新增 `references/rld_diagnosis_contract.md`：枚举定义、作用域规则、归因规则、覆盖缺口上报。
+- 新增 `examples/minimal_rld/`：全合成最小样例，覆盖"已支持不报 / 孤儿断言上报 / 仅相关不报 / 未覆盖语言上报"四类结果。
+- 新增 `tests/test_rld_semantic.py`：32 项自包含测试，不依赖本机任何历史目录。
+- 明确不包含：canonical 登记簿、原始论文 PDF、任何未公开研究数据（见 `NOT_INCLUDED.md`）。
+- 状态：审核候选。未合并 main、未打 Tag、未创建 Release、未 push。
 
 # 1.1.1 — 正式版本封包（2026-11-06，待负责人批准发布）
 
@@ -133,3 +147,17 @@ FREEFORM几何消费及结构化失败记录修复；历史正式门禁为14套�
 ## v1.0
 
 基线的默认学术模板、模块化研究框架、原图旁短句与箭头、成熟JSON和模板生成入口继续保留。许可性质不变。
+
+
+## RLD 真实模型交接
+
+使用同一论文的 Scientific Index、Evidence Network 和 Research Logic。保留原文及其引用路径。使用随包正式 PFS 验证器，无法补足独立语义审阅时保留 PARTIAL。
+
+```text
+python scripts/rld_units.py --index index.json --network network.json --logic logic.json --out argument_units.json
+python scripts/rld_diagnose.py --index index.json --network network.json --logic logic.json --out diagnostics.json
+```
+
+第二条命令自动派生论证单元。Agent 检查缺失字段和 source_statement_ids，回查原页及实验对照，记录待确认的前提与限制。逻辑标签不得冒充原文。归因候选需人工核对，尤其是已有干预与当前断言的关联。科研准确性 NOT_ESTIMABLE。
+
+数值核验使用 rld_numeric.py --claims claims.json --registry registry.json --manifest manifest.json --manifest-anchor SHA256 --out numeric.json。规格见 references/rld_diagnosis_contract.md。外部锚点须来自独立冻结记录，同次生成的 manifest 与摘要不建立可信来源。判定仅适用于报告的均值；不认证统计显著性、机制或因果。原论文和私人数据不分发。

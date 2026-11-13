@@ -1,0 +1,110 @@
+{
+ "version": "pfs-evidence-network-1",
+ "snapshot": "synthetic-example-snapshot-not-a-real-model",
+ "paper": {
+  "id": "synthetic_demo",
+  "paper_type": "original_research",
+  "title": "Synthetic demo paper",
+  "documents": [
+   {
+    "id": "synthetic_demo",
+    "role": "main_paper",
+    "format": "pdf",
+    "title": "Synthetic demo paper",
+    "version": "demo",
+    "availability": "available",
+    "sha256": null,
+    "hash_status": "unavailable",
+    "source_locator": "demo",
+    "physical_page_count": 1
+   }
+  ]
+ },
+ "nodes": [
+  {
+   "id": "IV_X",
+   "kind": "intervention",
+   "label": "compound X"
+  },
+  {
+   "id": "IV_VEH",
+   "kind": "intervention",
+   "label": "vehicle"
+  },
+  {
+   "id": "EV_Y",
+   "kind": "evidence",
+   "label": "readout Y"
+  },
+  {
+   "id": "CL_SUP",
+   "kind": "claim",
+   "label": "X improves Y"
+  },
+  {
+   "id": "CL_OBS",
+   "kind": "claim",
+   "label": "Y correlates with X"
+  },
+  {
+   "id": "CL_FOREIGN",
+   "kind": "claim",
+   "label": "X improves Y (uncovered language)"
+  }
+ ],
+ "edges": [
+  {
+   "id": "E_CMP",
+   "type": "compares",
+   "from": "IV_X",
+   "to": "IV_VEH",
+   "certainty": "paper_reported"
+  },
+  {
+   "id": "E_DATA",
+   "type": "data_depends_on",
+   "from": "IV_X",
+   "to": "EV_Y",
+   "certainty": "paper_reported"
+  },
+  {
+   "id": "E_SUP",
+   "type": "evidence_supports",
+   "from": "EV_Y",
+   "to": "CL_SUP",
+   "certainty": "paper_reported"
+  }
+ ],
+ "statements": [
+  {
+   "id": "S_NAME",
+   "role": "design",
+   "text": "compound X versus vehicle",
+   "source_refs": []
+  },
+  {
+   "id": "S_OBS",
+   "role": "result",
+   "text": "readout Y increased",
+   "source_refs": []
+  },
+  {
+   "id": "S_CLM",
+   "role": "interpretation",
+   "text": "Compound X promotes readout Y.",
+   "source_refs": []
+  },
+  {
+   "id": "S_LIM",
+   "role": "limitation",
+   "text": "single synthetic demo, no real data",
+   "source_refs": []
+  },
+  {
+   "id": "S_CORR",
+   "role": "interpretation",
+   "text": "Readout Y is associated with compound X.",
+   "source_refs": []
+  }
+ ]
+}

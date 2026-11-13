@@ -1,0 +1,277 @@
+{
+ "schema": "rld_semantic_diagnostics_v1",
+ "candidate": "RLD v1.2.0-rc.1 (review candidate; NOT an official release)",
+ "semantic_vocab": "rld-semantic-vocab-1",
+ "mode": "logic_first_no_registry",
+ "units": 4,
+ "findings": [
+  {
+   "unit_id": "AU_CL_ORPHAN",
+   "check": "CAUSAL_UPGRADE",
+   "dimension": "SCIENTIFIC_LOGIC",
+   "severity": "MAJOR",
+   "evidence": {
+    "claim": "Compound X drives readout Y.",
+    "semantic": "CAUSAL_ASSERTION",
+    "asserted_clauses": [
+     "Compound X promotes readout Y.",
+     "Compound X drives readout Y."
+    ],
+    "intervention_context": {
+     "verdict": "PAPER_HAS_INTERVENTION_ELSEWHERE",
+     "interventions_in_unit_scope": [],
+     "interventions_reachable": [],
+     "control_comparison_edges": [],
+     "protocol_edges": [],
+     "intervention_readout_edges": [],
+     "interventions_anywhere_in_model": [
+      "IV_VEH",
+      "IV_X"
+     ],
+     "reach_hops": 2
+    }
+   },
+   "finding": "该单元存在断言型因果表述（语义枚举 CAUSAL_ASSERTION），但 PFS 中该结论的证据未连到登记的干预与对照：PAPER_HAS_INTERVENTION_ELSEWHERE。",
+   "competing_explanation": "论文可能确有干预实验，只是重建时未把干预边连到该结论；PFS 缺边不等于论文缺实验。",
+   "missing_evidence": [
+    "该结论到干预实体/对照比较的 PFS 边"
+   ],
+   "what_would_change": "若 PFS 补上干预边，或原文该处为描述性/假说性用法，本条撤销。",
+   "attribution": "PFS_RECONSTRUCTION",
+   "action": "补干预到读出的关系边，不改编论文措辞。",
+   "reversible": true,
+   "pfs_anchors": {
+    "logic_node_id": "LN_OB",
+    "statement_ids": [
+     "S_CLM"
+    ],
+    "logic_edge_ids": [],
+    "entity_ids": [
+     "CL_OBS"
+    ]
+   }
+  },
+  {
+   "unit_id": "AU_CL_FOREIGN",
+   "check": "SEMANTIC_TYPE_UNRECOGNIZED",
+   "dimension": "LANGUAGE_LOGIC",
+   "severity": "MINOR",
+   "evidence": {
+    "coverage": {
+     "scripts": [
+      "HAN",
+      "KANA",
+      "LATIN"
+     ],
+     "assessable": false,
+     "reason": "SCRIPT_NOT_COVERED:HAN,KANA,LATIN"
+    },
+    "unit": "AU_CL_FOREIGN"
+   },
+   "finding": "该单元文本超出语义层覆盖面（脚本或空文本），因果判定未执行。这不是'没有问题'，而是'未评估'。",
+   "competing_explanation": "文本可能极短或含未覆盖字符集；不影响该单元的其它维度检查。",
+   "missing_evidence": [
+    "人工阅读原文确认该单元是否存在因果断言"
+   ],
+   "what_would_change": "补充对应字符集的语义规则后本条转由常规判定处理。",
+   "attribution": "RLD_COVERAGE_GAP",
+   "action": "标记为未评估，不计入 NO_ISSUE。",
+   "reversible": true,
+   "pfs_anchors": {
+    "logic_node_id": "LN_FO",
+    "statement_ids": [
+     "S_CLM"
+    ],
+    "logic_edge_ids": [],
+    "entity_ids": [
+     "CL_FOREIGN"
+    ]
+   }
+  }
+ ],
+ "by_dimension": {
+  "SCIENTIFIC_LOGIC": 1,
+  "LANGUAGE_LOGIC": 1,
+  "EXPRESSION_LOGIC": 0
+ },
+ "by_attribution": {
+  "PFS_RECONSTRUCTION": 1,
+  "RLD_COVERAGE_GAP": 1
+ },
+ "numeric": {
+  "AU_CL_SUP": {
+   "status": "NOT_APPLICABLE",
+   "reason": "unit makes no numeric comparison"
+  },
+  "AU_CL_ORPHAN": {
+   "status": "NOT_APPLICABLE",
+   "reason": "unit makes no numeric comparison"
+  },
+  "AU_CL_CORR": {
+   "status": "NOT_APPLICABLE",
+   "reason": "unit makes no numeric comparison"
+  },
+  "AU_CL_FOREIGN": {
+   "status": "NOT_APPLICABLE",
+   "reason": "unit makes no numeric comparison"
+  }
+ },
+ "semantic": {
+  "AU_CL_SUP": {
+   "dominant": "CAUSAL_ASSERTION",
+   "counts": {
+    "CAUSAL_ASSERTION": 1,
+    "NO_CAUSAL_CONTENT": 1
+   },
+   "coverage": {
+    "scripts": [
+     "LATIN"
+    ],
+    "assessable": true,
+    "reason": "COVERED"
+   },
+   "clauses": [
+    {
+     "clause": "Compound X promotes readout Y.",
+     "type": "CAUSAL_ASSERTION",
+     "hits": {
+      "causal": [
+       "promote",
+       "promote"
+      ]
+     }
+    },
+    {
+     "clause": "readout Y increased",
+     "type": "NO_CAUSAL_CONTENT",
+     "hits": {
+      "causal": []
+     }
+    }
+   ]
+  },
+  "AU_CL_ORPHAN": {
+   "dominant": "CAUSAL_ASSERTION",
+   "counts": {
+    "CAUSAL_ASSERTION": 2,
+    "NO_CAUSAL_CONTENT": 2
+   },
+   "coverage": {
+    "scripts": [
+     "LATIN"
+    ],
+    "assessable": true,
+    "reason": "COVERED"
+   },
+   "clauses": [
+    {
+     "clause": "Compound X promotes readout Y.",
+     "type": "CAUSAL_ASSERTION",
+     "hits": {
+      "causal": [
+       "promote",
+       "promote"
+      ]
+     }
+    },
+    {
+     "clause": "Compound X drives readout Y.",
+     "type": "CAUSAL_ASSERTION",
+     "hits": {
+      "causal": [
+       "drive"
+      ]
+     }
+    },
+    {
+     "clause": "readout Y increased",
+     "type": "NO_CAUSAL_CONTENT",
+     "hits": {
+      "causal": []
+     }
+    },
+    {
+     "clause": "compound X treatment only",
+     "type": "NO_CAUSAL_CONTENT",
+     "hits": {
+      "causal": []
+     }
+    }
+   ]
+  },
+  "AU_CL_CORR": {
+   "dominant": "CORRELATION_ONLY",
+   "counts": {
+    "CORRELATION_ONLY": 1,
+    "NO_CAUSAL_CONTENT": 2
+   },
+   "coverage": {
+    "scripts": [
+     "LATIN"
+    ],
+    "assessable": true,
+    "reason": "COVERED"
+   },
+   "clauses": [
+    {
+     "clause": "Readout Y is associated with compound X.",
+     "type": "CORRELATION_ONLY",
+     "hits": {
+      "causal": [],
+      "correlation": true
+     }
+    },
+    {
+     "clause": "readout Y increased",
+     "type": "NO_CAUSAL_CONTENT",
+     "hits": {
+      "causal": []
+     }
+    },
+    {
+     "clause": "observational sampling",
+     "type": "NO_CAUSAL_CONTENT",
+     "hits": {
+      "causal": []
+     }
+    }
+   ]
+  },
+  "AU_CL_FOREIGN": {
+   "dominant": "UNASSESSED_LANGUAGE",
+   "counts": {},
+   "coverage": {
+    "scripts": [
+     "HAN",
+     "KANA",
+     "LATIN"
+    ],
+    "assessable": false,
+    "reason": "SCRIPT_NOT_COVERED:HAN,KANA,LATIN"
+   },
+   "clauses": []
+  }
+ },
+ "causal_disposition": {
+  "AU_CL_SUP": "ASSERTED_WITH_REGISTERED_INTERVENTION_SUPPORT",
+  "AU_CL_ORPHAN": "ASSERTED_WITHOUT_INTERVENTIONAL_SUPPORT:PAPER_HAS_INTERVENTION_ELSEWHERE",
+  "AU_CL_CORR": "NOT_ASSERTED:CORRELATION_ONLY",
+  "AU_CL_FOREIGN": "UNASSESSED"
+ },
+ "suppressed_causal": [],
+ "coverage": {
+  "units_total": 4,
+  "assessed": 3,
+  "unassessed": 1,
+  "note": "unassessed>0 表示语义层未覆盖，已显式上报 SEMANTIC_TYPE_UNRECOGNIZED，不当作 NO_ISSUE"
+ },
+ "no_issue_units": [
+  "AU_CL_SUP",
+  "AU_CL_CORR"
+ ],
+ "boundary": {
+  "scientific_accuracy": "NOT_ESTIMABLE",
+  "note": "诊断是候选意见，不是科学认证；每条均可撤销",
+  "pfs_modified": false
+ }
+}

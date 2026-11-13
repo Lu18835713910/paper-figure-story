@@ -1,6 +1,6 @@
 # v1.1.1 maintenance candidate — 1.1.1
 
-Published v1.1.1; historical maintenance evidence is retained. Target version is `v1.1.1`, published as the v1.1.1 Git tag after owner authorisation. The base `v1.1.0` release remains immutable.
+Local maintenance branch; **not a published release**. Target version is `v1.1.1`, but that Git tag does not exist yet and is created only after the owner's release authorisation. The base `v1.1.0` release remains immutable.
 
 ## What this candidate adds
 

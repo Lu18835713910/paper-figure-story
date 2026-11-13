@@ -6,7 +6,7 @@
 
 ## 1. 三档能力（不要混谈）
 
-| 档位 | 能力 | 依赖 | 本版本验证状态 |
+| 档位 | 能力 | 依赖 | 本候选状态 |
 |---|---|---|---|
 | **A. portable** | PDF 索引、M1/Schema 校验、A/B/局部逻辑图的**原生 PPTX 渲染**、按 `page-map` 合稿进已有主稿、Workbook DOCX 生成、`deliver` / `check-delivery` / `validate_story` | 仅 `requirements.txt` 的 6 个 Python 包 | ✅ **VERIFIED**（本轮实测） |
 | **B. Office 导出** | 上述产物的**实际 PNG / PDF**、Office 输入回执 | 本地安装的 Microsoft PowerPoint / Word + COM | ⚠️ 本机具备，历史案例已实跑；干净机器未验证 |
@@ -88,12 +88,12 @@ python -c "import win32com.client as w; w.Dispatch('PowerPoint.Application'); pr
 
 ---
 
-## 4. 环境验证矩阵（本版本）
+## 4. 环境验证矩阵（本候选）
 
 | 环境 | 状态 | 依据 |
 |---|---|---|
 | Windows + CPython **3.13.14** + Office + 中英文字体 | **VERIFIED** | 本轮 `--help` / `--check-dependencies` / 缺 knowledge 门禁 / 缺宿主门禁 / `pip check`；历史回归在同一环境 229 项通过 |
-| Windows + CPython 3.10–3.12 | `NOT_TESTED` | 代码声明 3.10+，本版本未在该区间实跑 |
+| Windows + CPython 3.10–3.12 | `NOT_TESTED` | 代码声明 3.10+，本候选未在该区间实跑 |
 | macOS / Linux | `NOT_TESTED` | 路径分隔符、字体替换、COM 导出均未验收 |
 | 无 Office | 部分可用 | A 档可用；B 档不可用，PNG/PDF 与实际导出回执缺失 |
 | 无 Artifact 宿主 | 部分可用 | A + B 可用；**从零自适应主稿不可用** |
@@ -116,6 +116,6 @@ python -c "import win32com.client as w; w.Dispatch('PowerPoint.Application'); pr
 1. "`--check-dependencies` 通过 = PPT 渲染能力齐全" → 错。它只证明 **A 档**，C 档仍需 Node + Artifact 宿主。
 2. "`node -v` 有版本 = 宿主可用" → 错。还缺 Artifact 模块与 `container_tools` 三件套。
 3. "路径存在 = 可用" → 错。需实际跑一次并打开产物核验；未跑过一律 `NOT_TESTED`。
-4. "缺宿主 = 软件有缺陷" → 错。这是**声明的能力边界**，且有 `HOST_BACKEND_REQUIRED` 明确门禁。
+4. "缺宿主 = 候选有缺陷" → 错。这是**声明的能力边界**，且有 `HOST_BACKEND_REQUIRED` 明确门禁。
 
 当前正式门禁为21套件/297项，以实际正式配置与回执为准，参见TESTING.md；229项仅为历史记录。
