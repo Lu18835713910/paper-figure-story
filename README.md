@@ -114,6 +114,16 @@ PFS 不强行将 Fig.1–Fig.N 连成单一时间线，而是根据来源表达�
 
 Visual Polish 负责统一版面、连接线和阅读路径，**不会为视觉效果擅自增删科研事实或证据关系**。模式代表展开深度，不是科学可信度等级。
 
+## 将仓库链接直接交给Agent安装
+
+**这是为首次使用者推荐的安装入口。** 在支持本地Skills及Git/Python的Agent里，只需发送：
+
+> 请帮我安装或更新这个Skill：https://github.com/Lu18835713910/paper-figure-story 。请阅读仓库的README、AGENTS.md和INSTALL.md；核实我当前Agent实际使用的Skills目录与已有版本；使用仓库主分支中的`scripts/install_pfs_skill.py`先预检、备份旧版再完整替换；核对活动Skill的VERSION、SKILL.md和实际加载路径。不要把旧版文件和新版合并，也不要删除我的本地修改；如遇未知目录、权限不足或重叠的多个安装位置，先报告具体风险。
+
+这条入口对应仓库[AGENTS.md](AGENTS.md)以及[Agent安装流程](INSTALL.md#让agent直接安装或升级从仓库链接开始)。执行Agent应从**独立、干净的main分支Git克隆**运行受审查的安装器，而不是把仓库URL当成某个旧Tag或使用旧版README命令。安装器仅将Git登记的文件安装到核实后的Skills目录，保留旧版本备份。**已经安装v1.0/v1.1的人可以覆盖升级；GitHub不会远程自动覆盖其他人的电脑，仍需在用户设备上运行安装。**
+
+**正式版本与仓库说明的区别：** v1.2.0 Tag/Release ZIP仍是冻结的正式快照；仓库`main`的安装器和调用文档属于后续维护改进，不能称为已经重打包进原正式ZIP。若要求只安装固定发布资产，请使用下文原ZIP与SHA校验路径。
+
 ## 下载、升级与快速开始
 
 请从**[正式 v1.2.0 Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0)**获取：
