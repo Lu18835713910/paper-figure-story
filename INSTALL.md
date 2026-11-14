@@ -4,6 +4,29 @@
 
 > **发布快照边界：** Git Tag `v1.2.0`和正式Release ZIP是已发布快照；其内部旧版`INSTALL.md`不会随主分支文档更正自动变化。本页为当前在线说明，仍下载原正式ZIP并校验原SHA；不会改变Tag或正式资产身份。
 
+## 让Agent直接安装或升级（从仓库链接开始）
+
+用户不需要自己写PowerShell安装命令。只需要向具有本地文件与终端权限的Agent发送：
+
+> 给我安装或更新这个Skill：https://github.com/Lu18835713910/paper-figure-story
+
+执行Agent应读取本仓库[AGENTS.md](AGENTS.md)，并在当前用户的电脑上按下列步骤操作：
+
+1. **确认真正的Skill安装位置。** Codex用户级默认目录为`~/.codex/skills/paper-figure-story`；有的使用者还配置了工作区级Skill或其他Agent宿主。先定位活动目录和重名副本，不能仅凭默认目录猜测。
+2. **使用单独的干净main克隆。** 从`https://github.com/Lu18835713910/paper-figure-story.git`克隆到Skill目录以外的临时/工作位置，检查`git remote -v`、`VERSION`、`SKILL.md`与安装器源码，确认是可信仓库和预期版本。默认使用`main`是为了获得发布后维护的安全安装与调用文档；不是宣称原v1.2.0 ZIP已更新。
+3. **执行预检和安全替换：**
+
+   ```bash
+   python scripts/install_pfs_skill.py --dry-run
+   python scripts/install_pfs_skill.py
+   ```
+
+   从克隆仓库根目录运行。对于其他已核实的Agent技能目录，明确提供`--target /absolute/path/to/paper-figure-story`（预检和安装使用相同参数）。安装器只复制已登记的普通文件，校验文件哈希，不复制Git目录及未跟踪私人文件。旧版整个目录备份到当前Skills目录之外，安装失败会尝试回滚。
+4. **核对结果。** 查看安装器输出的`version`、`revision`、`target`、`backup`；在新会话确认Agent确实加载此`SKILL.md`和`VERSION=1.2.0`。若存在其他活动路径的同名Skill，分别报告且不得假称已全部覆盖。
+5. **不要直接执行旧版Tag中的安装说明，也不要在旧目录中`git pull`或覆盖合并。** 旧文件可能残留，或用户修改被覆盖。如果缺少Git、Python、主机权限，明确说明阻碍；不要将未完成安装冒充成功。
+
+适用于Windows、macOS与Linux上的具备Python 3.10+和Git的本地Agent；**目前仅进行了隔离文件系统安装/回滚测试，没有证明所有Agent宿主能发现并加载Skill**。本页原有Windows ZIP+SHA安装方式仍作为固定正式发布包的替代安装入口。
+
 ## 正式版本与下载
 
 - [v1.2.0正式Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0)
