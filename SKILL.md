@@ -20,7 +20,7 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 
 科研JSON由**执行Skill的Agent**依据来源构建，普通用户无需编写。开始M1前读[M1编写指南](references/m1_authoring_guide.md)：合法实体类型、全部实体必填limits、Story方法/证据身份及data_bindings，附真实校验的完整自编示例。不要通过修改Schema或伪装实体类型修复输入。
 
-已完成M1后遇`A_NEEDS_GUIDANCE`，先保留失败目录及缓存，按[A容量恢复操作单](references/a_overview_recovery.md#低成本即时恢复操作单)选择：**已有statement足以支持概括时，默认用statement绑定的display guidance恢复A**；需要精细B、局部图及Workbook协同时，再构建显式Research Logic。两者均需Agent有源内容审阅，不是自动科学聚合。不能为容量删贡献、改并行为因果或缩字。guidance只恢复显示规划，不代表B几何、主稿、Workbook或Full已经通过。
+已完成M1后遇`A_NEEDS_GUIDANCE`，先保留失败目录及缓存，按[A容量恢复操作单](references/a_overview_recovery.md#低成本即时恢复操作单)选择：**用户要求同源A/B、完整B、局部逻辑图或Workbook协同时，优先使用经过来源审阅的显式Research Logic，并修复其展示布局**；仅在不要求完整同源A/B、且已有statement足以支持简要概括时，可以用statement绑定的display guidance恢复旧默认A显示。两者均需Agent有源内容审阅，不是自动科学聚合。不能为容量删贡献、改并行为因果或缩字。guidance只恢复显示规划，不代表同源A/B、B几何、主稿、Workbook或Full已经通过。
 
 长任务按[五阶段保存与续跑](references/agent_staged_resume.md)执行。新会话核对指纹后从最近有效阶段续跑，不重复解析全文。读真实进程退出码及execution/failure/几何报告，不以stdout中的状态或exit 0单独宣称完成。便携A/B可用不等于Figure主稿Artifact宿主可用；先单独检查宿主，再开展昂贵资产工作。
 
