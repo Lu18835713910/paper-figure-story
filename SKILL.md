@@ -8,6 +8,14 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 > v1.1.1 既有 PFS 脚本及 schema 保留；新增内容仅限 RLD 诊断模块及其文档、测试与示例。
 > 工程测试通过不等于科学准确性认证（`scientific_accuracy=NOT_ESTIMABLE`）。
 
+## v1.2.0 正式科研逻辑图入口（优先于旧兼容框架）
+
+当用户要求整篇论文的**科研逻辑框架、分支关系、A/B图或可编辑科研汇报**时，执行Agent首先必须根据原文完成Scientific Index/Methods任务和来源覆盖审阅，再建立/验证同一论文的M1、Evidence Network、显式Research Logic。之后使用`--research-logic <validated-model>`启用同源投影；要求完整B时同时使用`--products with-network`。不得将`balanced`误认为多分支开关，也不得以旧兼容的`study_map`、默认`overview()`或逐Figure线性故事代替有源A/B逻辑模型。
+
+**科学拓扑决定展示拓扑：** 保留论文实际存在的多条研究主线、共享证据、平行任务、问题分叉、汇合与不连通分量；如果论文确实是一条主线，也须如实呈现，绝不为迎合模板虚构分叉。A显示已审核核心，B显示同模型全部已登记的节点/关系，C按Figure独立讲述。结构验证、来源复核和视觉验收分别记录；工程PASS不等于已发现论文所有核心贡献。
+
+仅当用户明确要求兼容旧PPT JSON/`study_map`时才使用旧版展示路径，并标注它**不是完整同源A/B**。遇到`A_NEEDS_GUIDANCE`时，若当前任务要求A/B协同，优先修复有源Research Logic模型与可读布局；不得为了消除容量错误直接退回旧单线图、截断贡献或省略B。独立便携A/B成功不代表主Figure PPT的Artifact后端成功；实际生成状态逐项报告。
+
 ## Agent首次执行与中断恢复（先按需读这三页）
 
 科研JSON由**执行Skill的Agent**依据来源构建，普通用户无需编写。开始M1前读[M1编写指南](references/m1_authoring_guide.md)：合法实体类型、全部实体必填limits、Story方法/证据身份及data_bindings，附真实校验的完整自编示例。不要通过修改Schema或伪装实体类型修复输入。
