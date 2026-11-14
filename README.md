@@ -122,6 +122,8 @@ Visual Polish 负责统一版面、连接线和阅读路径，**不会为视觉�
 
 这条入口对应仓库[AGENTS.md](AGENTS.md)以及[Agent安装流程](INSTALL.md#让agent直接安装或升级从仓库链接开始)。执行Agent应从**独立、干净的main分支Git克隆**运行受审查的安装器，而不是把仓库URL当成某个旧Tag或使用旧版README命令。安装器仅将Git登记的文件安装到核实后的Skills目录，保留旧版本备份。**已经安装v1.0/v1.1的人可以覆盖升级；GitHub不会远程自动覆盖其他人的电脑，仍需在用户设备上运行安装。**
 
+> **宿主不同，活动目录不同**：WorkBuddy 用户级是 `~/.workbuddy/skills/paper-figure-story`，Codex 用户级是 `~/.codex/skills/paper-figure-story`；安装器默认目标是后者，在 WorkBuddy 中必须显式 `--target`。Agent 需先枚举所有同名副本（含工作区级与其他插件引入的副本）并以宿主真实发现结果为准，同时记录 `VERSION` **和** Git 修订（main 的 VERSION 可能仍是 1.2.0 但含发布后维护提交）。升级完成后**必须新开会话**用宿主的 Skill 入口确认实际加载路径；当前会话手动读取新版文件不算自动加载通过。完整判据见 [INSTALL.md 宿主识别章节](INSTALL.md#宿主识别与新旧版本混用防护workbuddy--codex-必读) 与 [AGENTS.md](AGENTS.md)。
+
 **正式版本与仓库说明的区别：** v1.2.0 Tag/Release ZIP仍是冻结的正式快照；仓库`main`的安装器和调用文档属于后续维护改进，不能称为已经重打包进原正式ZIP。若要求只安装固定发布资产，请使用下文原ZIP与SHA校验路径。
 
 ## 下载、升级与快速开始

@@ -71,10 +71,44 @@ def safe_route(positions,source,target,lane,width):
     a,b=positions[source],positions[target];points=_route(a,b,lane,width)
     if not route_hits_node(points,positions,{source,target}):return points
     ax,ay,aw,ah=a;bx,by,bw,bh=b
-    bottom=max(p[1]+p[3] for p in positions.values())+60+lane*30
+    # Reuse a small bounded set of channels immediately below the node band.
+    # The former `lane*30` used the GLOBAL edge index, so every later fallback
+    # edge was pushed progressively further down. B then grew its canvas to
+    # accommodate those empty detour lanes (blank lower third + very long
+    # vertical runs). Bounding the channel count keeps detours short without
+    # dropping any relation or shrinking any text.
+    bottom=max(p[1]+p[3] for p in positions.values())+60+(lane%3)*26
     points=[[ax+aw,ay+ah/2],[ax+aw+22,ay+ah/2],[ax+aw+22,bottom],[bx-22,bottom],[bx-22,by+bh/2],[bx,by+bh/2]]
     if route_hits_node(points,positions,{source,target}):raise ValueError('LOGIC_ROUTE_NEEDS_EXPLICIT_CHANNEL: '+source+' '+target)
     return points
+# Projection-only display fields. research_logic.validate_model() checks
+# scientific identity/source contracts but intentionally does NOT check these;
+# build_scene() dereferences them unconditionally. Without an explicit gate a
+# model can be `valid:true` and still crash later with a bare KeyError: 'kind'.
+DISPLAY_NODE_FIELDS=('kind','identity','title','short_text','source_ids',
+                     'statement_ids','source_entity_ids','field_bindings')
+
+def validate_display_contract(model,node_ids=None):
+    """Fail early with an actionable code instead of a renderer KeyError."""
+    nm={x['id']:x for x in model['nodes']}
+    ids=list(node_ids) if node_ids is not None else [x['id'] for x in model['nodes']]
+    missing=[]
+    for nid in ids:
+        node=nm.get(nid)
+        if node is None:
+            missing.append(str(nid)+' / NODE_NOT_FOUND');continue
+        for field in DISPLAY_NODE_FIELDS:
+            if field not in node:missing.append(str(nid)+' / '+field)
+    return {'valid':not missing,'errors':missing,
+            'code':'LOGIC_DISPLAY_FIELD_REQUIRED'}
+
+def require_display_contract(model,node_ids=None):
+    q=validate_display_contract(model,node_ids)
+    if not q['valid']:
+        raise ValueError('LOGIC_DISPLAY_FIELD_REQUIRED: '+', '.join(q['errors'])+
+                         '; projection display fields are required even though '
+                         'validate_model() does not check them')
+
 def read_display(model,metadata):
     rec=metadata.get('logic_display')
     if not rec:return None
@@ -118,6 +152,8 @@ def read_display(model,metadata):
             if points and (len(points)<2 or not on_boundary(points[0],positions[em[eid]['from']]) or not on_boundary(points[-1],positions[em[eid]['to']])):raise ValueError('LOCAL_ROUTE_ENDPOINT')
     return d
 def build_scene(network,model,view='A',display=None):
+    # Earliest point where the display contract is actually consumed.
+    require_display_contract(model)
     nm={x['id']:x for x in model['nodes']};em={x['id']:x for x in model['edges']}
     local=(display or {}).get('views',{}).get(view)
     if view in ['A','B']:
@@ -228,6 +264,9 @@ def build_scene(network,model,view='A',display=None):
 def sample_products(network,metadata,views):
     m=read_model(network,metadata)
     if m is None:raise ValueError('RESEARCH_LOGIC_REQUIRED')
+    # Preflight before any product projection so the CLI reports a specific
+    # field list rather than a traceback deep inside the renderer.
+    require_display_contract(m)
     display=read_display(m,metadata)
     return [build_scene(network,m,v,display) for v in views]
 def validate_AB(model,A,B):

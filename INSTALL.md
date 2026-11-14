@@ -27,6 +27,29 @@
 
 适用于Windows、macOS与Linux上的具备Python 3.10+和Git的本地Agent；**目前仅进行了隔离文件系统安装/回滚测试，没有证明所有Agent宿主能发现并加载Skill**。本页原有Windows ZIP+SHA安装方式仍作为固定正式发布包的替代安装入口。
 
+### 宿主识别与新旧版本混用防护（WorkBuddy / Codex 必读）
+
+上面的代码块使用安装器默认目标 `~/.codex/skills/paper-figure-story`，**仅适用于 Codex**。在 WorkBuddy 中必须用宿主真实发现结果定位活动目录，并显式传 `--target`：
+
+```bash
+# WorkBuddy 用户级（先由宿主注册表/缓存确认，再执行）
+python scripts/install_pfs_skill.py --dry-run --target "$HOME/.workbuddy/skills/paper-figure-story"
+python scripts/install_pfs_skill.py --target "$HOME/.workbuddy/skills/paper-figure-story"
+```
+
+安装前后必做：
+
+| 步骤 | 要求 |
+|---|---|
+| 发现 | 枚举用户级、工作区/项目级、Codex、隔离目录、插件引入的同名 Skill；记录路径 / `VERSION` / `SKILL.md` SHA-256 / Git修订 / 是否活动 / 是否旧版 / 是否冲突；检查符号链接与 Windows 重解析点。不要把备份、普通克隆或研究工作目录当成正在使用的 Skill。 |
+| 版本身份 | 同时记录 `VERSION` 与 `git rev-parse HEAD`。`main` 的 `VERSION` 可能仍是 `1.2.0`，但已包含发布后维护提交，仅看 `VERSION` 会漏判。 |
+| 备份 | 除安装器自带的 `pfs-skill-backups/` 外，另存一份旧目录完整副本（含 `.git` 与用户自行修改的文件），记录备份路径与恢复命令。 |
+| 残留与校验 | 安装后确认活动目录无旧版独有文件；逐一比对全部 Git tracked 文件 SHA-256 与选定基线；检查 `SKILL.md`、`scripts/run_pfs.py` 等关键文件。 |
+| 新会话 | 宿主在**会话启动时冻结 Skill 注册信息**，中途安装不会在当前会话生效。必须新开会话，通过宿主的 `Skill(paper-figure-story)` 入口确认返回的 `SKILL.md` 路径、该路径下 `VERSION`、以及 `SKILL.md` 和关键脚本 SHA。当前会话手动读取新版文件或直接运行脚本，只能证明代码可调用，**不能算自动加载 PASS**；无法启动新会话时应保留 `NOT_TESTED` 并交付可直接执行的验证命令。 |
+| 运行一致性 | 一次真实论文任务中记录实际执行的 `run_pfs.py`、`project_research_logic.py`、`render_logic.py`、`build_pptx.py` 的绝对路径与 SHA-256，必须来自同一个已核验安装；主稿、A 图、B 图若来自不同目录需明确登记，不允许静默混用。 |
+
+若实际活动版本仍是旧版，或一次运行中混用新旧脚本，升级与发布均不得判为通过。详细 Agent 决策流程见 [AGENTS.md](AGENTS.md)。
+
 ## 正式版本与下载
 
 - [v1.2.0正式Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0)

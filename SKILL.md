@@ -242,3 +242,7 @@ python scripts/rld_diagnose.py --index index.json --network network.json --logic
 第二条命令自动派生论证单元。Agent 检查缺失字段和 source_statement_ids，回查原页及实验对照，记录待确认的前提与限制。逻辑标签不得冒充原文。归因候选需人工核对，尤其是已有干预与当前断言的关联。科研准确性 NOT_ESTIMABLE。
 
 数值核验使用 rld_numeric.py --claims claims.json --registry registry.json --manifest manifest.json --manifest-anchor SHA256 --out numeric.json。规格见 references/rld_diagnosis_contract.md。外部锚点须来自独立冻结记录，同次生成的 manifest 与摘要不建立可信来源。判定仅适用于报告的均值；不认证统计显著性、机制或因果。原论文和私人数据不分发。
+
+## 七、宿主版本自检（每次正式运行前）
+
+本 Skill 可能被多个宿主以不同目录加载，且宿主通常在**会话启动时冻结 Skill 注册信息**。开始正式论文任务前，先确认：当前宿主实际加载的 `SKILL.md` 绝对路径；该目录下的 `VERSION` 与 Git 修订（仅看 `VERSION` 不足以区分含维护提交的 `main`）；本次运行实际调用的 `scripts/run_pfs.py`、`project_research_logic.py`、`render_logic.py`、`build_pptx.py` 的绝对路径与 SHA-256 是否全部来自同一已核验安装。WorkBuddy 用户级目录为 `~/.workbuddy/skills/paper-figure-story`，Codex 用户级目录为 `~/.codex/skills/paper-figure-story`，两者不通用。升级安装后须新开会话用宿主 Skill 入口复核；在同一会话内手动读取新版文件或直接调用其脚本，不构成自动加载通过。安装与升级的完整安全流程见 [INSTALL.md](INSTALL.md) 与 [AGENTS.md](AGENTS.md)。

@@ -368,6 +368,11 @@ def insert_images(slide, shape, paths, json_path, allow_missing):
 # edges explicitly encode author-supported vs presentation-inferred relationships.
 EDGE_TYPES = {'motivates', 'tests', 'supports', 'validates', 'compares',
               'parallel', 'extends', 'feedback', 'integrates', 'alternative'}
+# Symmetric relations have NO registered scientific direction; from/to only
+# name the two endpoints. This matches the Research Logic projector's
+# directed_relation() and the existing figure-story step renderer, which
+# already draws parallel/compares as undirected dashed links.
+UNDIRECTED_RELATIONS = {'parallel', 'compares', 'alternative'}
 NODE_ROLES = {'background', 'question', 'experiment', 'observation',
               'analysis', 'validation', 'inference', 'conclusion'}
 
@@ -400,7 +405,10 @@ def _graph_layout(nodes, edges, W, H, detail_min=None):
         indeg={n['id']:0 for n in nodes}
         forward={n['id']:[] for n in nodes}
         for e in edges:
-            if e.get('relation')=='feedback': continue
+            # Feedback is a returning check and symmetric relations carry no
+            # ordering. Neither may be counted as a forward dependency when
+            # assigning topological display layers.
+            if e.get('relation')=='feedback' or e.get('relation') in UNDIRECTED_RELATIONS: continue
             forward[e['from']].append(e['to']);indeg[e['to']]+=1
         queue=[n['id'] for n in nodes if indeg[n['id']]==0]
         order=[];layers={k:0 for k in indeg}
@@ -478,24 +486,31 @@ def render_argument_graph(slide, record, style=None):
     for e in edges:
         src=coords[e['from']];dst=coords[e['to']]
         inferred=e.get('provenance')=='presentation'
-        feedback=e.get('relation')=='feedback' or dst[0]<=src[0]-.05
+        undirected=e.get('relation') in UNDIRECTED_RELATIONS
+        # A symmetric relation must never be serialized with a direction arrow,
+        # even when its endpoints happen to be laid out right-to-left.
+        arrow=not undirected
+        explicit_feedback=e.get('relation')=='feedback'
+        feedback=explicit_feedback or dst[0]<=src[0]-.05
         direction=1 if dst[0]>src[0] else -1
         xa=src[0]+direction*cw*.50; xb=dst[0]-direction*cw*.50
         ya,yb=src[1],dst[1]
         if feedback:
-            # Feedback loop is a returning hypothesis check; indicate with dashed line.
-            inferred=True
+            # Geometry alone is not a scientific claim: only an explicitly
+            # registered feedback relation may be marked as presentation
+            # inference. Right-to-left edges keep their declared provenance.
+            dashed=inferred or explicit_feedback
             yt=y0+H-.12
-            _connect(slide,src[0],ya+ch*.5,src[0],yt,style,True)
-            _connect(slide,src[0],yt,dst[0],yt,style,True)
-            _connect(slide,dst[0],yt,dst[0],yb+ch*.5,style,True,True)
+            _connect(slide,src[0],ya+ch*.5,src[0],yt,style,dashed)
+            _connect(slide,src[0],yt,dst[0],yt,style,dashed)
+            _connect(slide,dst[0],yt,dst[0],yb+ch*.5,style,dashed,arrow)
         elif abs(ya-yb)<.09:
-            _connect(slide,xa,ya,xb,yb,style,inferred,True)
+            _connect(slide,xa,ya,xb,yb,style,inferred,arrow)
         else:
             mid=(xa+xb)/2
             _connect(slide,xa,ya,mid,ya,style,inferred)
             _connect(slide,mid,ya,mid,yb,style,inferred)
-            _connect(slide,mid,yb,xb,yb,style,inferred,True)
+            _connect(slide,mid,yb,xb,yb,style,inferred,arrow)
         # Descriptive links live in their own small labels, not as invented causal arrows.
         lbl=str(e.get('label','')).strip()
         if lbl and abs(xb-xa)>.33:
@@ -528,7 +543,6 @@ def render_argument_graph(slide, record, style=None):
         if fig:
             textbox(slide,'PFS_GRAPH_FIGREF',x+.1,y+stack['figure_y'],cw-.2,stack['figure_h'],fig,
                     size=8,color='accent',style=style)
-
 
 
 def validate_framework(record, slide_i):
