@@ -109,6 +109,25 @@ def require_display_contract(model,node_ids=None):
                          '; projection display fields are required even though '
                          'validate_model() does not check them')
 
+# Scene units are 96-dpi px. A tailEnd triangle is drawn at the final point of
+# a connector and extends BACK along the last segment. When that point lies on
+# a filled node frame, the frame (painted after connectors) clips the triangle.
+# Retreating the endpoint one arrow-length keeps the whole head in the visible
+# band outside the card. Z-order is intentionally NOT changed.
+ARROW_ENDPOINT_RETREAT = 12
+
+def retreat_arrow_endpoint(points,retreat=None):
+    """Return the same path with only its final point pulled back along the
+    last segment. Bounded: never crosses the preceding corner."""
+    gap=ARROW_ENDPOINT_RETREAT if retreat is None else retreat
+    if len(points)<2 or gap<=0:return points
+    a,b=points[-2],points[-1]
+    dx,dy=b[0]-a[0],b[1]-a[1]
+    length=math.hypot(dx,dy)
+    if length<=gap:return points
+    moved=[b[0]-dx/length*gap,b[1]-dy/length*gap]
+    return list(points[:-1])+[moved]
+
 def read_display(model,metadata):
     rec=metadata.get('logic_display')
     if not rec:return None
@@ -225,6 +244,10 @@ def build_scene(network,model,view='A',display=None):
         if shown_edge.get('display_note') and view!='B' and not local:continue
         points=hint.get('points') or safe_route(pos,e['from'],e['to'],i,width)
         if route_hits_node(points,pos,{e['from'],e['to']}):raise ValueError('LOGIC_ROUTE_NODE_COLLISION: '+eid)
+        # U1 note: the arrowhead endpoint retreat is a PURE RENDERING transform
+        # applied in render_logic._display_points(). The scientific scene here
+        # must stay byte-identical, otherwise validate_products() rebuilds a
+        # deterministic source-bound plan and reports PRODUCT_PLAN_DRIFT.
         required_height=max(p[1] for p in points)+(65 if view=='A' else 40 if local else 200)
         if required_height>height:
             if view=='A' or local:raise ValueError('LOGIC_A_ROUTE_CAPACITY: use explicit channels within the main-slide canvas')

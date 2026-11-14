@@ -29,7 +29,11 @@
 
 ### 宿主识别与新旧版本混用防护（WorkBuddy / Codex 必读）
 
-上面的代码块使用安装器默认目标 `~/.codex/skills/paper-figure-story`，**仅适用于 Codex**。在 WorkBuddy 中必须用宿主真实发现结果定位活动目录，并显式传 `--target`：
+上面的代码块使用安装器默认目标 `~/.codex/skills/paper-figure-story`，**仅适用于 Codex**。
+
+**宿主路径对照（必须区分）**：WorkBuddy 用户级为 `~/.workbuddy/skills/paper-figure-story`，Codex 用户级为 `~/.codex/skills/paper-figure-story`；两者不通用，且项目级/工作区级副本需单独核对。下面的 `--target` 只对已核实的 WorkBuddy 活动目录生效。
+
+在 WorkBuddy 中必须用宿主真实发现结果定位活动目录，并显式传 `--target`：
 
 ```bash
 # WorkBuddy 用户级（先由宿主注册表/缓存确认，再执行）

@@ -115,7 +115,7 @@ def validate_scene(slide,scene):
         shape,element=anchors[0];p=element['position'];factor=shape.width/p['width'];ox=shape.left-p['left']*factor;oy=shape.top-p['top']*factor
         for edge in scene.get('connectors',[]):
             parts=sorted([s for s in slide.shapes if s.name.startswith('RC_EDGE_'+scene['id']+'_'+edge['id']+'_')],key=lambda s:int(s.name.rsplit('_',1)[1]))
-            segments=[(a,b) for a,b in zip(edge['points'],edge['points'][1:]) if a!=b]
+            segments=[(a,b) for a,b in zip(display_points(edge),display_points(edge)[1:]) if a!=b]
             if len(parts)!=len(segments):raise ValueError('NATIVE_EDGE_PATH_DRIFT')
             for i,(s,(a,b)) in enumerate(zip(parts,segments)):
                 actual=[s.begin_x,s.begin_y,s.end_x,s.end_y];wanted=[ox+a[0]*factor,oy+a[1]*factor,ox+b[0]*factor,oy+b[1]*factor]
@@ -124,6 +124,18 @@ def validate_scene(slide,scene):
                 head=s._element.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}headEnd')
                 arrow=tail is not None and tail.get('type','none')!='none'
                 if arrow!=bool(edge.get('arrow') and i==len(parts)-1) or (head is not None and head.get('type','none')!='none'):raise ValueError('NATIVE_EDGE_DIRECTION_DRIFT')
+
+def display_points(edge):
+    """Pure rendering transform: pull back the arrowhead endpoint so the
+    triangle is not clipped by the filled node frame painted earlier in the
+    z-order. The scientific scene model is NEVER modified here; both
+    draw_scene() and validate_scene() consume this same function so the
+    serialized geometry and its contract stay in agreement.
+    """
+    pts=edge['points']
+    if not edge.get('arrow') or len(pts)<2:return pts
+    from project_research_logic import retreat_arrow_endpoint
+    return retreat_arrow_endpoint(pts)
 
 def color(s):return RGBColor.from_string(s.lstrip('#'))
 def text(slide,name,value,p,size,bold=False,fill='#18365C',align='left',scale=1):
@@ -143,13 +155,16 @@ def draw_scene(slide,product,scene,frame=None,omit_scene_title=False):
     def rect(p):return [ox+p['left']*factor,oy+p['top']*factor,p['width']*factor,p['height']*factor]
     # Connector identity and endpoints are preserved in DrawingML metadata.
     for a in scene.get('connectors',[]):
-        segments=[(u,v) for u,v in zip(a['points'],a['points'][1:]) if u!=v]
+        dpts=display_points(a)
+        segments=[(u,v) for u,v in zip(dpts,dpts[1:]) if u!=v]
         for j,((ax,ay),(bx,by)) in enumerate(segments,1):
             c=slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT,int(ox+ax*factor),int(oy+ay*factor),int(ox+bx*factor),int(oy+by*factor));c.name='RC_EDGE_'+scene['id']+'_'+a['id']+'_'+str(j)
             c.line.color.rgb=color(a.get('color','#174994'));c.line.width=Pt(max(.8,a.get('stroke_width',2.2)*.75*scale))
             if a.get('dashed'):c.line.dash_style=MSO_LINE_DASH_STYLE.DASH
             if a.get('arrow') and j==len(segments):
-                tail=OxmlElement('a:tailEnd');tail.set('type','triangle');tail.set('w','med');tail.set('len','med');c._element.spPr.get_or_add_ln().append(tail)
+                # Large canvases are downscaled on PNG/PDF export; a 'med' head
+                # collapses to a few pixels and reads as no direction at all.
+                tail=OxmlElement('a:tailEnd');tail.set('type','triangle');tail.set('w','lg');tail.set('len','lg');c._element.spPr.get_or_add_ln().append(tail)
             cn=c._element.find('.//{http://schemas.openxmlformats.org/presentationml/2006/main}cNvPr');cn.set('descr',json.dumps({'logic_edge':a.get('source_logic_relation_id'),'identity':a['identity'],'relation_type':a.get('relation_type'),'from_node':a.get('from_node'),'to_node':a.get('to_node')},ensure_ascii=False))
     for e in scene['elements']:
         if omit_scene_title and e['id']==scene['id']+'_title':continue
