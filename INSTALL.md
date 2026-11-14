@@ -22,7 +22,7 @@
    ```
 
    从克隆仓库根目录运行。对于其他已核实的Agent技能目录，明确提供`--target /absolute/path/to/paper-figure-story`（预检和安装使用相同参数）。安装器只复制已登记的普通文件，校验文件哈希，不复制Git目录及未跟踪私人文件。旧版整个目录备份到当前Skills目录之外，安装失败会尝试回滚。
-4. **核对结果。** 查看安装器输出的`version`、`revision`、`target`、`backup`；在新会话确认Agent确实加载此`SKILL.md`和`VERSION=1.2.0`。若存在其他活动路径的同名Skill，分别报告且不得假称已全部覆盖。
+4. **核对结果。** 查看安装器输出的`version`、`revision`、`target`、`backup`；默认用户级安装的 Python 备份位于 `~/.codex/pfs-skill-backups/`，下方 Windows ZIP 流程的备份位于 `~/pfs-skill-backups/`。在新会话确认Agent确实加载此`SKILL.md`和`VERSION=1.2.0`。若存在其他活动路径的同名Skill，分别报告且不得假称已全部覆盖。
 5. **不要直接执行旧版Tag中的安装说明，也不要在旧目录中`git pull`或覆盖合并。** 旧文件可能残留，或用户修改被覆盖。如果缺少Git、Python、主机权限，明确说明阻碍；不要将未完成安装冒充成功。
 
 适用于Windows、macOS与Linux上的具备Python 3.10+和Git的本地Agent；**目前仅进行了隔离文件系统安装/回滚测试，没有证明所有Agent宿主能发现并加载Skill**。本页原有Windows ZIP+SHA安装方式仍作为固定正式发布包的替代安装入口。

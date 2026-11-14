@@ -11,6 +11,7 @@ import hashlib
 import os
 from pathlib import Path, PurePosixPath
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -22,6 +23,16 @@ EXPECTED_VERSION = "1.2.0"
 
 class InstallError(RuntimeError):
     pass
+
+
+def is_link(path: Path) -> bool:
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return False
+    return stat.S_ISLNK(info.st_mode) or bool(
+        getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT
+    )
 
 
 def git_output(root: Path, *args: str) -> bytes:
@@ -81,8 +92,8 @@ def install(source: Path, target: Path, dry_run: bool = False) -> dict:
     target = target.expanduser().absolute()
     if target.name != SKILL_NAME:
         raise InstallError("Target must end in /paper-figure-story")
-    if target.is_symlink() or target.parent.is_symlink():
-        raise InstallError("Installation target or skill directory is a symlink")
+    if is_link(target) or is_link(target.parent):
+        raise InstallError("Installation target or skill directory is a symlink or reparse point")
     if source == target.parent or source == target:
         raise InstallError("Do not install in-place from an active skill directory; use a separate Git clone")
     validate_skill(source)
@@ -102,8 +113,8 @@ def install(source: Path, target: Path, dry_run: bool = False) -> dict:
 
     parent = target.parent
     parent.mkdir(parents=True, exist_ok=True)
-    if parent.is_symlink():
-        raise InstallError("Skill directory is a symlink")
+    if is_link(parent):
+        raise InstallError("Skill directory is a symlink or reparse point")
     stage = Path(tempfile.mkdtemp(prefix=".pfs-stage-", dir=parent))
     backup = None
     activated = False
@@ -119,6 +130,8 @@ def install(source: Path, target: Path, dry_run: bool = False) -> dict:
         if target.exists():
             backup_root = parent.parent / "pfs-skill-backups"  # outside active skills directory
             backup_root.mkdir(parents=True, exist_ok=True)
+            if is_link(backup_root):
+                raise InstallError("Backup directory is a symlink or reparse point")
             backup = backup_root / (SKILL_NAME + "-" + uuid.uuid4().hex[:12])
             target.rename(backup)
             result["backup"] = str(backup)

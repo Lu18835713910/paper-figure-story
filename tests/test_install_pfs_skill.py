@@ -108,6 +108,23 @@ class InstallerTests(unittest.TestCase):
         with self.assertRaises(installer.InstallError):
             installer.install(self.repo, self.target)
 
+    @unittest.skipUnless(os.name == "nt", "Windows directory junction")
+    def test_target_junction_rejected(self):
+        real = self.base / "real-skill"
+        real.mkdir()
+        (real / "SKILL.md").write_text("---\nname: paper-figure-story\n---\n")
+        self.target.parent.mkdir(parents=True)
+        result = subprocess.run(
+            ["cmd.exe", "/d", "/c", "mklink", "/J", str(self.target), str(real)],
+            capture_output=True,
+        )
+        if result.returncode:
+            self.skipTest("cannot create junction in this environment")
+        self.addCleanup(self.target.rmdir)
+        with self.assertRaises(installer.InstallError):
+            installer.install(self.repo, self.target, dry_run=True)
+        self.assertTrue((real / "SKILL.md").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
