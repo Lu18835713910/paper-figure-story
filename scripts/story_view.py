@@ -27,6 +27,10 @@ def validate_story(model, story):
     nodes = {n["id"]: n for n in model["nodes"]}
     edges = {e["id"]: e for e in model["edges"]}
     units = story.get("units", [])
+    # The narrative grouping is authored/reviewed by the Agent or the user; this
+    # module only validates and renders it, and is not an automatic story writer.
+    if not (story.get("review") or {}).get("reviewed_by"):
+        errors.append("STORY_REVIEW_REQUIRED")
     if not 4 <= len(units) <= 8:
         errors.append("UNIT_COUNT_OUT_OF_RANGE:%d" % len(units))
     owner, ids = {}, set()
@@ -56,8 +60,13 @@ def validate_story(model, story):
                 types.add(e["type"])
                 if owner.get(e["from"]) != l.get("from") or owner.get(e["to"]) != l.get("to"):
                     errors.append("RELATION_UNIT_MISMATCH:" + r)
-            if l.get("arrow") and types and types <= UNDIRECTED:
+            if l.get("arrow") and (types & UNDIRECTED):
                 errors.append("CAUSAL_ARROW_ON_UNDIRECTED:" + ",".join(sorted(rid)))
+            # A single display link must not mix a symmetric/shared relation with
+            # a directed evidence relation: one arrowhead would then claim a
+            # direction for the undirected member.
+            if types and (types & UNDIRECTED) and (types - UNDIRECTED):
+                errors.append("MIXED_RELATION_SEMANTICS:" + ",".join(sorted(rid)))
         elif not (l.get("narrative") and l.get("basis")):
             errors.append("LINK_WITHOUT_PROVENANCE")
     return {"valid": not errors, "errors": errors,
@@ -283,7 +292,7 @@ def main(argv=None):
                           if s.name == "PFS_TITLE" and s.has_text_frame), "")
         for s in list(sl.shapes):
             sl.shapes._spTree.remove(s._element)
-        rr.text(sl, "PFS_TITLE", old_title or story.get("title", ""),
+        rr.text(sl, "PFS_TITLE", story.get("title") or old_title or "",
                 [Inches(.45), Inches(.15), prs.slide_width - Inches(.9), Inches(.5)], 32, True)
         rr.draw_scene(sl, product, scene,
                       (Inches(.35), Inches(.8),

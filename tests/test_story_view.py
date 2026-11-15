@@ -41,7 +41,8 @@ def fixture():
         {"id": "L2", "from": "U2", "to": "U3", "relation_ids": ["E2"], "arrow": False},
         {"id": "L3", "from": "U3", "to": "U4", "relation_ids": ["E3"], "arrow": True},
     ]
-    story = {"id": "story-fixture", "canvas": {"width": 1280, "height": 622},
+    story = {"id": "story-fixture", "review": {"reviewed_by": "test"},
+             "canvas": {"width": 1280, "height": 622},
              "title": "fixture", "citation": "fixture", "units": units, "links": links}
     return model, story
 
@@ -70,6 +71,27 @@ class StoryLayer(unittest.TestCase):
         s["links"][0]["to"] = "U3"
         r = sv.validate_story(m, s)
         self.assertTrue(any(e.startswith("RELATION_UNIT_MISMATCH") for e in r["errors"]))
+
+    def test_mixed_directed_and_undirected_link_is_rejected(self):
+        m, s = fixture()
+        s["links"][1]["relation_ids"] = ["E2", "E3"]
+        s["links"][1]["arrow"] = True
+        r = sv.validate_story(m, s)
+        self.assertTrue(any(e.startswith("MIXED_RELATION_SEMANTICS") for e in r["errors"]), r["errors"])
+        self.assertTrue(any(e.startswith("CAUSAL_ARROW_ON_UNDIRECTED") for e in r["errors"]), r["errors"])
+
+    def test_arrow_on_mixed_link_is_rejected_even_if_only_one_undirected(self):
+        m, s = fixture()
+        s["links"][2]["relation_ids"] = ["E3", "E2"]
+        s["links"][2]["arrow"] = True
+        r = sv.validate_story(m, s)
+        self.assertTrue(any(e.startswith("MIXED_RELATION_SEMANTICS") for e in r["errors"]), r["errors"])
+
+    def test_missing_reviewer_is_rejected(self):
+        m, s = fixture()
+        s.pop("review")
+        r = sv.validate_story(m, s)
+        self.assertIn("STORY_REVIEW_REQUIRED", r["errors"])
 
     def test_link_without_provenance_is_rejected(self):
         m, s = fixture()
