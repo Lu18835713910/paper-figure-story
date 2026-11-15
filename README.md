@@ -11,6 +11,8 @@
 </p>
 <p align="center"><sub>正式发布 · quick / balanced / full · Personal Non-Commercial Use</sub></p>
 
+> **版本状态**：`v1.2.1` 为**维护候选（未发布）**，包含关系方向、布局、主稿同源、箭头与长正文修复，以及可追溯的 5–7 单元故事层 A。上方链接仍指向已发布的 `v1.2.0` 正式资产；v1.2.1 发布后才会提供对应下载地址。
+
 ![PFS 品牌与真实成果展示](docs/images/v1.1.1/hero.png)
 
 ## 为什么使用 PFS

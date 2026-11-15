@@ -3,10 +3,11 @@ name: paper-figure-story
 description: 从科研论文PDF重构科学问题、实验或论据、实际发现及证据边界，用原始Figure和简短文字箭头链制作可编辑中文学术PPT；支持多分支总框架、综述讲述、三档深度及可选Methods和详细证据图。附带RLD诊断模块（rld_diagnose.py），可对既有PFS模型的论证单元做科研逻辑、语言逻辑、表达逻辑三维诊断，因果判定须经PFS干预与对照结构核查，未覆盖语言显式上报而非静默跳过。
 ---
 
-# Paper Figure Story v1.2.0
+# Paper Figure Story v1.2.1
 
 > v1.1.1 既有 PFS 脚本及 schema 保留；新增内容仅限 RLD 诊断模块及其文档、测试与示例。
 > 工程测试通过不等于科学准确性认证（`scientific_accuracy=NOT_ESTIMABLE`）。
+> **v1.2.1 为维护候选（未发布）**：本版修复对称关系方向、A/B 布局与来源投影、主稿同源、箭头/页脚/长正文布局，并新增可追溯的故事层 A（`A_story`，5–7 单元）。v1.2.0 正式 Tag 与 Release 资产保持不变。
 
 ## v1.2.0 正式科研逻辑图入口（优先于旧兼容框架）
 
