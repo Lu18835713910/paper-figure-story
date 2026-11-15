@@ -1,8 +1,9 @@
-# 安装与使用｜PFS v1.2.0
+# 安装与使用｜PFS v1.2.1
 
-**当前正式版本为v1.2.0。** 本页适用于Windows PowerShell下的Codex用户级Skill安装，以及从v1.0.0、v1.1.x升级到v1.2.0。先备份旧目录，再替换为新版；不会将旧脚本与新脚本混在同一活动Skill目录中。
+**本页适用于正式版 v1.2.1。** 本页适用于Windows PowerShell下的Codex用户级Skill安装，以及从v1.0.0、v1.1.x 或 v1.2.0 升级到 v1.2.1。先备份旧目录，再替换为新版；不会将旧脚本与新脚本混在同一活动Skill目录中。
 
-> **发布快照边界：** Git Tag `v1.2.0`和正式Release ZIP是已发布快照；其内部旧版`INSTALL.md`不会随主分支文档更正自动变化。本页为当前在线说明，仍下载原正式ZIP并校验原SHA；不会改变Tag或正式资产身份。
+
+
 
 ## 让Agent直接安装或升级（从仓库链接开始）
 
@@ -13,7 +14,7 @@
 执行Agent应读取本仓库[AGENTS.md](AGENTS.md)，并在当前用户的电脑上按下列步骤操作：
 
 1. **确认真正的Skill安装位置。** Codex用户级默认目录为`~/.codex/skills/paper-figure-story`；有的使用者还配置了工作区级Skill或其他Agent宿主。先定位活动目录和重名副本，不能仅凭默认目录猜测。
-2. **使用单独的干净main克隆。** 从`https://github.com/Lu18835713910/paper-figure-story.git`克隆到Skill目录以外的临时/工作位置，检查`git remote -v`、`VERSION`、`SKILL.md`与安装器源码，确认是可信仓库和预期版本。默认使用`main`是为了获得发布后维护的安全安装与调用文档；不是宣称原v1.2.0 ZIP已更新。
+2. **使用单独的干净main克隆。** 从`https://github.com/Lu18835713910/paper-figure-story.git`克隆到Skill目录以外的临时/工作位置，检查`git remote -v`、`VERSION`、`SKILL.md`与安装器源码，确认是可信仓库和预期版本。默认使用`main`是为了获得发布后维护的安全安装与调用文档；每个正式 Tag 和 ZIP 保持冻结。
 3. **执行预检和安全替换：**
 
    ```bash
@@ -22,27 +23,56 @@
    ```
 
    从克隆仓库根目录运行。对于其他已核实的Agent技能目录，明确提供`--target /absolute/path/to/paper-figure-story`（预检和安装使用相同参数）。安装器只复制已登记的普通文件，校验文件哈希，不复制Git目录及未跟踪私人文件。旧版整个目录备份到当前Skills目录之外，安装失败会尝试回滚。
-4. **核对结果。** 查看安装器输出的`version`、`revision`、`target`、`backup`；默认用户级安装的 Python 备份位于 `~/.codex/pfs-skill-backups/`，下方 Windows ZIP 流程的备份位于 `~/pfs-skill-backups/`。在新会话确认Agent确实加载此`SKILL.md`和`VERSION=1.2.0`。若存在其他活动路径的同名Skill，分别报告且不得假称已全部覆盖。
+4. **核对结果。** 查看安装器输出的`version`、`revision`、`target`、`backup`；默认用户级安装的 Python 备份位于 `~/.codex/pfs-skill-backups/`，下方 Windows ZIP 流程的备份位于 `~/pfs-skill-backups/`。在新会话确认Agent确实加载此`SKILL.md`和`VERSION=1.2.1`。若存在其他活动路径的同名Skill，分别报告且不得假称已全部覆盖。
 5. **不要直接执行旧版Tag中的安装说明，也不要在旧目录中`git pull`或覆盖合并。** 旧文件可能残留，或用户修改被覆盖。如果缺少Git、Python、主机权限，明确说明阻碍；不要将未完成安装冒充成功。
 
 适用于Windows、macOS与Linux上的具备Python 3.10+和Git的本地Agent；**目前仅进行了隔离文件系统安装/回滚测试，没有证明所有Agent宿主能发现并加载Skill**。本页原有Windows ZIP+SHA安装方式仍作为固定正式发布包的替代安装入口。
 
+### 宿主识别与新旧版本混用防护（WorkBuddy / Codex 必读）
+
+上面的代码块使用安装器默认目标 `~/.codex/skills/paper-figure-story`，**仅适用于 Codex**。
+
+**宿主路径对照（必须区分）**：WorkBuddy 用户级为 `~/.workbuddy/skills/paper-figure-story`，Codex 用户级为 `~/.codex/skills/paper-figure-story`；两者不通用，且项目级/工作区级副本需单独核对。下面的 `--target` 只对已核实的 WorkBuddy 活动目录生效。
+
+在 WorkBuddy 中必须用宿主真实发现结果定位活动目录，并显式传 `--target`：
+
+```bash
+# WorkBuddy 用户级（先由宿主注册表/缓存确认，再执行）
+python scripts/install_pfs_skill.py --dry-run --target "$HOME/.workbuddy/skills/paper-figure-story"
+python scripts/install_pfs_skill.py --target "$HOME/.workbuddy/skills/paper-figure-story"
+```
+
+安装前后必做：
+
+| 步骤 | 要求 |
+|---|---|
+| 发现 | 枚举用户级、工作区/项目级、Codex、隔离目录、插件引入的同名 Skill；记录路径 / `VERSION` / `SKILL.md` SHA-256 / Git修订 / 是否活动 / 是否旧版 / 是否冲突；检查符号链接与 Windows 重解析点。不要把备份、普通克隆或研究工作目录当成正在使用的 Skill。 |
+| 版本身份 | 同时记录 `VERSION` 与 `git rev-parse HEAD`。`main` 的 `VERSION` 可能仍是 `1.2.1`，但已包含发布后维护提交，仅看 `VERSION` 会漏判。 |
+| 备份 | 除安装器自带的 `pfs-skill-backups/` 外，另存一份旧目录完整副本（含 `.git` 与用户自行修改的文件），记录备份路径与恢复命令。 |
+| 残留与校验 | 安装后确认活动目录无旧版独有文件；逐一比对全部 Git tracked 文件 SHA-256 与选定基线；检查 `SKILL.md`、`scripts/run_pfs.py` 等关键文件。 |
+| 新会话 | 宿主在**会话启动时冻结 Skill 注册信息**，中途安装不会在当前会话生效。必须新开会话，通过宿主的 `Skill(paper-figure-story)` 入口确认返回的 `SKILL.md` 路径、该路径下 `VERSION`、以及 `SKILL.md` 和关键脚本 SHA。当前会话手动读取新版文件或直接运行脚本，只能证明代码可调用，**不能算自动加载 PASS**；无法启动新会话时应保留 `NOT_TESTED` 并交付可直接执行的验证命令。 |
+| 运行一致性 | 一次真实论文任务中记录实际执行的 `run_pfs.py`、`project_research_logic.py`、`render_logic.py`、`build_pptx.py` 的绝对路径与 SHA-256，必须来自同一个已核验安装；主稿、A 图、B 图若来自不同目录需明确登记，不允许静默混用。 |
+
+若实际活动版本仍是旧版，或一次运行中混用新旧脚本，升级与发布均不得判为通过。详细 Agent 决策流程见 [AGENTS.md](AGENTS.md)。
+
 ## 正式版本与下载
 
-- [v1.2.0正式Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0)
-- [Paper-Figure-Story-v1.2.0.zip](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.0/Paper-Figure-Story-v1.2.0.zip)
-- [正式SHA-256文件](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.0/Paper-Figure-Story-v1.2.0.zip.sha256)
+- [v1.2.1正式Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.1)
+- [Paper-Figure-Story-v1.2.1.zip](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.1/Paper-Figure-Story-v1.2.1.zip)
+- [正式SHA-256文件](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.1/Paper-Figure-Story-v1.2.1.zip.sha256)
 
-正式ZIP SHA-256：`14b216a5188b9bf811bd1443a23d049ea301f39ce3edb6eec5d16ad3d1c43a42`。旧版v1.1.1/v1.1.0/v1.0.0均为历史发布版，新安装与升级推荐使用v1.2.0。
+下载同一 Release 的 ZIP 及 SHA-256 文件到同一目录。历史 v1.2.0 的正式资产沿用其原始 SHA。
 
 ## Windows首次安装与安全覆盖升级
 
-在已下载ZIP的文件夹打开**Windows PowerShell**，复制运行下方完整命令。首次安装时直接安装；如果`~/.codex/skills/paper-figure-story`已有旧版，则先将旧目录整体移到`~/pfs-skill-backups/`中的唯一备份目录，再安装v1.2.0。安装过程中会验证正式ZIP SHA、ZIP目录结构和安装后版本；复制或版本校验失败时尝试恢复旧目录。
+在已下载ZIP的文件夹打开**Windows PowerShell**，复制运行下方完整命令。首次安装时直接安装；如果`~/.codex/skills/paper-figure-story`已有旧版，则先将旧目录整体移到`~/pfs-skill-backups/`中的唯一备份目录，再安装v1.2.1。安装过程中会验证正式ZIP SHA、ZIP目录结构和安装后版本；复制或版本校验失败时尝试恢复旧目录。
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$zip = (Resolve-Path -LiteralPath '.\Paper-Figure-Story-v1.2.0.zip').Path
-$expectedSha = '14b216a5188b9bf811bd1443a23d049ea301f39ce3edb6eec5d16ad3d1c43a42'
+$zip = (Resolve-Path -LiteralPath '.\Paper-Figure-Story-v1.2.1.zip').Path
+$checksum = Get-Content -Raw -LiteralPath ($zip + '.sha256')
+$expectedSha = ($checksum.Trim() -split '\s+')[0].ToLowerInvariant()
+if ($expectedSha -notmatch '^[0-9a-f]{64}$') { throw 'SHA-256 文件格式无效。' }
 if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expectedSha) {
     throw 'ZIP SHA-256不匹配：停止安装，请从正式Release重新下载。'
 }
@@ -50,7 +80,7 @@ if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant() -
 $skillRoot = Join-Path $HOME '.codex\skills'
 $target = Join-Path $skillRoot 'paper-figure-story'
 $backupRoot = Join-Path $HOME 'pfs-skill-backups'
-$work = Join-Path $env:TEMP ('pfs-v120-' + [guid]::NewGuid().ToString('N'))
+$work = Join-Path $env:TEMP ('pfs-v121-' + [guid]::NewGuid().ToString('N'))
 $backup = Join-Path $backupRoot ('paper-figure-story-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0, 6))
 $oldMoved = $false
 
@@ -62,8 +92,8 @@ try {
         -not (Test-Path -LiteralPath (Join-Path $source 'VERSION') -PathType Leaf)) {
         throw 'ZIP目录结构不符合预期：未找到paper-figure-story/SKILL.md和VERSION。'
     }
-    if ((Get-Content -LiteralPath (Join-Path $source 'VERSION') -Raw).Trim() -ne '1.2.0') {
-        throw 'ZIP内部VERSION不是1.2.0：停止安装。'
+    if ((Get-Content -LiteralPath (Join-Path $source 'VERSION') -Raw).Trim() -ne '1.2.1') {
+        throw 'ZIP内部VERSION不是1.2.1：停止安装。'
     }
 
     New-Item -ItemType Directory -Path $skillRoot -Force | Out-Null
@@ -80,11 +110,11 @@ try {
 
     try {
         Copy-Item -LiteralPath $source -Destination $target -Recurse
-        if ((Get-Content -LiteralPath (Join-Path $target 'VERSION') -Raw).Trim() -ne '1.2.0' -or
+        if ((Get-Content -LiteralPath (Join-Path $target 'VERSION') -Raw).Trim() -ne '1.2.1' -or
             -not (Test-Path -LiteralPath (Join-Path $target 'SKILL.md') -PathType Leaf)) {
             throw '安装后版本验证失败。'
         }
-        Write-Host "已安装PFS v1.2.0：$target"
+        Write-Host "已安装PFS v1.2.1：$target"
         if ($oldMoved) { Write-Host "旧版本已备份：$backup" }
     } catch {
         if (Test-Path -LiteralPath $target) {
@@ -109,12 +139,12 @@ Test-Path -LiteralPath (Join-Path $target 'SKILL.md')
 python (Join-Path $target 'scripts\run_pfs.py') --help
 ```
 
-应分别看到`1.2.0`、`True`，且帮助中有`run`、`validate-products`、`render-products`、`deliver`、`check-delivery`五个子命令。**新会话中也应让Agent报告实际读取的SKILL.md路径和VERSION**；仓库本身显示v1.2.0不能证明旧会话已经重新加载。
+应分别看到`1.2.1`、`True`，且帮助中有`run`、`validate-products`、`render-products`、`deliver`、`check-delivery`五个子命令。**新会话中也应让Agent报告实际读取的SKILL.md路径和VERSION**；仓库本身显示v1.2.1不能证明旧会话已经重新加载。
 
 ### Git方式（仅供全新目录或固定Tag参考）
 
 ```powershell
-git clone --branch v1.2.0 --single-branch https://github.com/Lu18835713910/paper-figure-story.git "$HOME\.codex\skills\paper-figure-story"
+git clone --branch v1.2.1 --single-branch https://github.com/Lu18835713910/paper-figure-story.git "$HOME\.codex\skills\paper-figure-story"
 ```
 
 已有同名目录时不要直接`git clone`到该路径；请使用前述ZIP安全升级流程。不要用`git reset --hard`、`git clean -fd`等可能丢失本地修改的操作来升级。
@@ -190,7 +220,7 @@ build_research_workbook.py --reader可生成短句/对照表/图相邻的DOCX手
 
 个人非商业使用｜源码可查看；不是OSI开源许可。完整授权见LICENSE。原图、PDF、Office、字体和用户资料的权利不由本包转授。v1.0历史原代码不修补，已知演示缺图等限制见历史Release说明。历史v1.1.1候选的8项P2、字号/版面边界与科学审核边界见[已知限制](docs/KNOWN_LIMITATIONS.md)。
 
-## v1.2.0当前使用边界
+## v1.2.1当前使用边界
 
 - `balanced`只决定内容展开深度，**不是**多分支拓扑开关。Agent必须依据实际论文识别一条或多条研究主线，不能为了好看虚构分叉。
 - **同源科研逻辑A/B**需由Agent建立并审核Research Logic，通过`--research-logic`接入；完整B需选择`--products with-network`。旧默认overview/detailed兼容路径不应冒充已审的同源A/B模型。
@@ -198,6 +228,8 @@ build_research_workbook.py --reader可生成短句/对照表/图相邻的DOCX手
 - `run_pfs.py run`不是单命令无人值守论文分析。缺少`--knowledge`时返回`REVIEWED_KNOWLEDGE_REQUIRED`；科学事实由实际调用Skill的Agent从论文和可用补充材料中审核并登记。
 - RLD可选：需来自同一论文的Scientific Index、Evidence Network和Research Logic；疑点需回查原文，不能据此直接判定论文造假。
 - 逻辑图的portable后端不等于从零生成普通Figure主PPT；Artifact宿主、Office导出、Workbook完整性与人工科学/视觉验收各有独立边界。
-- 原v1.2.0 Release ZIP/Tag中的历史安装说明不会因这次在线文档更新而改变。要让离线包也带上新文档，需要另发维护版，而不应无声替换已公布SHA的正式ZIP。
+- 历史 v1.2.0 Tag 与 ZIP 继续保留。
 
-参考：[v1.2.0发布说明](RELEASE_NOTES_v1.2.0.md) · [宿主要求](docs/HOST_REQUIREMENTS.md) · [历史已知限制](docs/KNOWN_LIMITATIONS.md) · [Skill说明](SKILL.md)。
+参考：[v1.2.1发布说明](RELEASE_NOTES_v1.2.1.md) · [宿主要求](docs/HOST_REQUIREMENTS.md) · [历史已知限制](docs/KNOWN_LIMITATIONS.md) · [Skill说明](SKILL.md)。
+
+科研故事的科学理解、分组、叙事压缩及结论限定需要 Agent 或用户对照来源审阅。PFS 不保证从任意论文自动生成高质量科研逻辑图。不同 Office 环境的字型与换行可能不同，正式交付前应实际渲染并目视核查。

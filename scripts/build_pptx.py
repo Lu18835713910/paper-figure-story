@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import math
 import re
 import sys
 from collections import Counter
@@ -21,7 +22,7 @@ from pathlib import Path
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE, MSO_CONNECTOR
-from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
+from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
 from pptx.enum.dml import MSO_LINE_DASH_STYLE
 from pptx.oxml.xmlchemy import OxmlElement
 from pptx.util import Inches, Pt
@@ -287,6 +288,73 @@ def clear_shape_fill_text(shape):
     shape.text_frame.clear()
 
 
+# Footer rule sits at y=7.13in; keep the bullet card clear of it on every host.
+CARD_MAX_BOTTOM = 6.96
+
+
+def fit_bullets(lines, width_in, max_h_in, base_pt):
+    """Largest point size whose measured wrapped lines fit max_h_in.
+
+    Uses real font metrics (presentation_typography.measure) instead of an
+    area-per-character heuristic. The old heuristic produced 19pt for a page
+    with six long bullets, which overflowed the card and the footer in both
+    PowerPoint and LibreOffice.
+    """
+    from presentation_typography import measure
+    inner = max(1.0, width_in - .20)
+    need = 0.0
+    for cand in [base_pt, 20, 19, 18, 17, 16, 15, 14]:
+        if cand > base_pt:
+            continue
+        wrapped = sum(max(1, math.ceil(measure('•  ' + s, cand) / 72.0 / inner))
+                      for s in lines)
+        spacing = 8 if cand >= 18 else 5
+        need = (wrapped * cand * 1.22 + len(lines) * spacing + 8) / 72.0
+        # 3% headroom: LibreOffice and PowerPoint differ in line metrics, so a
+        # size that only just fits in one renderer overflows in the other.
+        if need <= max_h_in * .97:
+            return cand, need
+    return 14, need
+
+
+def resize_question_bullets(slide, shape, lines):
+    """Fit a question page's bullet block inside its card, clear of the footer.
+
+    Called after the text is written, when the real content is known. Resizes
+    the pinning card and the text box together and disables auto-grow so that
+    PowerPoint and LibreOffice cannot re-flow the block past the card.
+    """
+    EMU = 914400
+    items = [str(x) for x in (lines if isinstance(lines, list) else [lines])
+             if str(x).strip()]
+    if not items:
+        return
+    card = next((s for s in slide.shapes if s.name == 'DECOR_card'), None)
+    bar = next((s for s in slide.shapes if s.name == 'DECOR_cardbar'), None)
+    if card is None:
+        return
+    top_in = shape.top / EMU
+    width_in = shape.width / EMU
+    avail = CARD_MAX_BOTTOM - top_in - .18
+    size, need = fit_bullets(items, width_in, avail, 21)
+    # Use the full available card height for dense pages: a 0.06in pad left only
+    # ~0.01in of slack under a taller line metric, which is not enough to be
+    # renderer-independent.
+    box_h = min(avail, max(shape.height / EMU, need + .18))
+    shape.height = Inches(box_h)
+    for para in shape.text_frame.paragraphs:
+        para.space_after = Pt(8 if size >= 18 else 5)
+        for run in para.runs:
+            run.font.size = Pt(size)
+    shape.text_frame.auto_size = MSO_AUTO_SIZE.NONE
+    # Never shrink the standard card: pages that already fit keep their original
+    # 6.81in bottom, so only dense pages grow.
+    card_bottom = max(6.81, top_in + box_h + .18)
+    card.height = Inches(card_bottom - card.top / EMU)
+    if bar is not None:
+        bar.height = Inches(card_bottom - .12 - bar.top / EMU)
+
+
 def styled_text(shape, value, is_list=False):
     if not shape.has_text_frame: return
     # Preserve the named template slot's first-run style rather than impose default color/font.
@@ -368,6 +436,11 @@ def insert_images(slide, shape, paths, json_path, allow_missing):
 # edges explicitly encode author-supported vs presentation-inferred relationships.
 EDGE_TYPES = {'motivates', 'tests', 'supports', 'validates', 'compares',
               'parallel', 'extends', 'feedback', 'integrates', 'alternative'}
+# Symmetric relations have NO registered scientific direction; from/to only
+# name the two endpoints. This matches the Research Logic projector's
+# directed_relation() and the existing figure-story step renderer, which
+# already draws parallel/compares as undirected dashed links.
+UNDIRECTED_RELATIONS = {'parallel', 'compares', 'alternative'}
 NODE_ROLES = {'background', 'question', 'experiment', 'observation',
               'analysis', 'validation', 'inference', 'conclusion'}
 
@@ -400,7 +473,10 @@ def _graph_layout(nodes, edges, W, H, detail_min=None):
         indeg={n['id']:0 for n in nodes}
         forward={n['id']:[] for n in nodes}
         for e in edges:
-            if e.get('relation')=='feedback': continue
+            # Feedback is a returning check and symmetric relations carry no
+            # ordering. Neither may be counted as a forward dependency when
+            # assigning topological display layers.
+            if e.get('relation')=='feedback' or e.get('relation') in UNDIRECTED_RELATIONS: continue
             forward[e['from']].append(e['to']);indeg[e['to']]+=1
         queue=[n['id'] for n in nodes if indeg[n['id']]==0]
         order=[];layers={k:0 for k in indeg}
@@ -437,7 +513,21 @@ def _graph_layout(nodes, edges, W, H, detail_min=None):
     return pos,cw,ch
 
 
+# Arrowheads are drawn at the segment END and point back along the segment.
+# If the endpoint sits exactly on (or inside) a filled node frame, the triangle
+# is clipped by the frame painted afterwards. Retreat the endpoint by one
+# arrow-length so the whole triangle lies in the visible area outside the card.
+# Z-order is deliberately unchanged: connectors stay beneath node frames.
+ARROW_ENDPOINT_RETREAT_IN = 0.11  # ~8 pt at 72 pt/in
+ARROW_HEAD_SIZE = 'lg'
+
 def _connect(slide,x1,y1,x2,y2,style,dashed=False,arrow=False):
+    if arrow:
+        dx,dy=x2-x1,y2-y1
+        length=(dx*dx+dy*dy)**.5
+        if length>ARROW_ENDPOINT_RETREAT_IN:
+            x2-=dx/length*ARROW_ENDPOINT_RETREAT_IN
+            y2-=dy/length*ARROW_ENDPOINT_RETREAT_IN
     sh=slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(x1),Inches(y1), Inches(x2),Inches(y2))
     sh.name='PFS_GRAPH_EDGE'
     sh.line.color.rgb=rgb(style['border'] if dashed else style['accent'])
@@ -447,7 +537,8 @@ def _connect(slide,x1,y1,x2,y2,style,dashed=False,arrow=False):
         from pptx.oxml.ns import qn
         ln=sh._element.spPr.find(qn('a:ln'))
         if ln is not None:
-            end=OxmlElement('a:tailEnd');end.set('type','triangle');end.set('w','sm');end.set('len','sm');ln.append(end)
+            end=OxmlElement('a:tailEnd');end.set('type','triangle')
+            end.set('w',ARROW_HEAD_SIZE);end.set('len',ARROW_HEAD_SIZE);ln.append(end)
     return sh
 
 
@@ -478,30 +569,62 @@ def render_argument_graph(slide, record, style=None):
     for e in edges:
         src=coords[e['from']];dst=coords[e['to']]
         inferred=e.get('provenance')=='presentation'
-        feedback=e.get('relation')=='feedback' or dst[0]<=src[0]-.05
+        undirected=e.get('relation') in UNDIRECTED_RELATIONS
+        # A symmetric relation must never be serialized with a direction arrow,
+        # even when its endpoints happen to be laid out right-to-left.
+        arrow=not undirected
+        explicit_feedback=e.get('relation')=='feedback'
+        feedback=explicit_feedback or dst[0]<=src[0]-.05
         direction=1 if dst[0]>src[0] else -1
         xa=src[0]+direction*cw*.50; xb=dst[0]-direction*cw*.50
         ya,yb=src[1],dst[1]
-        if feedback:
-            # Feedback loop is a returning hypothesis check; indicate with dashed line.
-            inferred=True
+        same_column=abs(src[0]-dst[0])<.03
+        label_side_offset=None
+        if same_column and not feedback and abs(ya-yb)>=.09:
+            # Two cards in the same column. The old horizontal detour ran from
+            # the source's LEFT edge to the target's RIGHT edge, i.e. straight
+            # THROUGH both filled cards; a plain vertical link would also cross
+            # cards in intermediate rows. Route through an outer side channel
+            # (outside every card of this column) and enter the target from its
+            # LEFT edge, so the arrowhead stays outside the frame.
+            left=src[0]-cw*.5
+            lane=left-.18 if left-.18>x0+.02 else src[0]+cw*.5+.18
+            _connect(slide,left,ya,lane,ya,style,inferred)
+            _connect(slide,lane,ya,lane,yb,style,inferred)
+            _connect(slide,lane,yb,left,yb,style,inferred,arrow)
+            label_side_offset=lane+.05
+        elif feedback:
+            # Geometry alone is not a scientific claim: only an explicitly
+            # registered feedback relation may be marked as presentation
+            # inference. Right-to-left edges keep their declared provenance.
+            dashed=inferred or explicit_feedback
             yt=y0+H-.12
-            _connect(slide,src[0],ya+ch*.5,src[0],yt,style,True)
-            _connect(slide,src[0],yt,dst[0],yt,style,True)
-            _connect(slide,dst[0],yt,dst[0],yb+ch*.5,style,True,True)
+            # Route the returning loop through the empty left margin and the
+            # bottom channel. The old vertical leg started at the source card's
+            # bottom edge and ran straight down THROUGH cards in lower rows.
+            lane=x0+.05
+            _connect(slide,src[0]-cw*.5,ya,lane,ya,style,dashed)
+            _connect(slide,lane,ya,lane,yt,style,dashed)
+            _connect(slide,lane,yt,dst[0],yt,style,dashed)
+            _connect(slide,dst[0],yt,dst[0],yb+ch*.5,style,dashed,arrow)
         elif abs(ya-yb)<.09:
-            _connect(slide,xa,ya,xb,yb,style,inferred,True)
+            _connect(slide,xa,ya,xb,yb,style,inferred,arrow)
         else:
             mid=(xa+xb)/2
             _connect(slide,xa,ya,mid,ya,style,inferred)
             _connect(slide,mid,ya,mid,yb,style,inferred)
-            _connect(slide,mid,yb,xb,yb,style,inferred,True)
+            _connect(slide,mid,yb,xb,yb,style,inferred,arrow)
         # Descriptive links live in their own small labels, not as invented causal arrows.
         lbl=str(e.get('label','')).strip()
         if lbl and abs(xb-xa)>.33:
             from presentation_typography import measure
             lw=max(.24,min(2.0,measure(lbl,8.5)/72+.12));lh=.24
-            tx=(xa+xb)/2-lw/2; ty=(ya+yb)/2-.14
+            # A white-filled label placed ON the connector used to hide the
+            # arrowhead on short edges. Keep the label clear of the line:
+            # above it for horizontal runs, beside it for vertical runs.
+            tx=(xa+xb)/2-lw/2; ty=(ya+yb)/2-.30
+            if label_side_offset is not None:
+                tx=label_side_offset; ty=(ya+yb)/2-.12
             if e.get('label_y') is not None:ty=y0+H*float(e['label_y'])
             textbox(slide,'PFS_EDGE_LABEL',max(x0+.03,min(x0+W-lw-.03,tx)),ty,lw,lh,
                     lbl,size=8.5,color='body',fill='white',align=PP_ALIGN.CENTER,
@@ -528,7 +651,6 @@ def render_argument_graph(slide, record, style=None):
         if fig:
             textbox(slide,'PFS_GRAPH_FIGREF',x+.1,y+stack['figure_y'],cw-.2,stack['figure_h'],fig,
                     size=8,color='accent',style=style)
-
 
 
 def validate_framework(record, slide_i):
@@ -909,6 +1031,8 @@ def populate_slide(slide, record, json_path, index, short_citation, allow_missin
         if shape.name in values:
             val = values[shape.name]
             styled_text(shape, val, is_list=shape.name in ('PFS_BULLETS', 'PFS_POINTS'))
+            if shape.name == 'PFS_BULLETS' and kind == 'question':
+                resize_question_bullets(slide, shape, val)
             prefix={'PFS_LEAD':'lead','PFS_TRANSITION':'transition','PFS_RESULT':'result'}.get(shape.name)
             if prefix:
                 if record.get(prefix+'_height') is not None:shape.height=Inches(float(record[prefix+'_height']))

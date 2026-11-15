@@ -115,7 +115,7 @@ def validate_scene(slide,scene):
         shape,element=anchors[0];p=element['position'];factor=shape.width/p['width'];ox=shape.left-p['left']*factor;oy=shape.top-p['top']*factor
         for edge in scene.get('connectors',[]):
             parts=sorted([s for s in slide.shapes if s.name.startswith('RC_EDGE_'+scene['id']+'_'+edge['id']+'_')],key=lambda s:int(s.name.rsplit('_',1)[1]))
-            segments=[(a,b) for a,b in zip(edge['points'],edge['points'][1:]) if a!=b]
+            segments=[(a,b) for a,b in zip(display_points(edge),display_points(edge)[1:]) if a!=b]
             if len(parts)!=len(segments):raise ValueError('NATIVE_EDGE_PATH_DRIFT')
             for i,(s,(a,b)) in enumerate(zip(parts,segments)):
                 actual=[s.begin_x,s.begin_y,s.end_x,s.end_y];wanted=[ox+a[0]*factor,oy+a[1]*factor,ox+b[0]*factor,oy+b[1]*factor]
@@ -124,6 +124,23 @@ def validate_scene(slide,scene):
                 head=s._element.find('.//{http://schemas.openxmlformats.org/drawingml/2006/main}headEnd')
                 arrow=tail is not None and tail.get('type','none')!='none'
                 if arrow!=bool(edge.get('arrow') and i==len(parts)-1) or (head is not None and head.get('type','none')!='none'):raise ValueError('NATIVE_EDGE_DIRECTION_DRIFT')
+
+# Rendering-only lift for the one-line A legend. The scene keeps its declarative
+# y (height-48) so the deterministic projection never drifts; the drawn legend is
+# moved up to clear the citation strip at H-44.
+LEGEND_A_LIFT=44
+
+def display_points(edge):
+    """Pure rendering transform: pull back the arrowhead endpoint so the
+    triangle is not clipped by the filled node frame painted earlier in the
+    z-order. The scientific scene model is NEVER modified here; both
+    draw_scene() and validate_scene() consume this same function so the
+    serialized geometry and its contract stay in agreement.
+    """
+    pts=edge['points']
+    if not edge.get('arrow') or len(pts)<2:return pts
+    from project_research_logic import retreat_arrow_endpoint
+    return retreat_arrow_endpoint(pts)
 
 def color(s):return RGBColor.from_string(s.lstrip('#'))
 def text(slide,name,value,p,size,bold=False,fill='#18365C',align='left',scale=1):
@@ -143,17 +160,24 @@ def draw_scene(slide,product,scene,frame=None,omit_scene_title=False):
     def rect(p):return [ox+p['left']*factor,oy+p['top']*factor,p['width']*factor,p['height']*factor]
     # Connector identity and endpoints are preserved in DrawingML metadata.
     for a in scene.get('connectors',[]):
-        segments=[(u,v) for u,v in zip(a['points'],a['points'][1:]) if u!=v]
+        dpts=display_points(a)
+        segments=[(u,v) for u,v in zip(dpts,dpts[1:]) if u!=v]
         for j,((ax,ay),(bx,by)) in enumerate(segments,1):
             c=slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT,int(ox+ax*factor),int(oy+ay*factor),int(ox+bx*factor),int(oy+by*factor));c.name='RC_EDGE_'+scene['id']+'_'+a['id']+'_'+str(j)
             c.line.color.rgb=color(a.get('color','#174994'));c.line.width=Pt(max(.8,a.get('stroke_width',2.2)*.75*scale))
             if a.get('dashed'):c.line.dash_style=MSO_LINE_DASH_STYLE.DASH
             if a.get('arrow') and j==len(segments):
-                tail=OxmlElement('a:tailEnd');tail.set('type','triangle');tail.set('w','med');tail.set('len','med');c._element.spPr.get_or_add_ln().append(tail)
+                # Large canvases are downscaled on PNG/PDF export; a 'med' head
+                # collapses to a few pixels and reads as no direction at all.
+                tail=OxmlElement('a:tailEnd');tail.set('type','triangle');tail.set('w','lg');tail.set('len','lg');c._element.spPr.get_or_add_ln().append(tail)
             cn=c._element.find('.//{http://schemas.openxmlformats.org/presentationml/2006/main}cNvPr');cn.set('descr',json.dumps({'logic_edge':a.get('source_logic_relation_id'),'identity':a['identity'],'relation_type':a.get('relation_type'),'from_node':a.get('from_node'),'to_node':a.get('to_node')},ensure_ascii=False))
     for e in scene['elements']:
         if omit_scene_title and e['id']==scene['id']+'_title':continue
-        name='RC_'+scene['id']+'_'+e['id'];p=rect(e['position'])
+        name='RC_'+scene['id']+'_'+e['id']
+        pos=e['position']
+        if e['id'].endswith('_legend') and scene['coverage'].get('view')=='A':
+            pos=dict(pos);pos['top']=pos['top']-LEGEND_A_LIFT
+        p=rect(pos)
         if e['kind']=='rect':
             q=slide.shapes.add_shape(MSO_SHAPE.RECTANGLE,*map(int,p));q.name=name;q.fill.solid();q.fill.fore_color.rgb=color(e.get('fill','#FFFFFF'));q.line.color.rgb=color(e.get('stroke','#B8CBE6'))
         elif e['kind']=='text':
@@ -161,7 +185,9 @@ def draw_scene(slide,product,scene,frame=None,omit_scene_title=False):
             if e.get('logic_node_id'):q._element.find('.//{http://schemas.openxmlformats.org/presentationml/2006/main}cNvPr').set('descr',json.dumps({'logic_node_id':e['logic_node_id'],'source_node_ids':e.get('source_node_ids',[]),'statement_ids':e.get('statement_ids',[])},ensure_ascii=False))
         elif e['kind']=='image':raise ValueError('LOGIC_PLAN_MUST_BE_NATIVE_NOT_IMAGE')
         else:raise ValueError('UNSUPPORTED_PORTABLE_ELEMENT: '+e['kind'])
-    local=scene['coverage'].get('scope')=='local';fy=H-42 if local else H-32
+    # Keep the citation strip fully inside the canvas (H-32 pushed the 32px
+    # text box past the bottom edge and clipped descenders).
+    local=scene['coverage'].get('scope')=='local';fy=H-42 if local else H-44
     text(slide,'RC_CITATION',scene.get('citation',''),[ox+60*factor,oy+fy*factor,(W-120)*factor,32*factor],max(16,10/.75/scale),False,'#61748A',scale=scale)
     notes=scene.get('notes',{});slide.notes_slide.notes_text_frame.text='科学问题：'+str(notes.get('scientific_question',scene['title']))+'\n关系表示证据与论文论证，不表示实验日历。\n来源索引：'+', '.join(notes.get('logic_source_ids',[]))+'\n模型快照：'+scene.get('logic_snapshot','')+'\n科学审核PARTIAL；缺失补件与限制见配套来源记录。'
     if local:

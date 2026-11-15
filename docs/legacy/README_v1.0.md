@@ -1,6 +1,5 @@
 <div align="center">
 
-<img src="docs/images/hero.svg" alt="Paper Figure Story: 从论文到研究逻辑、实验框架与可编辑PPT" width="100%" />
 
 # Paper Figure Story
 
@@ -24,7 +23,6 @@
 
 **Paper Figure Story** 面向科研组会、文献汇报和学术交流，将论文的正文、Methods、Figure legends 与关键补充证据组织成可讲述的科研故事，自动生成中文、可编辑的 PPTX。它不是论文摘要生成器，也不只是把 Figure 排进幻灯片。
 
-<img src="docs/images/atera-showcase.png" alt="示例：研究思路、全文联合总框架、逐 Figure 科研文字链" width="100%" />
 
 ## 核心功能
 
@@ -41,13 +39,11 @@
 
 这张页面回答**整篇论文如何展开**，而不是某一张 Figure 的实验故事。它把研究对象、样本来源、技术任务、独立验证和最终分析关联放进同一框架。
 
-<img src="docs/images/atera-overall-framework.png" alt="Atera 案例：研究思路与实验路线联合总框架" width="100%" />
 
 ### 2. 每张 Figure：图像是证据，文字链才是讲述核心
 
 结果页提炼具体研究问题、实验方法、关键观察和下一步问题，并使用可编辑的箭头组织逻辑。若同一个科研问题跨多个 panel，可合并；若存在并行证据，不人为制造因果顺序。
 
-<img src="docs/images/atera-figure-story-layout.png" alt="Atera案例：逐Figure文字箭头链，原论文图像已从公开预览中移除" width="100%" />
 
 > 图示为实际生成PPT的布局预览。公开预览中已移除第三方论文Figure，右侧研究逻辑文字链保留。
 

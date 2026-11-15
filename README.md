@@ -4,12 +4,15 @@
 <p align="center">从论文中的科学问题出发，重建实验与证据之间的真实关系，形成可编辑的科研故事；再用 RLD 检查推理、措辞与论据之间的潜在断点。</p>
 
 <p align="center">
-  <a href="https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0"><strong>获取正式版 v1.2.0</strong></a>
+  <a href="https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.1"><strong>获取正式版 v1.2.1</strong></a>
   · <a href="INSTALL.md">安装指南</a>
-  · <a href="RELEASE_NOTES_v1.2.0.md">版本更新</a>
+  · <a href="RELEASE_NOTES_v1.2.1.md">版本更新</a>
   · <a href="examples/minimal_rld/README.md">运行 RLD 示例</a>
 </p>
 <p align="center"><sub>正式发布 · quick / balanced / full · Personal Non-Commercial Use</sub></p>
+
+> **v1.2.1** 支持同源 Research Logic A/B、带来源映射的 A_story 和原生可编辑 PowerPoint。比较、并行和共享关系按各自语义呈现。
+> 科研故事的科学理解、分组、叙事压缩及结论限定需要 Agent 或用户对照来源审阅。PFS 不保证从任意论文自动生成高质量科研逻辑图。不同 Office 环境的字型与换行可能不同，正式交付前应实际渲染并目视核查。
 
 ![PFS 品牌与真实成果展示](docs/images/v1.1.1/hero.png)
 
@@ -120,26 +123,28 @@ Visual Polish 负责统一版面、连接线和阅读路径，**不会为视觉�
 
 > 请帮我安装或更新这个Skill：https://github.com/Lu18835713910/paper-figure-story 。请阅读仓库的README、AGENTS.md和INSTALL.md；核实我当前Agent实际使用的Skills目录与已有版本；使用仓库主分支中的`scripts/install_pfs_skill.py`先预检、备份旧版再完整替换；核对活动Skill的VERSION、SKILL.md和实际加载路径。不要把旧版文件和新版合并，也不要删除我的本地修改；如遇未知目录、权限不足或重叠的多个安装位置，先报告具体风险。
 
-这条入口对应仓库[AGENTS.md](AGENTS.md)以及[Agent安装流程](INSTALL.md#让agent直接安装或升级从仓库链接开始)。执行Agent应从**独立、干净的main分支Git克隆**运行受审查的安装器，而不是把仓库URL当成某个旧Tag或使用旧版README命令。安装器仅将Git登记的文件安装到核实后的Skills目录，保留旧版本备份。**已经安装v1.0/v1.1的人可以覆盖升级；GitHub不会远程自动覆盖其他人的电脑，仍需在用户设备上运行安装。**
+这条入口对应仓库[AGENTS.md](AGENTS.md)以及[Agent安装流程](INSTALL.md#让agent直接安装或升级从仓库链接开始)。
+> **A 的两层**：`project_research_logic.py --views A B` 得到的是完整模型概览（`A_full`）；面向演示的简洁主线用 `scripts/story_view.py --model <RL> --story <story.json>` 生成 `A_story`（5–7 个叙事单元，每单元绑定原始节点、每条展示关系引用原始关系或登记为叙事归纳）。故事层只改展示，不改模型或 snapshot。 `--story` 需由 Agent 或用户提供经审核的叙事视图（含 `reviewed_by`）；该模块只校验与渲染，不是全自动故事生成器。
 
-**正式版本与仓库说明的区别：** v1.2.0 Tag/Release ZIP仍是冻结的正式快照；仓库`main`的安装器和调用文档属于后续维护改进，不能称为已经重打包进原正式ZIP。若要求只安装固定发布资产，请使用下文原ZIP与SHA校验路径。
+> **同源 A/B 的官方可执行入口**：先以显式 Research Logic 模型运行 `scripts/project_research_logic.py --views A B`，再用 `scripts/run_pfs.py render-products --backend portable --development-preview` 生成原生 A/B；需要把正式 A 合入主稿时使用 `scripts/render_logic.py --page-map`。手绘的 `build_pptx.py` 逻辑摘要图不是同源 A，`balanced` 也不是多分支开关。
+执行Agent应从**独立、干净的main分支Git克隆**运行受审查的安装器，而不是把仓库URL当成某个旧Tag或使用旧版README命令。安装器仅将Git登记的文件安装到核实后的Skills目录，保留旧版本备份。**已经安装v1.0/v1.1的人可以覆盖升级；GitHub不会远程自动覆盖其他人的电脑，仍需在用户设备上运行安装。**
+
+> **宿主不同，活动目录不同**：WorkBuddy 用户级是 `~/.workbuddy/skills/paper-figure-story`，Codex 用户级是 `~/.codex/skills/paper-figure-story`；安装器默认目标是后者，在 WorkBuddy 中必须显式 `--target`。Agent 需先枚举所有同名副本（含工作区级与其他插件引入的副本）并以宿主真实发现结果为准，同时记录 `VERSION` **和** Git 修订（同版本也可能对应不同提交）。升级完成后**必须新开会话**用宿主的 Skill 入口确认实际加载路径；当前会话手动读取新版文件不算自动加载通过。完整判据见 [INSTALL.md 宿主识别章节](INSTALL.md#宿主识别与新旧版本混用防护workbuddy--codex-必读) 与 [AGENTS.md](AGENTS.md)。
+
+**正式版本与仓库说明的区别：** v1.2.0 Tag/Release ZIP仍是冻结的正式快照；v1.2.1 使用自己的固定 ZIP 与 SHA 文件，见下文。
 
 ## 下载、升级与快速开始
 
-请从**[正式 v1.2.0 Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0)**获取：
+请从**[正式 v1.2.1 Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.1)**获取：
 
-- [`Paper-Figure-Story-v1.2.0.zip`](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.0/Paper-Figure-Story-v1.2.0.zip)
-- [`Paper-Figure-Story-v1.2.0.zip.sha256`](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.0/Paper-Figure-Story-v1.2.0.zip.sha256)
+- [`Paper-Figure-Story-v1.2.1.zip`](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.1/Paper-Figure-Story-v1.2.1.zip)
+- [`Paper-Figure-Story-v1.2.1.zip.sha256`](https://github.com/Lu18835713910/paper-figure-story/releases/download/v1.2.1/Paper-Figure-Story-v1.2.1.zip.sha256)
 
-正式ZIP SHA-256：
-
-```text
-14b216a5188b9bf811bd1443a23d049ea301f39ce3edb6eec5d16ad3d1c43a42
-```
+使用同一 Release 的 SHA-256 附件校验 ZIP。
 
 ### 首次安装和从旧版本升级：使用同一套安全命令
 
-**已经安装过v1.0.0、v1.1.x或v1.2.0的用户，无需手动删除旧目录。** 请打开**[当前安装与覆盖升级指南](INSTALL.md#windows首次安装与安全覆盖升级)**，下载正式ZIP后，复制指南中的完整PowerShell命令。它会先校验ZIP的SHA和版本，再将活动安装目录`~/.codex/skills/paper-figure-story`中的原版本移动到Skill目录之外备份，替换为v1.2.0，并核验新版本；复制或校验失败时尝试恢复原目录。
+**已经安装过v1.0.0、v1.1.x或v1.2.0的用户，无需手动删除旧目录。** 请打开**[当前安装与覆盖升级指南](INSTALL.md#windows首次安装与安全覆盖升级)**，下载正式ZIP后，复制指南中的完整PowerShell命令。它会先校验ZIP的SHA和版本，再将活动安装目录`~/.codex/skills/paper-figure-story`中的原版本移动到Skill目录之外备份，替换为v1.2.1，并核验新版本；复制或校验失败时尝试恢复原目录。
 
 不要直接将新ZIP解压合并到旧Skill目录，也不要在已安装的目录中执行`git clone`；两种方式都可能造成旧文件残留或升级失败。自定义工作区级Skill和其他Agent的安装位置需要单独核对，不会被用户级升级命令自动覆盖。
 
@@ -147,19 +152,19 @@ Visual Polish 负责统一版面、连接线和阅读路径，**不会为视觉�
 
 ```powershell
 $skill = Join-Path $HOME '.codex\skills\paper-figure-story'
-Get-Content -LiteralPath (Join-Path $skill 'VERSION')  # 应为 1.2.0
+Get-Content -LiteralPath (Join-Path $skill 'VERSION')  # 应为 1.2.1
 Test-Path -LiteralPath (Join-Path $skill 'SKILL.md')    # 应为 True
 ```
 
-若希望固定Git Tag进行**全新安装**，可使用`git clone --branch v1.2.0 --single-branch https://github.com/Lu18835713910/paper-figure-story.git`，但不要克隆进已有目录。**注意：Tag与正式ZIP是冻结快照，内含的旧版安装说明不会随主分支更新；应以当前在线[INSTALL.md](INSTALL.md)为准。**
+若希望固定Git Tag进行**全新安装**，可使用`git clone --branch v1.2.1 --single-branch https://github.com/Lu18835713910/paper-figure-story.git`，但不要克隆进已有目录。**注意：Tag与正式ZIP是冻结快照，内含的旧版安装说明不会随主分支更新；应以当前在线[INSTALL.md](INSTALL.md)为准。**
 
-### 推荐调用提示词（适用于v1.2.0）
+### 推荐调用提示词（适用于v1.2.1）
 
 在支持本地Skills的Codex中附上论文PDF及已获得的补充材料，再复制以下提示词。此提示词要求**先正确理解论文，再有源构建科研逻辑**，不是要求把所有论文强行画成多分支。
 
 > 使用 `$paper-figure-story`，按 **balanced** 模式分析这篇论文，制作可编辑科研汇报。
 >
-> **开始前**：核对本次Agent实际加载的`SKILL.md`路径与`VERSION`，确认版本为`1.2.0`；若仍加载旧版则先报告并停止，不要沿用旧流程。
+> **开始前**：核对本次Agent实际加载的`SKILL.md`路径与`VERSION`，确认版本为`1.2.1`；若仍加载旧版则先报告并停止，不要沿用旧流程。
 >
 > **科学建模**：阅读当前可用的全文、Methods、Results、Discussion、主Figure图注及补充材料；建立有来源的M1、Evidence Network和Research Logic，识别核心科学问题与贡献、实验对照、关键发现、并行或递进分支、共享实验、证据汇合及不确定性。不得根据Figure编号直接连成实验时间线，也不得为了画得复杂而虚构分支。
 >
@@ -192,7 +197,7 @@ python scripts/rld_diagnose.py --index index.json --network network.json --logic
 
 | 版本 | 主要更新 | 下载 |
 |---|---|---|
-| **v1.2.0（当前）** | PFS→RLD真实模型交接；科研、语言与表达逻辑候选诊断；可信数值比较 | [正式Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0) |
+| **v1.2.0（历史）** | PFS→RLD真实模型交接；科研、语言与表达逻辑候选诊断；可信数值比较 | [正式Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.2.0) |
 | v1.1.1 | 科研逻辑A/B、逐Figure讲述、Workbook、发布校验与既有工具链 | [历史Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.1.1) |
 | v1.1.0 | 共享证据关系及视觉、内容和交付工作流完善 | [历史Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.1.0) |
 | v1.0.0 | 初期逐Figure故事和可编辑学术汇报案例 | [历史Release](https://github.com/Lu18835713910/paper-figure-story/releases/tag/v1.0.0) |

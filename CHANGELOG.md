@@ -1,3 +1,15 @@
+# 1.2.1 — 维护版本：关系语义、主稿同源与故事层 A
+
+- 对称关系（`parallel` / `compares` / `alternative`）不再序列化为方向箭头，几何位置不再覆盖显式 `provenance`。
+- A/B 兜底路由有界，B 画布不再被无意义撑高；`LOGIC_A_ROUTE_CAPACITY` 不再因全局边序号线性下移而触发。
+- 投影前校验显示字段，缺字段返回 `LOGIC_DISPLAY_FIELD_REQUIRED`，不再抛裸 `KeyError`。
+- 箭头可见性：箭头放大为 `lg`，端点沿来向回退（纯渲染变换），不改变确定性 scene，故不触发 `PRODUCT_PLAN_DRIFT`。
+- 主稿第 3 页可由 `render_logic.py --page-map` 用正式 Research Logic 原生注入，替代手绘摘要图。
+- 新增故事层 A（`scripts/story_view.py`）：把已审核节点组织为 5–7 个叙事单元，单元绑定原始节点、展示关系引用原始关系或登记为经审核叙事归纳；只改展示，不改模型与 snapshot。
+- 布局修复：A 视图图例与来源引用不再重叠；密集要点页按实测换行字号自适应，避免跨宿主溢出。
+- 文案修复：封面术语统一为“宏观侵入渗流模型”；第 13 页区分 `A_story` / `A_full` / `B`。
+- 文档：README / INSTALL / SKILL / AGENTS 说明 A 两层与版本状态。
+
 # 1.2.0 — RLD 科研论证辅助诊断
 
 - 接入真实 PFS 三件套，派生带来源的论证单元。

@@ -3,12 +3,15 @@ name: paper-figure-story
 description: 从科研论文PDF重构科学问题、实验或论据、实际发现及证据边界，用原始Figure和简短文字箭头链制作可编辑中文学术PPT；支持多分支总框架、综述讲述、三档深度及可选Methods和详细证据图。附带RLD诊断模块（rld_diagnose.py），可对既有PFS模型的论证单元做科研逻辑、语言逻辑、表达逻辑三维诊断，因果判定须经PFS干预与对照结构核查，未覆盖语言显式上报而非静默跳过。
 ---
 
-# Paper Figure Story v1.2.0
+# Paper Figure Story v1.2.1
 
 > v1.1.1 既有 PFS 脚本及 schema 保留；新增内容仅限 RLD 诊断模块及其文档、测试与示例。
 > 工程测试通过不等于科学准确性认证（`scientific_accuracy=NOT_ESTIMABLE`）。
+> **v1.2.1 正式版**：本版修复对称关系方向、A/B 布局与来源投影、主稿同源、箭头/页脚/长正文布局，并新增可追溯的故事层 A（`A_story`，5–7 单元）。v1.2.0 正式 Tag 与 Release 资产保持不变。
 
 ## v1.2.0 正式科研逻辑图入口（优先于旧兼容框架）
+
+科研故事的科学理解、分组、叙事压缩及结论限定需要 Agent 或用户对照来源审阅。PFS 不保证从任意论文自动生成高质量科研逻辑图。不同 Office 环境的字型与换行可能不同，正式交付前应实际渲染并目视核查。
 
 当用户要求整篇论文的**科研逻辑框架、分支关系、A/B图或可编辑科研汇报**时，执行Agent首先必须根据原文完成Scientific Index/Methods任务和来源覆盖审阅，再建立/验证同一论文的M1、Evidence Network、显式Research Logic。之后使用`--research-logic <validated-model>`启用同源投影；要求完整B时同时使用`--products with-network`。不得将`balanced`误认为多分支开关，也不得以旧兼容的`study_map`、默认`overview()`或逐Figure线性故事代替有源A/B逻辑模型。
 
@@ -24,7 +27,7 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 
 长任务按[五阶段保存与续跑](references/agent_staged_resume.md)执行。新会话核对指纹后从最近有效阶段续跑，不重复解析全文。读真实进程退出码及execution/failure/几何报告，不以stdout中的状态或exit 0单独宣称完成。便携A/B可用不等于Figure主稿Artifact宿主可用；先单独检查宿主，再开展昂贵资产工作。
 
-## 维护候选的标准路径与安全门
+## 标准路径与安全门
 
 先读[受支持的PDF→模型→A/B→Figure→PPT/原生Workbook路径](references/maintenance_workflow_v1_1_1.md)。复用按SHA匹配的缓存；Agent完成科学语义，不改已安装代码。scientific_index骨架必须保持PENDING，完成来源填充并验证后才能组装research_logic。Figure必须登记原PDF/页码/panel/区域/指纹；像素匹配、panel审核与科学语义分别记录，禁止用黑像素阈值拒绝合法黑底。
 
@@ -32,7 +35,7 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 
 原生学习手册由`build_research_workbook.py`复用已登记M1/RSU、Figure Story和可选Inventory；省略`--content`时确定性组装，缺字段返回`.assembly.json`定向任务及exit 2，不生成空壳完整手册。显式`--content`继续读取原格式，原有自由文本只标记为legacy输入，不冒充字段级自动绑定。已有事实只登记一次，不为Workbook另写一套科研解释；参数和来源不足时由当前Agent定向核查。仅需逻辑索引可显式`--scope logic-only`并报告PARTIAL。旧`--reader`保留Inventory/annotations路径；与`--content`组合明确拒绝，不静默忽略。合同仍为`schemas/workbook_content_v1_1.schema.json`。
 
-## 候选维护：贡献覆盖与表达审阅（未发布）
+## 贡献覆盖与表达审阅
 
 本段是基于两份V0.1讨论稿的受控候选，不代表讨论稿已成为发布标准或既有案例科学终审升级。先按[维护流程中的贡献覆盖审阅](references/maintenance_workflow_v1_1_1.md#候选维护贡献覆盖与表达审阅)检查已登记事实，再制作展示；不新增科学事实库。
 
@@ -44,6 +47,7 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 ## RC1候选：A/B与局部图的科研表达分工
 
 - A为16:9科研逻辑概览：呈现一条或多条“问题—探索—发现—进一步探索—综合认识”的骨架，使读者看清主要研究任务、关键发现及其真实联系。这是表达原则，不是固定五步、固定节点数或线性实验模板。
+- **A 分两层，不可混称**：`A_full` 是从完整模型投影的概览（节点/关系较多，用于审计与对照）；`A_story` 是**故事层**（通常 5–7 个高层叙事单元），用 `scripts/story_view.py` 从同一模型生成。故事层只改展示：每个单元绑定原始节点 id，每条展示关系引用原始关系 id，或显式登记为经审核的叙事归纳（含 basis）；它不修改模型、不改变 snapshot，也不得声称与 A_full 逐边同构。`--story` 必须由 Agent 或用户提供经审核的叙事视图（含 `reviewed_by`），本模块只做校验与渲染，**不是**全自动跨论文故事生成器；分组与合并需人工/Agent 科学审阅。
 - B在同一有源骨架下展开具体实验/分析、操作与材料、数据与读数、结果、支持证据及必要限制，保留独立、完整、原生可编辑、可缩放的大画布。不以整图缩到16:9后的字号作为唯一验收尺度。
 - 主稿16:9局部图从同源B选择适合当前讲述的节点/关系，标明父B、模型snapshot及展示省略；局部图不冒充完整B。不能因一页容量删改完整B的科学关系。
 - Agent依据论文判断贡献、分支数量、科学含义和展示信息层级；PFS执行既有来源、身份、证据强度及容量约束并稳定渲染。叙事/论证顺序不得自动升级为实验真实时间顺序或科学因果。
@@ -242,3 +246,7 @@ python scripts/rld_diagnose.py --index index.json --network network.json --logic
 第二条命令自动派生论证单元。Agent 检查缺失字段和 source_statement_ids，回查原页及实验对照，记录待确认的前提与限制。逻辑标签不得冒充原文。归因候选需人工核对，尤其是已有干预与当前断言的关联。科研准确性 NOT_ESTIMABLE。
 
 数值核验使用 rld_numeric.py --claims claims.json --registry registry.json --manifest manifest.json --manifest-anchor SHA256 --out numeric.json。规格见 references/rld_diagnosis_contract.md。外部锚点须来自独立冻结记录，同次生成的 manifest 与摘要不建立可信来源。判定仅适用于报告的均值；不认证统计显著性、机制或因果。原论文和私人数据不分发。
+
+## 七、宿主版本自检（每次正式运行前）
+
+本 Skill 可能被多个宿主以不同目录加载，且宿主通常在**会话启动时冻结 Skill 注册信息**。开始正式论文任务前，先确认：当前宿主实际加载的 `SKILL.md` 绝对路径；该目录下的 `VERSION` 与 Git 修订（仅看 `VERSION` 不足以区分含维护提交的 `main`）；本次运行实际调用的 `scripts/run_pfs.py`、`project_research_logic.py`、`render_logic.py`、`build_pptx.py` 的绝对路径与 SHA-256 是否全部来自同一已核验安装。WorkBuddy 用户级目录为 `~/.workbuddy/skills/paper-figure-story`，Codex 用户级目录为 `~/.codex/skills/paper-figure-story`，两者不通用。升级安装后须新开会话用宿主 Skill 入口复核；在同一会话内手动读取新版文件或直接调用其脚本，不构成自动加载通过。安装与升级的完整安全流程见 [INSTALL.md](INSTALL.md) 与 [AGENTS.md](AGENTS.md)。

@@ -18,7 +18,7 @@ import tempfile
 import uuid
 
 SKILL_NAME = "paper-figure-story"
-EXPECTED_VERSION = "1.2.0"
+EXPECTED_VERSION = "1.2.1"
 
 
 class InstallError(RuntimeError):
