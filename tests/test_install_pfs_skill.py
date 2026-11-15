@@ -23,7 +23,7 @@ class InstallerTests(unittest.TestCase):
         self.repo = self.base / "repo"
         self.repo.mkdir()
         (self.repo / "scripts").mkdir()
-        (self.repo / "VERSION").write_text("1.2.0\n", encoding="utf-8")
+        (self.repo / "VERSION").write_text("1.2.1\n", encoding="utf-8")
         (self.repo / "SKILL.md").write_text("---\nname: paper-figure-story\n---\n", encoding="utf-8")
         (self.repo / "scripts" / "run_pfs.py").write_text("print('ok')\n", encoding="utf-8")
         (self.repo / "README.md").write_text("Current", encoding="utf-8")
@@ -44,7 +44,7 @@ class InstallerTests(unittest.TestCase):
         result = installer.install(self.repo, self.target)
         self.assertEqual(result["status"], "INSTALLED")
         self.assertIsNone(result["backup"])
-        self.assertEqual((self.target / "VERSION").read_text().strip(), "1.2.0")
+        self.assertEqual((self.target / "VERSION").read_text().strip(), "1.2.1")
         self.assertFalse((self.target / ".git").exists())
         self.assertFalse((self.target / "PRIVATE.txt").exists())
 
