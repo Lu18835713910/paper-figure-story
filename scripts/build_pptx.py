@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import math
 import re
 import sys
 from collections import Counter
@@ -21,7 +22,7 @@ from pathlib import Path
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE, MSO_CONNECTOR
-from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
+from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
 from pptx.enum.dml import MSO_LINE_DASH_STYLE
 from pptx.oxml.xmlchemy import OxmlElement
 from pptx.util import Inches, Pt
@@ -285,6 +286,70 @@ def theme_rgb_from_shape(prs):
 def clear_shape_fill_text(shape):
     if not shape.has_text_frame: return
     shape.text_frame.clear()
+
+
+# Footer rule sits at y=7.13in; keep the bullet card clear of it on every host.
+CARD_MAX_BOTTOM = 6.96
+
+
+def fit_bullets(lines, width_in, max_h_in, base_pt):
+    """Largest point size whose measured wrapped lines fit max_h_in.
+
+    Uses real font metrics (presentation_typography.measure) instead of an
+    area-per-character heuristic. The old heuristic produced 19pt for a page
+    with six long bullets, which overflowed the card and the footer in both
+    PowerPoint and LibreOffice.
+    """
+    from presentation_typography import measure
+    inner = max(1.0, width_in - .20)
+    need = 0.0
+    for cand in [base_pt, 20, 19, 18, 17, 16, 15, 14]:
+        if cand > base_pt:
+            continue
+        wrapped = sum(max(1, math.ceil(measure('•  ' + s, cand) / 72.0 / inner))
+                      for s in lines)
+        spacing = 8 if cand >= 18 else 5
+        need = (wrapped * cand * 1.22 + len(lines) * spacing + 8) / 72.0
+        # 3% headroom: LibreOffice and PowerPoint differ in line metrics, so a
+        # size that only just fits in one renderer overflows in the other.
+        if need <= max_h_in * .97:
+            return cand, need
+    return 14, need
+
+
+def resize_question_bullets(slide, shape, lines):
+    """Fit a question page's bullet block inside its card, clear of the footer.
+
+    Called after the text is written, when the real content is known. Resizes
+    the pinning card and the text box together and disables auto-grow so that
+    PowerPoint and LibreOffice cannot re-flow the block past the card.
+    """
+    EMU = 914400
+    items = [str(x) for x in (lines if isinstance(lines, list) else [lines])
+             if str(x).strip()]
+    if not items:
+        return
+    card = next((s for s in slide.shapes if s.name == 'DECOR_card'), None)
+    bar = next((s for s in slide.shapes if s.name == 'DECOR_cardbar'), None)
+    if card is None:
+        return
+    top_in = shape.top / EMU
+    width_in = shape.width / EMU
+    avail = CARD_MAX_BOTTOM - top_in - .18
+    size, need = fit_bullets(items, width_in, avail, 21)
+    box_h = min(avail, max(shape.height / EMU, need + .06))
+    shape.height = Inches(box_h)
+    for para in shape.text_frame.paragraphs:
+        para.space_after = Pt(8 if size >= 18 else 5)
+        for run in para.runs:
+            run.font.size = Pt(size)
+    shape.text_frame.auto_size = MSO_AUTO_SIZE.NONE
+    # Never shrink the standard card: pages that already fit keep their original
+    # 6.81in bottom, so only dense pages grow.
+    card_bottom = max(6.81, top_in + box_h + .18)
+    card.height = Inches(card_bottom - card.top / EMU)
+    if bar is not None:
+        bar.height = Inches(card_bottom - .12 - bar.top / EMU)
 
 
 def styled_text(shape, value, is_list=False):
@@ -963,6 +1028,8 @@ def populate_slide(slide, record, json_path, index, short_citation, allow_missin
         if shape.name in values:
             val = values[shape.name]
             styled_text(shape, val, is_list=shape.name in ('PFS_BULLETS', 'PFS_POINTS'))
+            if shape.name == 'PFS_BULLETS' and kind == 'question':
+                resize_question_bullets(slide, shape, val)
             prefix={'PFS_LEAD':'lead','PFS_TRANSITION':'transition','PFS_RESULT':'result'}.get(shape.name)
             if prefix:
                 if record.get(prefix+'_height') is not None:shape.height=Inches(float(record[prefix+'_height']))
