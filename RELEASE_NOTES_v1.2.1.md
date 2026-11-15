@@ -1,6 +1,6 @@
-# PFS v1.2.1 Release Notes（候选稿，未发布）
+# PFS v1.2.1 Release Notes
 
-**状态**：维护候选，未创建 Tag / Release。v1.2.0 的 Tag、Release ZIP 与资产保持不变。
+**版本**：v1.2.1。v1.2.0 的 Tag、Release ZIP 与资产保持不变。
 
 ## 修复
 
@@ -16,9 +16,18 @@
 
 - 故事层 A（`scripts/story_view.py`）：5–7 个叙事单元，绑定原始节点；展示关系引用原始关系或登记为经审核叙事归纳。**需由 Agent 或用户提供经审核的故事视图，不是全自动跨论文故事提取器。**
 
+- 安装：核对版本和 Git 修订，替换前备份旧目录，激活失败时回滚。
+- Research Logic A/B 与 A_story 支持可编辑 PowerPoint，A_story 保留节点和关系来源映射。
+
+科研故事的科学理解、分组、叙事压缩及结论限定需要 Agent 或用户对照来源审阅。PFS 不保证从任意论文自动生成高质量科研逻辑图。不同 Office 环境的字型与换行可能不同，正式交付前应实际渲染并目视核查。
+
 ## 验收
 
 - 正式门禁：21 套件 / 297 项 / 0 FAIL / 0 SKIP。
 - 全量 unittest：errors=4 / skipped=54（既有环境/私有夹具基线，非全绿）。
 - 真实论文作品：13 页主稿 + A_story + A_full + B，PowerPoint PNG/PDF 导出。
 - 已知限制：纯自然语言不会自动发现本 Skill（宿主 `disableModelInvocation=true`）；LibreOffice 跨宿主渲染若未执行记为 NOT_TESTED。
+
+## 公开资产
+
+移除来源或分发范围未核实的历史 Atera 截图、旧 Hero SVG 与模板预览 PNG。公开保留有来源记录的演示和原生模板。私人论文及验收作品不随包分发。

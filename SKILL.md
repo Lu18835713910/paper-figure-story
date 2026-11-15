@@ -7,9 +7,11 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 
 > v1.1.1 既有 PFS 脚本及 schema 保留；新增内容仅限 RLD 诊断模块及其文档、测试与示例。
 > 工程测试通过不等于科学准确性认证（`scientific_accuracy=NOT_ESTIMABLE`）。
-> **v1.2.1 为维护候选（未发布）**：本版修复对称关系方向、A/B 布局与来源投影、主稿同源、箭头/页脚/长正文布局，并新增可追溯的故事层 A（`A_story`，5–7 单元）。v1.2.0 正式 Tag 与 Release 资产保持不变。
+> **v1.2.1 正式版**：本版修复对称关系方向、A/B 布局与来源投影、主稿同源、箭头/页脚/长正文布局，并新增可追溯的故事层 A（`A_story`，5–7 单元）。v1.2.0 正式 Tag 与 Release 资产保持不变。
 
 ## v1.2.0 正式科研逻辑图入口（优先于旧兼容框架）
+
+科研故事的科学理解、分组、叙事压缩及结论限定需要 Agent 或用户对照来源审阅。PFS 不保证从任意论文自动生成高质量科研逻辑图。不同 Office 环境的字型与换行可能不同，正式交付前应实际渲染并目视核查。
 
 当用户要求整篇论文的**科研逻辑框架、分支关系、A/B图或可编辑科研汇报**时，执行Agent首先必须根据原文完成Scientific Index/Methods任务和来源覆盖审阅，再建立/验证同一论文的M1、Evidence Network、显式Research Logic。之后使用`--research-logic <validated-model>`启用同源投影；要求完整B时同时使用`--products with-network`。不得将`balanced`误认为多分支开关，也不得以旧兼容的`study_map`、默认`overview()`或逐Figure线性故事代替有源A/B逻辑模型。
 
@@ -25,7 +27,7 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 
 长任务按[五阶段保存与续跑](references/agent_staged_resume.md)执行。新会话核对指纹后从最近有效阶段续跑，不重复解析全文。读真实进程退出码及execution/failure/几何报告，不以stdout中的状态或exit 0单独宣称完成。便携A/B可用不等于Figure主稿Artifact宿主可用；先单独检查宿主，再开展昂贵资产工作。
 
-## 维护候选的标准路径与安全门
+## 标准路径与安全门
 
 先读[受支持的PDF→模型→A/B→Figure→PPT/原生Workbook路径](references/maintenance_workflow_v1_1_1.md)。复用按SHA匹配的缓存；Agent完成科学语义，不改已安装代码。scientific_index骨架必须保持PENDING，完成来源填充并验证后才能组装research_logic。Figure必须登记原PDF/页码/panel/区域/指纹；像素匹配、panel审核与科学语义分别记录，禁止用黑像素阈值拒绝合法黑底。
 
@@ -33,7 +35,7 @@ description: 从科研论文PDF重构科学问题、实验或论据、实际发�
 
 原生学习手册由`build_research_workbook.py`复用已登记M1/RSU、Figure Story和可选Inventory；省略`--content`时确定性组装，缺字段返回`.assembly.json`定向任务及exit 2，不生成空壳完整手册。显式`--content`继续读取原格式，原有自由文本只标记为legacy输入，不冒充字段级自动绑定。已有事实只登记一次，不为Workbook另写一套科研解释；参数和来源不足时由当前Agent定向核查。仅需逻辑索引可显式`--scope logic-only`并报告PARTIAL。旧`--reader`保留Inventory/annotations路径；与`--content`组合明确拒绝，不静默忽略。合同仍为`schemas/workbook_content_v1_1.schema.json`。
 
-## 候选维护：贡献覆盖与表达审阅（未发布）
+## 贡献覆盖与表达审阅
 
 本段是基于两份V0.1讨论稿的受控候选，不代表讨论稿已成为发布标准或既有案例科学终审升级。先按[维护流程中的贡献覆盖审阅](references/maintenance_workflow_v1_1_1.md#候选维护贡献覆盖与表达审阅)检查已登记事实，再制作展示；不新增科学事实库。
 
