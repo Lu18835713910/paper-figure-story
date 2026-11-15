@@ -337,7 +337,10 @@ def resize_question_bullets(slide, shape, lines):
     width_in = shape.width / EMU
     avail = CARD_MAX_BOTTOM - top_in - .18
     size, need = fit_bullets(items, width_in, avail, 21)
-    box_h = min(avail, max(shape.height / EMU, need + .06))
+    # Use the full available card height for dense pages: a 0.06in pad left only
+    # ~0.01in of slack under a taller line metric, which is not enough to be
+    # renderer-independent.
+    box_h = min(avail, max(shape.height / EMU, need + .18))
     shape.height = Inches(box_h)
     for para in shape.text_frame.paragraphs:
         para.space_after = Pt(8 if size >= 18 else 5)
