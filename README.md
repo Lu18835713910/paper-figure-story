@@ -121,6 +121,8 @@ Visual Polish 负责统一版面、连接线和阅读路径，**不会为视觉�
 > 请帮我安装或更新这个Skill：https://github.com/Lu18835713910/paper-figure-story 。请阅读仓库的README、AGENTS.md和INSTALL.md；核实我当前Agent实际使用的Skills目录与已有版本；使用仓库主分支中的`scripts/install_pfs_skill.py`先预检、备份旧版再完整替换；核对活动Skill的VERSION、SKILL.md和实际加载路径。不要把旧版文件和新版合并，也不要删除我的本地修改；如遇未知目录、权限不足或重叠的多个安装位置，先报告具体风险。
 
 这条入口对应仓库[AGENTS.md](AGENTS.md)以及[Agent安装流程](INSTALL.md#让agent直接安装或升级从仓库链接开始)。
+> **A 的两层**：`project_research_logic.py --views A B` 得到的是完整模型概览（`A_full`）；面向演示的简洁主线用 `scripts/story_view.py --model <RL> --story <story.json>` 生成 `A_story`（5–7 个叙事单元，每单元绑定原始节点、每条展示关系引用原始关系或登记为叙事归纳）。故事层只改展示，不改模型或 snapshot。
+
 > **同源 A/B 的官方可执行入口**：先以显式 Research Logic 模型运行 `scripts/project_research_logic.py --views A B`，再用 `scripts/run_pfs.py render-products --backend portable --development-preview` 生成原生 A/B；需要把正式 A 合入主稿时使用 `scripts/render_logic.py --page-map`。手绘的 `build_pptx.py` 逻辑摘要图不是同源 A，`balanced` 也不是多分支开关。
 执行Agent应从**独立、干净的main分支Git克隆**运行受审查的安装器，而不是把仓库URL当成某个旧Tag或使用旧版README命令。安装器仅将Git登记的文件安装到核实后的Skills目录，保留旧版本备份。**已经安装v1.0/v1.1的人可以覆盖升级；GitHub不会远程自动覆盖其他人的电脑，仍需在用户设备上运行安装。**
 
